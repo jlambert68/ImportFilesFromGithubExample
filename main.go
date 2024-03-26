@@ -4,9 +4,11 @@ import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"time"
+	"image/color"
+	"strings"
 )
 
 func main() {
@@ -31,14 +33,120 @@ func main() {
 		_ = importFilesFromGitHub.InitiateImportFilesFromGitHubWindow(originalApiUrl, myMainWindow, myApp)
 	})
 
-	myVBoxContainer := container.NewVBox(myButton)
-	myMainWindow.SetContent(myVBoxContainer)
+	inputText := "This is {{yellow}} text and this is {{also yellow}} and normal again."
 
-	go func() {
-		time.Sleep(2 * time.Second)
+	// Create canvas.Text objects for different segments
+	regularText := canvas.NewText("This is regular text. ", color.Black)
+	yellowText := canvas.NewText("This is yellow text. ", color.NRGBA{R: 255, G: 255, B: 0, A: 255})
+	moreText := canvas.NewText("And this is more regular text.", color.Black)
 
-	}()
+	regularText.TextSize = 18
+	yellowText.TextSize = 14
+	moreText.TextSize = 10
+	/*
+		rt := widget.NewRichText(
+			&widget.TextSegment{
+				Text: "A Title\r\n",
+				Style: widget.RichTextStyle{
+					Inline:    true,
+					TextStyle: fyne.TextStyle{Bold: true},
+				},
+			},
+			&widget.TextSegment{
+				Text: "Here is some text,\r\nwith a line break",
+			},
+		)
+
+		btn := widget.NewButton("Refresh", func() {
+			rt.Segments = []widget.RichTextSegment{
+				&widget.TextSegment{
+					Text: "A Title\n",
+					Style: widget.RichTextStyle{
+						Inline:    true,
+						TextStyle: fyne.TextStyle{Bold: true},
+						ColorName: fyne.ThemeColorName("ColorNameShadow"),
+					},
+				},
+				&widget.TextSegment{
+					Text: "Here is some text,\n\n\n\nwith a line break",
+				},
+			}
+			rt.Refresh()
+		})
+	*/
+
+	myContainer := container.NewBorder(myButton, nil, nil, nil, parseAndColorText(inputText))
+	myMainWindow.SetContent(myContainer)
 
 	myMainWindow.ShowAndRun()
 
+}
+
+func parseAndColorText(inputText string) (tempRichText *widget.RichText) {
+	var segments []widget.RichTextSegment
+
+	// Splitting the string at each "{{" and "}}"
+	parts := strings.FieldsFunc(inputText, func(r rune) bool {
+		return r == '{' || r == '}'
+	})
+
+	for i, part := range parts {
+		var txt *widget.TextSegment
+
+		// Handle text inside "{{...}}"
+		if i%2 == 1 {
+			txt = &widget.TextSegment{
+				Text: "{{" + part + "}}",
+				Style: widget.RichTextStyle{
+					Inline:    true,
+					TextStyle: fyne.TextStyle{Bold: true, Italic: true},
+				},
+			}
+		} else {
+			// Handle regular text
+			txt = &widget.TextSegment{
+				Text: part,
+				Style: widget.RichTextStyle{
+					Inline: true,
+				},
+			}
+		}
+
+		segments = append(segments, txt)
+	}
+	/*
+		parts := strings.Split(inputText, "#")
+		for i, part := range parts {
+
+			//txt := canvas.NewText(part, color.Black)
+			var txt *widget.TextSegment
+			txt = &widget.TextSegment{
+				Text: part,
+				Style: widget.RichTextStyle{
+					Inline: true,
+				},
+			}
+
+			if i%2 == 1 { // Color odd parts (between '#')
+				txt = &widget.TextSegment{
+					Text: "#" + part + "#",
+					Style: widget.RichTextStyle{
+						Inline:    true,
+						TextStyle: fyne.TextStyle{Bold: true, Italic: true},
+					},
+				}
+			}
+			segments = append(segments, txt)
+		}
+
+	*/
+
+	tempRichText = &widget.RichText{
+		BaseWidget: widget.BaseWidget{},
+		Segments:   segments,
+		Wrapping:   0,
+		Scroll:     0,
+		Truncation: 0,
+	}
+	return tempRichText
 }

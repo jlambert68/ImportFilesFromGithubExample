@@ -84,6 +84,11 @@ func InitiateImportFilesFromGitHubWindow(originalApiUrl string, mainWindow fyne.
 	// Set content
 	githubFileImporterWindow.SetContent(content)
 
+	// Set the callback function for window close event to show the Main window again
+	githubFileImporterWindow.SetOnClosed(func() {
+		fenixMainWindow.Show()
+	})
+
 	// Show the githubFileImporterWindow
 	githubFileImporterWindow.Show()
 
