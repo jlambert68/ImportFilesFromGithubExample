@@ -3,10 +3,12 @@ package importFilesFromGitHub
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 	"log"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func generateFilteredList(parentWindow fyne.Window) {
@@ -16,16 +18,20 @@ func generateFilteredList(parentWindow fyne.Window) {
 			return len(githubFilesFiltered)
 		},
 		func() fyne.CanvasObject {
-			// Create a customLabel for each item.
-			label := newCustomLabel("Template", func() {
+			// Create a customFilteredLabel for each item.
+			label := newCustomFilteredLabel("Template", func() {
 				// Define double-click action here.
 			})
 			return label
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
 			// Update the label text and double-click action for each item.
-			label := obj.(*customLabel)
+			label := obj.(*customFilteredLabel)
 			label.Text = githubFilesFiltered[id].Name
+
+			if githubFilesFiltered[id].Type == "file" {
+				label.TextStyle = fyne.TextStyle{Italic: true}
+			}
 
 			label.onDoubleTap = func() {
 
@@ -106,3 +112,33 @@ func filterFileListFromGitHub() {
 
 	githubFilesFiltered = tempGithubFilesFiltered
 }
+
+type customFilteredLabel struct {
+	widget.Label
+	onDoubleTap func()
+	lastTap     time.Time
+}
+
+func newCustomFilteredLabel(text string, onDoubleTap func()) *customFilteredLabel {
+	l := &customFilteredLabel{Label: widget.Label{Text: text}, onDoubleTap: onDoubleTap}
+	l.ExtendBaseWidget(l)
+	return l
+}
+
+func (l *customFilteredLabel) Tapped(e *fyne.PointEvent) {
+	now := time.Now()
+	if now.Sub(l.lastTap) < 500*time.Millisecond { // 500 ms as double-click interval
+		if l.onDoubleTap != nil {
+			l.onDoubleTap()
+		}
+	}
+	l.lastTap = now
+}
+
+func (l *customFilteredLabel) TappedSecondary(*fyne.PointEvent) {
+	// Implement if you need right-click (secondary tap) actions.
+}
+
+func (l *customFilteredLabel) MouseIn(*desktop.MouseEvent)    {}
+func (l *customFilteredLabel) MouseMoved(*desktop.MouseEvent) {}
+func (l *customFilteredLabel) MouseOut()                      {}
