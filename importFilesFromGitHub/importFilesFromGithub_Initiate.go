@@ -10,13 +10,20 @@ import (
 	"time"
 )
 
-func InitiateImportFilesFromGitHubWindow(originalApiUrl string, mainWindow fyne.Window, myApp fyne.App) (githubFileImporterWindow fyne.Window) {
+func InitiateImportFilesFromGitHubWindow(
+	originalApiUrl string,
+	mainWindow fyne.Window,
+	myApp fyne.App,
+	responseChannel *chan bool) *[]GitHubFile {
 
 	// Cleare list from Previous Import
 	githubFilesFiltered = nil
 
 	// Disable the main window
 	mainWindow.Hide()
+
+	// Store Channel reference in local varaible
+	sharedResponseChannel = responseChannel
 
 	// Store reference to Fenix Main Window
 	fenixMainWindow = mainWindow
@@ -86,13 +93,14 @@ func InitiateImportFilesFromGitHubWindow(originalApiUrl string, mainWindow fyne.
 
 	// Set the callback function for window close event to show the Main window again
 	githubFileImporterWindow.SetOnClosed(func() {
+		*sharedResponseChannel <- false
 		fenixMainWindow.Show()
 	})
 
 	// Show the githubFileImporterWindow
 	githubFileImporterWindow.Show()
 
-	return githubFileImporterWindow
+	return &selectedFiles
 
 }
 

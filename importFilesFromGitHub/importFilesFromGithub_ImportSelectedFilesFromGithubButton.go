@@ -36,7 +36,7 @@ func generateImportSelectedFilesFromGithubButton(parentWindow fyne.Window) {
 			fmt.Println(contentAsString)
 
 			// Save the file content
-			file.fileContetAsString = contentAsString
+			selectedFiles[fileIndex].FileContetAsString = contentAsString
 		}
 
 		fenixMainWindow.Show()

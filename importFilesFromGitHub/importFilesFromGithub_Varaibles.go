@@ -6,8 +6,16 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// Channel used to inform when this window closes and there are values to use
+// True = files where picked
+// False = No file where picked
+var sharedResponseChannel *chan bool
+
 // A pointer to Fenix Main Window
 var fenixMainWindow fyne.Window
+
+// The window for the File Importer
+var githubFileImporterWindow fyne.Window
 
 // THe root ApiUrl
 var rootApiUrl string

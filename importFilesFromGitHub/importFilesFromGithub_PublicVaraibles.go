@@ -6,7 +6,7 @@ type GitHubFile struct {
 	Type               string `json:"type"` // "file" or "dir"
 	URL                string `json:"url"`  // URL to fetch contents if it's a directory
 	Content            []byte `json:"content"`
-	fileContetAsString string
+	FileContetAsString string
 }
 type GitHubFileDetail struct {
 	Name        string `json:"name"`
