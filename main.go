@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -30,17 +31,25 @@ func main() {
 	var responseChannel chan bool
 	responseChannel = make(chan bool)
 	var selectedFiles *[]importFilesFromGitHub.GitHubFile
-	myButton := widget.NewButton("Import files from GitHub", func() {
+	githubFilesImporterButton := widget.NewButton("Import files from GitHub", func() {
 		myMainWindow.Hide()
 		selectedFiles = importFilesFromGitHub.InitiateImportFilesFromGitHubWindow(originalApiUrl, myMainWindow, myApp, &responseChannel)
 		fmt.Println(selectedFiles)
+	})
+
+	filesViewerButton := widget.NewButton("View imported files", func() {
+		myMainWindow.Hide()
+		fileViewer.InitiateFileViewe(myMainWindow, myApp, selectedFiles)
+
 	})
 
 	inputText := "This is {{yellow}} text and this is {{also yellow}} and normal again."
 	var tempRichText *widget.RichText
 	tempRichText = parseAndFormatText(inputText)
 
-	myContainer := container.NewBorder(myButton, nil, nil, nil, tempRichText)
+	buttonContainer := container.NewVBox(githubFilesImporterButton, filesViewerButton)
+
+	myContainer := container.NewBorder(buttonContainer, nil, nil, nil, tempRichText)
 	myMainWindow.SetContent(myContainer)
 
 	go func() {
@@ -102,7 +111,7 @@ func parseAndFormatText(inputText string) (tempRichText *widget.RichText) {
 			// Add the styled text between {{ and }}
 			currentText = inputText[startIndex : endIndex+2] // +2 to include the closing braces
 			segments = append(segments, &widget.TextSegment{
-				Text: "{{" + currentText + "}}",
+				Text: currentText,
 				Style: widget.RichTextStyle{
 					Inline:    true,
 					TextStyle: fyne.TextStyle{Bold: true},

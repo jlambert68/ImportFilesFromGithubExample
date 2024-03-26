@@ -6,6 +6,7 @@ type GitHubFile struct {
 	Type               string `json:"type"` // "file" or "dir"
 	URL                string `json:"url"`  // URL to fetch contents if it's a directory
 	Content            []byte `json:"content"`
+	SHA                string `json:"sha"`
 	FileContetAsString string
 }
 type GitHubFileDetail struct {
@@ -16,5 +17,6 @@ type GitHubFileDetail struct {
 	Type        string `json:"type"`
 	Content     string `json:"content"`
 	Encoding    string `json:"encoding"`
+	SHA         string `json:"sha"`
 	// Include other fields as needed
 }
