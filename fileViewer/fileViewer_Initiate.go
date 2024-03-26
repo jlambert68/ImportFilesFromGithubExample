@@ -2,9 +2,12 @@ package fileViewer
 
 import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
+	"ImportFilesFromGithub/tengoScriptExecuter"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"regexp"
 	"strings"
 )
 
@@ -25,6 +28,7 @@ func InitiateFileViewe(
 	fileViewerWindow.Resize(fyne.NewSize(400, 500))
 
 	var leftContainer *fyne.Container
+	var rightContainer *fyne.Container
 
 	// Extract filenames for the dropdown
 	var fileNames []string
@@ -43,6 +47,14 @@ func InitiateFileViewe(
 		Scroll:     0,
 		Truncation: 0,
 	}
+	var richTextWithValues *widget.RichText
+	richTextWithValues = &widget.RichText{
+		BaseWidget: widget.BaseWidget{},
+		Segments:   nil,
+		Wrapping:   0,
+		Scroll:     0,
+		Truncation: 0,
+	}
 
 	// Set the dropdown change handler
 	dropdown.OnChanged = func(selected string) {
@@ -53,10 +65,18 @@ func InitiateFileViewe(
 				myContainerObjects := leftContainer.Objects
 				for index, object := range myContainerObjects {
 					if object == richText {
-						richText = parseAndFormatText(file.FileContetAsString)
+						richText, _ = parseAndFormatText(file.FileContetAsString)
 						myContainerObjects[index] = richText
 						leftContainer.Refresh()
-						break
+					}
+				}
+
+				myContainerObjects = rightContainer.Objects
+				for index, object := range myContainerObjects {
+					if object == richTextWithValues {
+						_, richTextWithValues = parseAndFormatText(file.FileContetAsString)
+						myContainerObjects[index] = richTextWithValues
+						rightContainer.Refresh()
 					}
 				}
 
@@ -65,16 +85,20 @@ func InitiateFileViewe(
 		}
 	}
 
-	// Placeholder for rightContainer - add your form view here
-	rightContainer := widget.NewLabel("Right side content")
+	topContainer := container.NewVBox(dropdown, urlLabel)
 
-	leftContainer = container.NewBorder(container.NewVBox(dropdown, urlLabel), nil, nil, nil, richText)
+	// Placeholder for rightContainer - add your form view here
+	rightContainer = container.NewBorder(nil, nil, nil, nil, richTextWithValues)
+
+	leftContainer = container.NewBorder(nil, nil, nil, nil, richText)
 
 	// Create split container
 	split := container.NewHSplit(leftContainer, rightContainer)
 	split.Offset = 0.5 // Adjust as needed
 
-	fileViewerWindow.SetContent(split)
+	fullContentContainer := container.NewBorder(topContainer, nil, nil, nil, split)
+
+	fileViewerWindow.SetContent(fullContentContainer)
 
 	// Set the callback function for window close event to show the Main window again
 	fileViewerWindow.SetOnClosed(func() {
@@ -85,8 +109,31 @@ func InitiateFileViewe(
 	fileViewerWindow.Show()
 }
 
-func parseAndFormatText(inputText string) (tempRichText *widget.RichText) {
+func mstch(text string) (functionName string, functionValue string) {
+	//text := "{{SubCustody.Today(1)}}"
+	pattern := `\{\{([a-zA-Z0-9_.]+)\((-?\d+)\)\}\}`
+
+	re := regexp.MustCompile(pattern)
+	matches := re.FindStringSubmatch(text)
+
+	if len(matches) >= 3 {
+		functionName = matches[1]
+		functionValue = matches[2]
+		fmt.Println("Function Name:", functionName)
+		fmt.Println("Function Value:", functionValue)
+	} else {
+		fmt.Println("No match found")
+	}
+
+	return functionName, functionValue
+}
+
+func parseAndFormatText(inputText string) (
+	tempRichText *widget.RichText,
+	tempRichTextWithValues *widget.RichText) {
+
 	var segments []widget.RichTextSegment
+	var segmentsWithValues []widget.RichTextSegment
 
 	var currentText string
 
@@ -108,8 +155,19 @@ func parseAndFormatText(inputText string) (tempRichText *widget.RichText) {
 
 			// Add the styled text between {{ and }}
 			currentText = inputText[startIndex : endIndex+2] // +2 to include the closing braces
+			_, functionValue := mstch(currentText)
+			newDateValue := tengoScriptExecuter.ExecuteScripte(functionValue)
+
 			segments = append(segments, &widget.TextSegment{
 				Text: currentText,
+				Style: widget.RichTextStyle{
+					Inline:    true,
+					TextStyle: fyne.TextStyle{Bold: true},
+				},
+			})
+
+			segmentsWithValues = append(segmentsWithValues, &widget.TextSegment{
+				Text: newDateValue,
 				Style: widget.RichTextStyle{
 					Inline:    true,
 					TextStyle: fyne.TextStyle{Bold: true},
@@ -121,6 +179,7 @@ func parseAndFormatText(inputText string) (tempRichText *widget.RichText) {
 		} else {
 			// Add the remaining text, if any
 			segments = append(segments, &widget.TextSegment{Text: inputText})
+			segmentsWithValues = append(segmentsWithValues, &widget.TextSegment{Text: inputText})
 			break
 		}
 	}
@@ -132,5 +191,13 @@ func parseAndFormatText(inputText string) (tempRichText *widget.RichText) {
 		Scroll:     0,
 		Truncation: 0,
 	}
-	return tempRichText
+
+	tempRichTextWithValues = &widget.RichText{
+		BaseWidget: widget.BaseWidget{},
+		Segments:   segmentsWithValues,
+		Wrapping:   0,
+		Scroll:     0,
+		Truncation: 0,
+	}
+	return tempRichText, tempRichTextWithValues
 }

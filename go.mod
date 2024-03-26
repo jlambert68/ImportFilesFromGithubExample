@@ -2,7 +2,10 @@ module ImportFilesFromGithub
 
 go 1.22
 
-require fyne.io/fyne/v2 v2.4.4
+require (
+	fyne.io/fyne/v2 v2.4.4
+	github.com/d5/tengo/v2 v2.17.0
+)
 
 require (
 	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e // indirect

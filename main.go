@@ -3,6 +3,7 @@ package main
 import (
 	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
+	"ImportFilesFromGithub/tengoScriptExecuter"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -82,6 +83,8 @@ func main() {
 			}
 		}
 	}()
+
+	tengoScriptExecuter.ExecuteScripte("1")
 
 	myMainWindow.ShowAndRun()
 
