@@ -6,7 +6,7 @@
 
 		// Define the length of the array
 		length := 20
-		numberOfDecimal := 2
+		numberOfDecimals := 2
 		maxIntegerPartSize := 2
 
 
@@ -25,7 +25,7 @@
         // ***********************************************************************************
         // formatFloat
         // Function to format a float with a specific number of decimals
-        formatFloat := func(number, numberOfDecimal) {
+        formatFloat := func(number, numberOfDecimals) {
             str := string(number) // Convert the number to a string
 
             // Find the position of the decimal point
@@ -38,7 +38,7 @@
             }
 
             // Add a decimal point if it doesn't exist
-            if numberOfDecimal > 0 {
+            if numberOfDecimals > 0 {
                 if dotIndex == -1 {
                     dotIndex = len(str)
                     str += "."
@@ -51,7 +51,7 @@
 
 
             // Add zeros to reach the desired number of decimal places
-            for currentDecimals < numberOfDecimal {
+            for currentDecimals < numberOfDecimals {
                 str = str + "0"
                 currentDecimals++
             }
@@ -68,8 +68,8 @@
 		// ***********************************************************************************
 		// randomize
 		// Function to generate random numbers
-		randomize := func(index, maxIntegerPartSize, numberOfDecimal) {
-		    rand.seed(index)
+		randomize := func(testCaseUuidRandomizer, index, maxIntegerPartSize, numberOfDecimals) {
+		    rand.seed(testCaseUuidRandomizer + index)
 
 		    // Generate Integer part of random number
 		    randomIntegerPart :=  rand.float()
@@ -82,17 +82,17 @@
 
 		    decimalPart := 0
 
-		    if numberOfDecimal > 0 {
+		    if numberOfDecimals > 0 {
 
-		         decimalPart = math.ceil(math.pow(10, numberOfDecimal) * randomDecimalPart)
+		         decimalPart = math.ceil(math.pow(10, numberOfDecimals) * randomDecimalPart)
 		    }
 
 
 		    // Combine Integer and decimal part into one random number
-		    randomNumber := integerPart + math.pow(10, -1 * numberOfDecimal) * decimalPart
+		    randomNumber := integerPart + math.pow(10, -1 * numberOfDecimals) * decimalPart
 
 
-            randomNumber = round(randomNumber, numberOfDecimal)
+            randomNumber = round(randomNumber, numberOfDecimals)
 
 			return randomNumber
 		}
@@ -114,14 +114,69 @@
 		for i, v in array {       // array: index and element
             // 'i' is index
              // 'v' is value
-             tempValueAsFloat = randomize(i, maxIntegerPartSize, numberOfDecimal )
+             tempValueAsFloat = randomize(0, i, maxIntegerPartSize, numberOfDecimals)
 
 
-             array[i] = formatFloat(tempValueAsFloat, numberOfDecimal)
+             array[i] = formatFloat(tempValueAsFloat, numberOfDecimals)
+
+
+        }
+
+         // ***********************************************************************************
+		// SubCustody_RandomFloatValue_ArrayValue // SubCustody.RandomFloatValue[n]()
+		// Function to generate random value with a specif max number of integer and speciic number of decimals
+        SubCustody_RandomFloatValue_ArrayValue := func(testCaseUuidRandomizer, arrayPosition, maxIntegerPartSize, numberOfDecimals) {
+
+
+            // From users perspektive, position "0" is the number "1"
+            arrayPosition = arrayPosition - 1
+
+            if arrayPosition < 0 {
+                arrayPosition = 0
+            }
+
+            // Generate Random number based on array position
+            tempValueAsFloat = randomize(testCaseUuidRandomizer, arrayPosition, maxIntegerPartSize, numberOfDecimals )
+
+            // Format the value into a string
+             out1 := formatFloat(tempValueAsFloat, numberOfDecimals)
+
+             return out1
+
+        }
+
+
+        // ***********************************************************************************
+
+
+
+        // ***********************************************************************************
+		// SubCustody_RandomFloatValue
+		// Function to generate random value with a specif max number of integer and speciic number of decimals
+		// Always use arrau value 1, first array position from user perspective
+        SubCustody_RandomFloatValue := func(testCaseUuidRandomizer, maxIntegerPartSize, numberOfDecimals) {
+
+            out1 := SubCustody_RandomFloatValue_ArrayValue(testCaseUuidRandomizer, 1, maxIntegerPartSize, numberOfDecimals)
+
+            return out1
 
 
         }
 
 
+        // ***********************************************************************************
+
+
 		// Output the array
-		fmt.print(array)
+		fmt.println(array)
+
+		fmt.println(SubCustody_RandomFloatValue(0, numberOfDecimals, maxIntegerPartSize))
+
+		fmt.println(SubCustody_RandomFloatValue_ArrayValue(0, 3, numberOfDecimals, maxIntegerPartSize))
+
+		fmt.println(SubCustody_RandomFloatValue(1, numberOfDecimals, maxIntegerPartSize))
+
+		fmt.println(SubCustody_RandomFloatValue_ArrayValue(1, 3, numberOfDecimals, maxIntegerPartSize))
+
+
+
