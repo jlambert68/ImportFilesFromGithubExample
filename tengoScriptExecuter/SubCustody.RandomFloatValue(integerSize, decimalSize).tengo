@@ -132,12 +132,12 @@
 
 
             inputParametersArray := [
-                "testCaseUuidRandomizer_090c013dbc",
-                "arrayPosition_090c013dbc",
-                "maxIntegerPartSize_090c013dbc",
-                "numberOfDecimals_090c013dbc"]
+                {testCaseUuidRandomizer_090c013dbc: "int64"},
+                {arrayPosition_090c013dbc: "int64"},
+                {maxIntegerPartSize_090c013dbc: "int64"},
+                {numberOfDecimals_090c013dbc: "int64"}]
 
-
+            return inputParametersArray
         }
 
 
@@ -182,9 +182,11 @@
 
 
         inputParametersArray := [
-            "testCaseUuidRandomizer_44a5fa6715",
-            "maxIntegerPartSize_44a5fa6715",
-            "numberOfDecimals_44a5fa6715"]
+            {testCaseUuidRandomizer_44a5fa6715: "int64"},
+            {maxIntegerPartSize_44a5fa6715: "int64"},
+            {numberOfDecimals_44a5fa6715: "int64"}]
+
+            return inputParametersArray
 
 
         }
@@ -201,6 +203,11 @@
 
 
         // ***********************************************************************************
+
+
+    	fmt.println(SubCustody_RandomFloatValue_ArrayValue_InputParameters())
+    	fmt.println(SubCustody_RandomFloatValue_InputParameters())
+
 
 
 		// Output the array
