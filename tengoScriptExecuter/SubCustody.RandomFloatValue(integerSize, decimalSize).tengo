@@ -9,6 +9,10 @@
 		//numberOfDecimals := 2
 		//maxIntegerPartSize := 2
 
+        //inputArray := ["SubCustody_RandomFloatValue", 2, 2, 0]
+        //inputArray := ["SubCustody_RandomFloatValue_ArrayValue", 1, 2, 2, 0]
+
+
 
         // ***********************************************************************************
         // round
@@ -135,6 +139,7 @@
 
         SubCustody_RandomFloatValue_ArrayValue := func(inputArray) {
 
+
             // Extract values from input array
             arrayPosition := inputArray[0]
             maxIntegerPartSize := inputArray[1]
@@ -159,7 +164,6 @@
 
         }
 
-
         // ***********************************************************************************
 
 
@@ -183,20 +187,38 @@
             return SubCustody_RandomFloatValue_out
 
         }
-        SubCustody_RandomFloatValue_out := SubCustody_RandomFloatValue(inputArray)
-
 
         // ***********************************************************************************
 
+        SubCustody_RandomFloatValue_out := "No value was created"
+        SubCustody_RandomFloatValue_ArrayValue_out := "No value was created"
+
+        if inputArray[0] == "SubCustody_RandomFloatValue" {
+            SubCustody_RandomFloatValue_out = SubCustody_RandomFloatValue(inputArray[1:])
+
+        } else  if inputArray[0] == "SubCustody_RandomFloatValue_ArrayValue" {
+            SubCustody_RandomFloatValue_ArrayValue_out = SubCustody_RandomFloatValue_ArrayValue(inputArray[1:])
+
+        } else {
+            SubCustody_RandomFloatValue_out := "No known function '" + inputArray[0] + "'"
+            SubCustody_RandomFloatValue_ArrayValue_out = SubCustody_RandomFloatValue_out
+        }
+
+
+
+
 /*
+        fmt.println(SubCustody_RandomFloatValue_out)
 
-		fmt.println(SubCustody_RandomFloatValue([numberOfDecimals, maxIntegerPartSize, 0]))
+        fmt.println(SubCustody_RandomFloatValue_ArrayValue_out)
 
-		fmt.println(SubCustody_RandomFloatValue_ArrayValue([3, numberOfDecimals, maxIntegerPartSize, 0]))
+		fmt.println(SubCustody_RandomFloatValue([2, 3, 0]))
 
-		fmt.println(SubCustody_RandomFloatValue([numberOfDecimals, maxIntegerPartSize, 1]))
+		fmt.println(SubCustody_RandomFloatValue_ArrayValue([3, 2, 3, 0]))
 
-		fmt.println(SubCustody_RandomFloatValue_ArrayValue([3, numberOfDecimals, maxIntegerPartSize, 1]))
+		fmt.println(SubCustody_RandomFloatValue([2, 3, 1]))
+
+		fmt.println(SubCustody_RandomFloatValue_ArrayValue([3, 2, 3, 1]))
 
 */
 

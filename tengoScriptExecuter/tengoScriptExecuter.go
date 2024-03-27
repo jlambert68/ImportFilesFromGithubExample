@@ -5,17 +5,16 @@ import (
 	"github.com/d5/tengo/v2"
 	"github.com/d5/tengo/v2/stdlib"
 	"log"
-	"strings"
 )
 
-func ExecuteScripte(tengoFunctionName string, inputParameterArray []interface{}) (responseValue string) {
+func ExecuteScripte(inputParameterArray []interface{}) (responseValue string) {
 
 	// Add TestCaseUUid randomness
 	inputParameterArray = append(inputParameterArray, 0)
 
 	concatenateTengoScriptFiles()
 
-	tengoFunctionName = strings.ReplaceAll(tengoFunctionName, ".", "_")
+	tengoFunctionName := inputParameterArray[0].(string)
 
 	var script *tengo.Script
 

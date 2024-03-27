@@ -110,16 +110,25 @@ func InitiateFileViewe(
 	fileViewerWindow.Show()
 }
 
-func match(text string) (functionName string, functionValueSlice []interface{}) {
+func match(text string) (functionValueSlice []interface{}) {
 	//text := "{{SubCustody.Today(1)}}"
-	pattern := `\{\{([a-zA-Z0-9_.]+)\((([-?\d+],?\s*)+)\)\}\}`
+	pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d+)\])?\((([-?\d+],?\s*)*)\)\}\}`
 
 	re := regexp.MustCompile(pattern)
 	matches := re.FindStringSubmatch(text)
 
-	if len(matches) >= 3 {
-		functionName = matches[1]
-		functionArgs := matches[2]
+	if len(matches) >= 4 {
+		functionName := matches[1]
+		arrayIndexAsString := matches[2]
+		functionArgs := matches[3]
+
+		functionName = strings.ReplaceAll(functionName, ".", "_")
+		functionValueSlice = append(functionValueSlice, functionName)
+
+		arrayIndex, _ := strconv.Atoi(arrayIndexAsString)
+		if arrayIndex > 0 {
+			functionValueSlice = append(functionValueSlice, arrayIndex)
+		}
 
 		// Split the arguments into a slice
 		args := strings.Split(functionArgs, ",")
@@ -131,6 +140,7 @@ func match(text string) (functionName string, functionValueSlice []interface{}) 
 		}
 
 		fmt.Println("Function Name:", functionName)
+		fmt.Println("Array Index:", arrayIndexAsString)
 		fmt.Println("Function Arguments:", args)
 	} else {
 		fmt.Println("No match found")
@@ -139,7 +149,7 @@ func match(text string) (functionName string, functionValueSlice []interface{}) 
 	// Add an integer to the slice
 	//functionValueSlice = append(functionValueSlice, functionValue)
 
-	return functionName, functionValueSlice
+	return functionValueSlice
 }
 
 func parseAndFormatText(inputText string) (
@@ -176,8 +186,8 @@ func parseAndFormatText(inputText string) (
 
 			// Add the styled text between {{ and }}
 			currentText = inputText[startIndex : endIndex+2] // +2 to include the closing braces
-			functionName, functionValueSlice := match(currentText)
-			newTextFromScriptEngine := tengoScriptExecuter.ExecuteScripte(functionName, functionValueSlice)
+			functionValueSlice := match(currentText)
+			newTextFromScriptEngine := tengoScriptExecuter.ExecuteScripte(functionValueSlice)
 
 			segments = append(segments, &widget.TextSegment{
 				Text: currentText,
