@@ -156,7 +156,7 @@ func parseAndFormatText(inputText string) (
 			// Add the styled text between {{ and }}
 			currentText = inputText[startIndex : endIndex+2] // +2 to include the closing braces
 			_, functionValue := mstch(currentText)
-			newDateValue := tengoScriptExecuter.ExecuteScripte(functionValue)
+			newDateValue := tengoScriptExecuter.ExecuteScripte(functionValue, []string{})
 
 			segments = append(segments, &widget.TextSegment{
 				Text: currentText,

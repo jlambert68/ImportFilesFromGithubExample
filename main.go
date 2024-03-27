@@ -84,7 +84,7 @@ func main() {
 		}
 	}()
 
-	tengoScriptExecuter.ExecuteScripte("1")
+	tengoScriptExecuter.ExecuteScripte("SubCustody_RandomFloatValue", []string{"1"})
 
 	myMainWindow.ShowAndRun()
 

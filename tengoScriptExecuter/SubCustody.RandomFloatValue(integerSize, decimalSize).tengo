@@ -1,5 +1,6 @@
 		// Tengo script to create an array of 10 random numbers
 
+/*
 		rand := import("rand")
 		math := import("math")
 		fmt := import("fmt")
@@ -8,7 +9,7 @@
 		length := 20
 		numberOfDecimals := 2
 		maxIntegerPartSize := 2
-
+*/
 
         // ***********************************************************************************
         // round
@@ -100,28 +101,6 @@
 		// ***********************************************************************************
 
 
-		// Create an empty array
-		array := []
-
-		// Fill the array to the desired length
-		for i := 0; i < length; i++ {
-    		array = append(array, "")  // Initialize with default value (e.g., 0)
-		}
-
-		tempValueAsFloat := 0.0
-
-		// Fill the array with random numbers
-		for i, v in array {       // array: index and element
-            // 'i' is index
-             // 'v' is value
-             tempValueAsFloat = randomize(0, i, maxIntegerPartSize, numberOfDecimals)
-
-
-             array[i] = formatFloat(tempValueAsFloat, numberOfDecimals)
-
-
-        }
-
          // ***********************************************************************************
 		// SubCustody_RandomFloatValue_ArrayValue // SubCustody.RandomFloatValue[n](maxIntegerPartSize, numberOfDecimals)
 		// SHA256("SubCustody.RandomFloatValue[") = "090c013dbc0b7ca817dca2d1371a74f2f3edf4631327b7de3f3bdcfd297da275"
@@ -157,7 +136,7 @@
             }
 
             // Generate Random number based on array position
-            tempValueAsFloat = randomize(testCaseUuidRandomizer_090c013dbc, arrayPosition_090c013dbc, maxIntegerPartSize_090c013dbc, numberOfDecimals_090c013dbc )
+            tempValueAsFloat := randomize(testCaseUuidRandomizer_090c013dbc, arrayPosition_090c013dbc, maxIntegerPartSize_090c013dbc, numberOfDecimals_090c013dbc )
 
             // Format the value into a string
              out1 := formatFloat(tempValueAsFloat, numberOfDecimals)
@@ -203,14 +182,33 @@
 
 
         // ***********************************************************************************
+/*
+		// Create an empty array
+		array := []
+
+		// Fill the array to the desired length
+		for i := 0; i < length; i++ {
+    		array = append(array, "")  // Initialize with default value (e.g., 0)
+		}
+
+		tempValueAsFloat := 0.0
+
+		// Fill the array with random numbers
+		for i, v in array {       // array: index and element
+            // 'i' is index
+             // 'v' is value
+             tempValueAsFloat = randomize(0, i, maxIntegerPartSize, numberOfDecimals)
+
+
+             array[i] = formatFloat(tempValueAsFloat, numberOfDecimals)
+
+
+        }
 
 
     	fmt.println(SubCustody_RandomFloatValue_ArrayValue_InputParameters())
     	fmt.println(SubCustody_RandomFloatValue_InputParameters())
 
-
-
-		// Output the array
 		fmt.println(array)
 
 		fmt.println(SubCustody_RandomFloatValue(0, numberOfDecimals, maxIntegerPartSize))
@@ -221,5 +219,5 @@
 
 		fmt.println(SubCustody_RandomFloatValue_ArrayValue(1, 3, numberOfDecimals, maxIntegerPartSize))
 
-
+*/
 

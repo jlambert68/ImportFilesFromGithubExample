@@ -22,8 +22,8 @@ func concatenateTengoScriptFiles() {
 
 	var tempScript string
 	tempScript = string(myTengoFile1)
-	tempScript = tempScript + string(myTengoFile1)
 	tempScript = tempScript + string(myTengoFile2)
+	tempScript = tempScript + string(myTengoFile3)
 
 	myTengoFile = []byte(tempScript)
 }
