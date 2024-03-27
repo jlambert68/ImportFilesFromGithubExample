@@ -124,8 +124,29 @@
 
          // ***********************************************************************************
 		// SubCustody_RandomFloatValue_ArrayValue // SubCustody.RandomFloatValue[n](maxIntegerPartSize, numberOfDecimals)
+		// SHA256("SubCustody.RandomFloatValue[") = "090c013dbc0b7ca817dca2d1371a74f2f3edf4631327b7de3f3bdcfd297da275"
+		// 090c013dbc
 		// Function to generate random value with a specif max number of integer and speciic number of decimals
-        SubCustody_RandomFloatValue_ArrayValue := func(testCaseUuidRandomizer, arrayPosition, maxIntegerPartSize, numberOfDecimals) {
+
+        SubCustody_RandomFloatValue_ArrayValue_InputParameters := func() {
+
+
+            inputParametersArray := [
+                "testCaseUuidRandomizer_090c013dbc",
+                "arrayPosition_090c013dbc",
+                "maxIntegerPartSize_090c013dbc",
+                "numberOfDecimals_090c013dbc"]
+
+
+        }
+
+
+        SubCustody_RandomFloatValue_ArrayValue := func(testCaseUuidRandomizer_090c013dbc, arrayPosition_090c013dbc, maxIntegerPartSize_090c013dbc, numberOfDecimals_090c013dbc) {
+
+            testCaseUuidRandomizer := testCaseUuidRandomizer_090c013dbc
+            arrayPosition := arrayPosition_090c013dbc
+            maxIntegerPartSize := maxIntegerPartSize_090c013dbc
+            numberOfDecimals := numberOfDecimals_090c013dbc
 
 
             // From users perspektive, position "0" is the number "1"
@@ -136,7 +157,7 @@
             }
 
             // Generate Random number based on array position
-            tempValueAsFloat = randomize(testCaseUuidRandomizer, arrayPosition, maxIntegerPartSize, numberOfDecimals )
+            tempValueAsFloat = randomize(testCaseUuidRandomizer_090c013dbc, arrayPosition_090c013dbc, maxIntegerPartSize_090c013dbc, numberOfDecimals_090c013dbc )
 
             // Format the value into a string
              out1 := formatFloat(tempValueAsFloat, numberOfDecimals)
@@ -152,11 +173,26 @@
 
         // ***********************************************************************************
 		// SubCustody_RandomFloatValue // SubCustody.RandomFloatValue(maxIntegerPartSize, numberOfDecimals)
+		// SHA256("SubCustody.RandomFloatValue(" = "44a5fa671578800d412bd60c650ab7070d3826a61fd18f31d69045b96efbc61b"
+		// 44a5fa6715
 		// Function to generate random value with a specif max number of integer and speciic number of decimals
 		// Always use arrau value 1, first array position from user perspective
-        SubCustody_RandomFloatValue := func(testCaseUuidRandomizer, maxIntegerPartSize, numberOfDecimals) {
 
-            out1 := SubCustody_RandomFloatValue_ArrayValue(testCaseUuidRandomizer, 1, maxIntegerPartSize, numberOfDecimals)
+          SubCustody_RandomFloatValue_InputParameters := func() {
+
+
+        inputParametersArray := [
+            "testCaseUuidRandomizer_44a5fa6715",
+            "maxIntegerPartSize_44a5fa6715",
+            "numberOfDecimals_44a5fa6715"]
+
+
+        }
+
+
+        SubCustody_RandomFloatValue := func(testCaseUuidRandomizer_44a5fa6715, maxIntegerPartSize_44a5fa6715, numberOfDecimals_44a5fa6715) {
+
+            out1 := SubCustody_RandomFloatValue_ArrayValue(testCaseUuidRandomizer_44a5fa6715, 1, maxIntegerPartSize_44a5fa6715, numberOfDecimals_44a5fa6715)
 
             return out1
 

@@ -1,0 +1,6 @@
+// Libraries that is needed by the scripts
+
+rand := import("rand")
+math := import("math")
+fmt := import("fmt")
+times := import("times")

@@ -27,6 +27,8 @@ func ExecuteScripte(dateShift string) (responseValue string) {
 
 	*/
 
+	concatenateTengoScriptFiles()
+
 	script := tengo.NewScript(myTengoFile)
 
 	// Set 'input' variable in the script
