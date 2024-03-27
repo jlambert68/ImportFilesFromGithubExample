@@ -1,13 +1,13 @@
-		// ShiftDays function shifts the current date by 'n' days and returns the new date in YYYY-MM-DD format
-		fmt := import("fmt")
-		times := import("times")
+// ShiftDays function shifts the current date by 'n' days and returns the new date in YYYY-MM-DD format
+fmt := import("fmt")
+times := import("times")
 
-		shift_days := func(n) {
-    		today := times.now()               // Get the current date and time
-   			shiftedDate := times.add_date(today, 0, 0, n) // Shift the date by 'n' daysadd_date(t time, years int, months int, days int)
-    		return times.time_format(shiftedDate,"2006-01-02")  // Return the formatted date
-		}
+shift_days := func(n) {
+    today := times.now()               // Get the current date and time
+    shiftedDate := times.add_date(today, 0, 0, n) // Shift the date by 'n' daysadd_date(t time, years int, months int, days int)
+    return times.time_format(shiftedDate,"2006-01-02")  // Return the formatted date
+}
 
-		dateShifted := shift_days(input)
+dateShifted := shift_days(input)
 
-		fmt.println("Shifted Date:", dateShifted)
+fmt.println("Shifted Date:", dateShifted)

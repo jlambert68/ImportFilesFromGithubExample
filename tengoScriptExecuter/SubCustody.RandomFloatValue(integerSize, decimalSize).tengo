@@ -1,0 +1,127 @@
+		// Tengo script to create an array of 10 random numbers
+
+		rand := import("rand")
+		math := import("math")
+		fmt := import("fmt")
+
+		// Define the length of the array
+		length := 20
+		numberOfDecimal := 2
+		maxIntegerPartSize := 2
+
+
+        // ***********************************************************************************
+        // round
+        // Function to round a float to a specific number of decimal places
+        round := func(x, places) {
+            shift := math.pow(10, places)
+            return math.floor(x * shift + 0.5) / shift
+        }
+
+        // ***********************************************************************************
+
+
+
+        // ***********************************************************************************
+        // formatFloat
+        // Function to format a float with a specific number of decimals
+        formatFloat := func(number, numberOfDecimal) {
+            str := string(number) // Convert the number to a string
+
+            // Find the position of the decimal point
+            dotIndex := -1
+            for i := 0; i < len(str); i++ {
+                if str[i] == '.' {
+                    dotIndex = i
+                    break
+                }
+            }
+
+            // Add a decimal point if it doesn't exist
+            if numberOfDecimal > 0 {
+                if dotIndex == -1 {
+                    dotIndex = len(str)
+                    str += "."
+                }
+            }
+
+
+            // Calculate the number of decimal places currently in the string
+            currentDecimals := len(str) - dotIndex - 1
+
+
+            // Add zeros to reach the desired number of decimal places
+            for currentDecimals < numberOfDecimal {
+                str = str + "0"
+                currentDecimals++
+            }
+
+
+            return str
+        }
+
+        // ***********************************************************************************
+
+
+
+
+		// ***********************************************************************************
+		// randomize
+		// Function to generate random numbers
+		randomize := func(index, maxIntegerPartSize, numberOfDecimal) {
+		    rand.seed(index)
+
+		    // Generate Integer part of random number
+		    randomIntegerPart :=  rand.float()
+
+		    integerPart := math.ceil(math.pow(10, maxIntegerPartSize) * randomIntegerPart)
+
+
+		    // Generate Decimal part of random number
+		    randomDecimalPart :=  rand.float()
+
+		    decimalPart := 0
+
+		    if numberOfDecimal > 0 {
+
+		         decimalPart = math.ceil(math.pow(10, numberOfDecimal) * randomDecimalPart)
+		    }
+
+
+		    // Combine Integer and decimal part into one random number
+		    randomNumber := integerPart + math.pow(10, -1 * numberOfDecimal) * decimalPart
+
+
+            randomNumber = round(randomNumber, numberOfDecimal)
+
+			return randomNumber
+		}
+
+		// ***********************************************************************************
+
+
+		// Create an empty array
+		array := []
+
+		// Fill the array to the desired length
+		for i := 0; i < length; i++ {
+    		array = append(array, "")  // Initialize with default value (e.g., 0)
+		}
+
+		tempValueAsFloat := 0.0
+
+		// Fill the array with random numbers
+		for i, v in array {       // array: index and element
+            // 'i' is index
+             // 'v' is value
+             tempValueAsFloat = randomize(i, maxIntegerPartSize, numberOfDecimal )
+
+
+             array[i] = formatFloat(tempValueAsFloat, numberOfDecimal)
+
+
+        }
+
+
+		// Output the array
+		fmt.print(array)
