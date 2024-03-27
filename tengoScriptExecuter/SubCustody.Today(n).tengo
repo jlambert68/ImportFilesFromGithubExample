@@ -1,28 +1,19 @@
 fmt := import("fmt")
 times := import("times")
 
-//shift_days_f883cffd80 := 0
+//inputArray := [1]
 
 // ***********************************************************************************
 // SubCustody_TodayShiftDay
-// SHA256("SubCustody.TodayShiftDay(" = "f883cffd80329bcf8785788c3e49ea89f78ed6d4f4dc614993992edfc6d9acce"
-// f883cffd80
+//
 // SubCustody_TodayShiftDay function shifts the current date by 'n' days and returns the new date in YYYY-MM-DD format
+// inoutArray := [shift_days]
 
- SubCustody_TodayShiftDay_InputParameters := func() {
 
-    inputParametersArray := [
-        {shift_days_f883cffd80: "int64"}]
+SubCustody_TodayShiftDay := func(inputArray) {
 
-    return inputParametersArray
-
-    }
-SubCustody_TodayShiftDay_InputParameters_out := SubCustody_TodayShiftDay_InputParameters()
-//export SubCustody_TodayShiftDay_InputParameters_out
-
-SubCustody_TodayShiftDay := func(shift_days) {
-
-fmt.println("shift_days :", shift_days_f883cffd80)
+    // Extract values from input array
+    shift_days := inputArray[0]
 
     // Get the current date and time
     today := times.now()
@@ -33,17 +24,14 @@ fmt.println("shift_days :", shift_days_f883cffd80)
     // Format the date
     shiftedDate_formated := times.time_format(shiftedDate,"2006-01-02")
 
-    // Return the formatted date
-    out1 := shiftedDate_formated
 
     return  shiftedDate_formated
 }
-SubCustody_TodayShiftDay_out := SubCustody_TodayShiftDay(shift_days_f883cffd80)
+SubCustody_TodayShiftDay_out := SubCustody_TodayShiftDay(inputArray)
 
 // ***********************************************************************************
 
-/*
-ou1 := SubCustody_TodayShiftDay(1)
-fmt.println("Shifted Date:", ou1)
-fmt.println("inputParametersArray :", SubCustody_RandomFloatValue_InputParameters())
-*/
+
+//ou1 := SubCustody_TodayShiftDay([-1])
+//fmt.println("Shifted Date:", ou1)
+

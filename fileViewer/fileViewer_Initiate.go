@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -109,23 +110,36 @@ func InitiateFileViewe(
 	fileViewerWindow.Show()
 }
 
-func mstch(text string) (functionName string, functionValue string) {
+func match(text string) (functionName string, functionValueSlice []interface{}) {
 	//text := "{{SubCustody.Today(1)}}"
-	pattern := `\{\{([a-zA-Z0-9_.]+)\((-?\d+)\)\}\}`
+	pattern := `\{\{([a-zA-Z0-9_.]+)\((([-?\d+],?\s*)+)\)\}\}`
 
 	re := regexp.MustCompile(pattern)
 	matches := re.FindStringSubmatch(text)
 
 	if len(matches) >= 3 {
 		functionName = matches[1]
-		functionValue = matches[2]
+		functionArgs := matches[2]
+
+		// Split the arguments into a slice
+		args := strings.Split(functionArgs, ",")
+		for i, arg := range args {
+			args[i] = strings.TrimSpace(arg) // Trim whitespace from each argument
+
+			argAsInt, _ := strconv.Atoi(args[i])
+			functionValueSlice = append(functionValueSlice, argAsInt)
+		}
+
 		fmt.Println("Function Name:", functionName)
-		fmt.Println("Function Value:", functionValue)
+		fmt.Println("Function Arguments:", args)
 	} else {
 		fmt.Println("No match found")
 	}
 
-	return functionName, functionValue
+	// Add an integer to the slice
+	//functionValueSlice = append(functionValueSlice, functionValue)
+
+	return functionName, functionValueSlice
 }
 
 func parseAndFormatText(inputText string) (
@@ -151,12 +165,19 @@ func parseAndFormatText(inputText string) (
 						Style: widget.RichTextStyle{
 							Inline: true,
 						}})
+
+				segmentsWithValues = append(segmentsWithValues,
+					&widget.TextSegment{
+						Text: currentText,
+						Style: widget.RichTextStyle{
+							Inline: true,
+						}})
 			}
 
 			// Add the styled text between {{ and }}
 			currentText = inputText[startIndex : endIndex+2] // +2 to include the closing braces
-			_, functionValue := mstch(currentText)
-			newDateValue := tengoScriptExecuter.ExecuteScripte(functionValue, []string{})
+			functionName, functionValueSlice := match(currentText)
+			newTextFromScriptEngine := tengoScriptExecuter.ExecuteScripte(functionName, functionValueSlice)
 
 			segments = append(segments, &widget.TextSegment{
 				Text: currentText,
@@ -167,7 +188,7 @@ func parseAndFormatText(inputText string) (
 			})
 
 			segmentsWithValues = append(segmentsWithValues, &widget.TextSegment{
-				Text: newDateValue,
+				Text: newTextFromScriptEngine,
 				Style: widget.RichTextStyle{
 					Inline:    true,
 					TextStyle: fyne.TextStyle{Bold: true},

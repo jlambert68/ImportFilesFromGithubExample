@@ -3,7 +3,6 @@ package main
 import (
 	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
-	"ImportFilesFromGithub/tengoScriptExecuter"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -84,7 +83,12 @@ func main() {
 		}
 	}()
 
-	tengoScriptExecuter.ExecuteScripte("SubCustody_RandomFloatValue", []string{"1"})
+	// Define a slice of interfaces
+	//var mySlice []interface{}
+
+	// Add an integer to the slice
+	//mySlice = append(mySlice, 1)
+	//tengoScriptExecuter.ExecuteScripte("SubCustody_RandomFloatValue", mySlice)
 
 	myMainWindow.ShowAndRun()
 

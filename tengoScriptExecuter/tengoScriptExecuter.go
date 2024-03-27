@@ -5,20 +5,39 @@ import (
 	"github.com/d5/tengo/v2"
 	"github.com/d5/tengo/v2/stdlib"
 	"log"
+	"strings"
 )
 
-func ExecuteScripte(tengoFunctionName string, inputParameters []string) (responseValue string) {
+func ExecuteScripte(tengoFunctionName string, inputParameterArray []interface{}) (responseValue string) {
+
+	// Add TestCaseUUid randomness
+	inputParameterArray = append(inputParameterArray, 0)
 
 	concatenateTengoScriptFiles()
 
-	script := tengo.NewScript(myTengoFile2)
+	tengoFunctionName = strings.ReplaceAll(tengoFunctionName, ".", "_")
+
+	var script *tengo.Script
+
+	switch tengoFunctionName {
+
+	case "SubCustody_TodayShiftDay":
+		script = tengo.NewScript(myTengoFile2)
+	case "SubCustody_RandomFloatValue":
+		script = tengo.NewScript(myTengoFile3)
+	case "SubCustody_RandomFloatValue_ArrayValue":
+		script = tengo.NewScript(myTengoFile3)
+	default:
+		responseValue = fmt.Sprintf("Unknown 'tengoFunctionName¨ - '%s", tengoFunctionName)
+
+		return responseValue
+
+	}
 
 	// Import time module from stdlib
 	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 
-	script.Add("shift_days_f883cffd80", 4)
-	fmt.Println(script.Remove("shift_days_f883cffd80"))
-	script.Add("shift_days_f883cffd80", -1)
+	script.Add("inputArray", inputParameterArray)
 
 	// Compile the script
 	compiled, err := script.Compile()
@@ -26,67 +45,22 @@ func ExecuteScripte(tengoFunctionName string, inputParameters []string) (respons
 		log.Fatalln("Error compiling script:", err)
 	}
 
-	compiled.Set("shift_days_f883cffd80", 5) // Set myVar to 5
-
-	compiled, err = script.Compile()
-	if err != nil {
-		log.Fatalln("Error compiling script:", err)
-	}
-
 	err = compiled.Run()
 	if err != nil {
 		log.Fatalln("Error compiling script:", err)
 	}
 
-	// Get the function from the script
-	functionVariable2 := compiled.Get("SubCustody_TodayShiftDay_InputParameters") // This returns *tengo.Variable
+	responseVariableInTengoScript := tengoFunctionName + "_out"
+	functionResponse := compiled.Get(responseVariableInTengoScript)
 
 	// Check if the function variable is nil
-	if functionVariable2 == nil {
-		log.Fatalf("Function %s does not exist in the script", functionVariable2)
+	if functionResponse == nil {
+		responseValue = fmt.Sprintf("Function %s does not exist in the script", tengoFunctionName)
+
+		return responseValue
 	}
 
-	ouut := compiled.Get("SubCustody_TodayShiftDay_InputParameters_out")
-	fmt.Println(ouut)
+	responseValue = functionResponse.String()
 
-	ouut2 := compiled.Get("SubCustody_TodayShiftDay_out")
-	fmt.Println(ouut2)
-
-	err = compiled.Set("shift_days_f883cffd80", 1)
-	if err != nil {
-		log.Fatalln("Error compiling script:", err)
-	}
-
-	err = compiled.Run()
-	if err != nil {
-		log.Fatalln("Error compiling script:", err)
-	}
-
-	ouut3 := compiled.Get("SubCustody_TodayShiftDay_out")
-	fmt.Println(ouut3)
-	/*
-		// Get the function from the script for input parameters
-		parameterFuntion := "SubCustody_TodayShiftDay_InputParameters" //tengoFunctionName + "_InputParameters"
-
-		functionVariable := compiled.Get(parameterFuntion) // This returns *tengo.Variable
-
-		// Assert the underlying value to be *tengo.UserFunction
-		tengoFunctionToCall, ok := functionVariable.Value().(*tengo.UserFunction)
-		if !ok {
-			//log.Fatalln("Function " + parameterFuntion + " not found or not a user function")
-		}
-
-		fmt.Println(tengoFunctionToCall.CanCall())
-
-		// Call the function to get input parameters
-		result, err := tengoFunctionToCall.Call()
-		if err != nil {
-			log.Fatalln("Error calling function:", err)
-		}
-
-		responseValue = result.String()
-
-		fmt.Println("result:", result)
-	*/
 	return responseValue
 }

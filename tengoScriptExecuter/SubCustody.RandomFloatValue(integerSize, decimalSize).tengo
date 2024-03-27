@@ -175,7 +175,7 @@
         SubCustody_RandomFloatValue := func(inputArray) {
 
             // Extract values from input array
-            inputArray2 := [inputArray[0], 1, inputArray[2], inputArray[2]]
+            inputArray2 := [1, inputArray[0],inputArray[1], inputArray[2]]
 
 
             SubCustody_RandomFloatValue_out := SubCustody_RandomFloatValue_ArrayValue(inputArray2)
@@ -183,7 +183,7 @@
             return SubCustody_RandomFloatValue_out
 
         }
-
+        SubCustody_RandomFloatValue_out := SubCustody_RandomFloatValue(inputArray)
 
 
         // ***********************************************************************************
