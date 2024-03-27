@@ -1,19 +1,19 @@
 		// Tengo script to create an array of 10 random numbers
 
-/*
 		rand := import("rand")
 		math := import("math")
 		fmt := import("fmt")
 
 		// Define the length of the array
-		length := 20
-		numberOfDecimals := 2
-		maxIntegerPartSize := 2
-*/
+		//length := 20
+		//numberOfDecimals := 2
+		//maxIntegerPartSize := 2
+
 
         // ***********************************************************************************
         // round
         // Function to round a float to a specific number of decimal places
+
         round := func(x, places) {
             shift := math.pow(10, places)
             return math.floor(x * shift + 0.5) / shift
@@ -26,6 +26,7 @@
         // ***********************************************************************************
         // formatFloat
         // Function to format a float with a specific number of decimals
+
         formatFloat := func(number, numberOfDecimals) {
             str := string(number) // Convert the number to a string
 
@@ -69,7 +70,8 @@
 		// ***********************************************************************************
 		// randomize
 		// Function to generate random numbers
-		randomize := func(testCaseUuidRandomizer, index, maxIntegerPartSize, numberOfDecimals) {
+
+		randomize := func(index, maxIntegerPartSize, numberOfDecimals, testCaseUuidRandomizer) {
 		    rand.seed(testCaseUuidRandomizer + index)
 
 		    // Generate Integer part of random number
@@ -100,89 +102,7 @@
 
 		// ***********************************************************************************
 
-
-         // ***********************************************************************************
-		// SubCustody_RandomFloatValue_ArrayValue // SubCustody.RandomFloatValue[n](maxIntegerPartSize, numberOfDecimals)
-		// SHA256("SubCustody.RandomFloatValue[") = "090c013dbc0b7ca817dca2d1371a74f2f3edf4631327b7de3f3bdcfd297da275"
-		// 090c013dbc
-		// Function to generate random value with a specif max number of integer and speciic number of decimals
-
-        SubCustody_RandomFloatValue_ArrayValue_InputParameters := func() {
-
-
-            inputParametersArray := [
-                {testCaseUuidRandomizer_090c013dbc: "int64"},
-                {arrayPosition_090c013dbc: "int64"},
-                {maxIntegerPartSize_090c013dbc: "int64"},
-                {numberOfDecimals_090c013dbc: "int64"}]
-
-            return inputParametersArray
-        }
-
-
-        SubCustody_RandomFloatValue_ArrayValue := func(testCaseUuidRandomizer_090c013dbc, arrayPosition_090c013dbc, maxIntegerPartSize_090c013dbc, numberOfDecimals_090c013dbc) {
-
-            testCaseUuidRandomizer := testCaseUuidRandomizer_090c013dbc
-            arrayPosition := arrayPosition_090c013dbc
-            maxIntegerPartSize := maxIntegerPartSize_090c013dbc
-            numberOfDecimals := numberOfDecimals_090c013dbc
-
-
-            // From users perspektive, position "0" is the number "1"
-            arrayPosition = arrayPosition - 1
-
-            if arrayPosition < 0 {
-                arrayPosition = 0
-            }
-
-            // Generate Random number based on array position
-            tempValueAsFloat := randomize(testCaseUuidRandomizer_090c013dbc, arrayPosition_090c013dbc, maxIntegerPartSize_090c013dbc, numberOfDecimals_090c013dbc )
-
-            // Format the value into a string
-             out1 := formatFloat(tempValueAsFloat, numberOfDecimals)
-
-             return out1
-
-        }
-
-
-        // ***********************************************************************************
-
-
-
-        // ***********************************************************************************
-		// SubCustody_RandomFloatValue // SubCustody.RandomFloatValue(maxIntegerPartSize, numberOfDecimals)
-		// SHA256("SubCustody.RandomFloatValue(" = "44a5fa671578800d412bd60c650ab7070d3826a61fd18f31d69045b96efbc61b"
-		// 44a5fa6715
-		// Function to generate random value with a specif max number of integer and speciic number of decimals
-		// Always use arrau value 1, first array position from user perspective
-
-          SubCustody_RandomFloatValue_InputParameters := func() {
-
-
-        inputParametersArray := [
-            {testCaseUuidRandomizer_44a5fa6715: "int64"},
-            {maxIntegerPartSize_44a5fa6715: "int64"},
-            {numberOfDecimals_44a5fa6715: "int64"}]
-
-            return inputParametersArray
-
-
-        }
-
-
-        SubCustody_RandomFloatValue := func(testCaseUuidRandomizer_44a5fa6715, maxIntegerPartSize_44a5fa6715, numberOfDecimals_44a5fa6715) {
-
-            out1 := SubCustody_RandomFloatValue_ArrayValue(testCaseUuidRandomizer_44a5fa6715, 1, maxIntegerPartSize_44a5fa6715, numberOfDecimals_44a5fa6715)
-
-            return out1
-
-
-        }
-
-
-        // ***********************************************************************************
-/*
+		/*
 		// Create an empty array
 		array := []
 
@@ -204,20 +124,79 @@
 
 
         }
+        */
+
+         // ***********************************************************************************
+		// SubCustody_RandomFloatValue_ArrayValue // SubCustody.RandomFloatValue[n](maxIntegerPartSize, numberOfDecimals)
+        //
+		// Function to generate random value with a specif max number of integer and speciic number of decimals
+		// inputArray := [arrayPosition, maxIntegerPartSize, numberOfDecimals, testCaseUuidRandomizer]
 
 
-    	fmt.println(SubCustody_RandomFloatValue_ArrayValue_InputParameters())
-    	fmt.println(SubCustody_RandomFloatValue_InputParameters())
+        SubCustody_RandomFloatValue_ArrayValue := func(inputArray) {
 
-		fmt.println(array)
+            // Extract values from input array
+            arrayPosition := inputArray[0]
+            maxIntegerPartSize := inputArray[1]
+            numberOfDecimals := inputArray[2]
+            testCaseUuidRandomizer := inputArray[3]
 
-		fmt.println(SubCustody_RandomFloatValue(0, numberOfDecimals, maxIntegerPartSize))
 
-		fmt.println(SubCustody_RandomFloatValue_ArrayValue(0, 3, numberOfDecimals, maxIntegerPartSize))
+            // From users perspektive, position "0" is the number "1"
+            arrayPosition = arrayPosition - 1
 
-		fmt.println(SubCustody_RandomFloatValue(1, numberOfDecimals, maxIntegerPartSize))
+            if arrayPosition < 0 {
+                arrayPosition = 0
+            }
 
-		fmt.println(SubCustody_RandomFloatValue_ArrayValue(1, 3, numberOfDecimals, maxIntegerPartSize))
+            // Generate Random number based on array position
+            tempValueAsFloat := randomize(arrayPosition, maxIntegerPartSize, numberOfDecimals, testCaseUuidRandomizer)
+
+            // Format the value into a string
+             SubCustody_RandomFloatValue_ArrayValue_out := formatFloat(tempValueAsFloat, numberOfDecimals)
+
+             return SubCustody_RandomFloatValue_ArrayValue_out
+
+        }
+
+
+        // ***********************************************************************************
+
+
+
+        // ***********************************************************************************
+		// SubCustody_RandomFloatValue // SubCustody.RandomFloatValue(maxIntegerPartSize, numberOfDecimals)
+		//
+		// Function to generate random value with a specif max number of integer and speciic number of decimals
+		// Always use array value 1, first array position from user perspective
+		//
+		// inputArray := [maxIntegerPartSize, numberOfDecimals, testCaseUuidRandomizer]
+
+        SubCustody_RandomFloatValue := func(inputArray) {
+
+            // Extract values from input array
+            inputArray2 := [inputArray[0], 1, inputArray[2], inputArray[2]]
+
+
+            SubCustody_RandomFloatValue_out := SubCustody_RandomFloatValue_ArrayValue(inputArray2)
+
+            return SubCustody_RandomFloatValue_out
+
+        }
+
+
+
+        // ***********************************************************************************
+
+/*
+
+		fmt.println(SubCustody_RandomFloatValue([numberOfDecimals, maxIntegerPartSize, 0]))
+
+		fmt.println(SubCustody_RandomFloatValue_ArrayValue([3, numberOfDecimals, maxIntegerPartSize, 0]))
+
+		fmt.println(SubCustody_RandomFloatValue([numberOfDecimals, maxIntegerPartSize, 1]))
+
+		fmt.println(SubCustody_RandomFloatValue_ArrayValue([3, numberOfDecimals, maxIntegerPartSize, 1]))
 
 */
 

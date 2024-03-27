@@ -17,6 +17,8 @@ func ExecuteScripte(tengoFunctionName string, inputParameters []string) (respons
 	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 
 	script.Add("shift_days_f883cffd80", 4)
+	fmt.Println(script.Remove("shift_days_f883cffd80"))
+	script.Add("shift_days_f883cffd80", -1)
 
 	// Compile the script
 	compiled, err := script.Compile()
