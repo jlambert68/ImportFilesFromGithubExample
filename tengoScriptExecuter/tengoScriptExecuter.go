@@ -21,7 +21,7 @@ func ExecuteScripte(inputParameterArray []interface{}) (responseValue string) {
 	switch tengoFunctionName {
 
 	case "SubCustody_TodayShiftDay":
-		script = tengo.NewScript(myTengoFile2)
+		script = tengo.NewScript(myTengoFile4) //2
 
 	case "SubCustody_RandomPositiveFloatValue":
 		script = tengo.NewScript(myTengoFile3)
@@ -35,6 +35,8 @@ func ExecuteScripte(inputParameterArray []interface{}) (responseValue string) {
 		return responseValue
 
 	}
+
+	script.EnableFileImport(true)
 
 	// Import time module from stdlib
 	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))

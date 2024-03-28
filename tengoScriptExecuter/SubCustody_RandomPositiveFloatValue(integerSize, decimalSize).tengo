@@ -274,6 +274,13 @@ TengoScriptStartingPoint := func(inputArray) {
 
 // ***********************************************************************************
 
+
+export func(inputArray) {
+  return TengoScriptStartingPoint(inputArray)
+}
+
+inputArray := []
+
  // Execution function when script runs
 TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
 
