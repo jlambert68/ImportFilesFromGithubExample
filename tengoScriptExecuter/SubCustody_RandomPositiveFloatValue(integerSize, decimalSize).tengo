@@ -169,7 +169,7 @@ SubCustody_RandomFloatValue_ArrayValue := func(inputArray) {
 
 
 // ***********************************************************************************
-// SubCustody_RandomFloatValue // SubCustody.RandomFloatValue(maxIntegerPartSize, numberOfDecimals)
+// SubCustody_RandomPositiveFloatValue // SubCustody.RandomFloatValue(maxIntegerPartSize, numberOfDecimals)
 //
 // Function to generate random value with a specif max number of integer and speciic number of decimals
 // Always use array value 1, first array position from user perspective
@@ -274,7 +274,8 @@ TengoScriptStartingPoint := func(inputArray) {
 
 // ***********************************************************************************
 
-
+ // Execution function when script runs
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
 
 /*
 

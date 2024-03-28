@@ -21,7 +21,7 @@ SubCustody_TodayShiftDay := func(inputArray) {
 
     // Secure that no ArraysIndexArray is emtpty
     if len(arraysIndexArray) > 0 {
-        error_message := "Error - array index is not sopported. '" + format("arraysIndexArray: %v", arraysIndexArray) + "'"
+        error_message := "Error - array index is not supported. '" + format("arraysIndexArray: %v", arraysIndexArray) + "'"
 
         return error_message
     }
@@ -95,6 +95,8 @@ TengoScriptStartingPoint := func(inputArray) {
     }
 }
 
+ // Execution function when script runs
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
 
 
 /*

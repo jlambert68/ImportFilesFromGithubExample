@@ -14,7 +14,7 @@ func ExecuteScripte(inputParameterArray []interface{}) (responseValue string) {
 
 	concatenateTengoScriptFiles()
 
-	tengoFunctionName := inputParameterArray[0].(string)
+	tengoFunctionName := inputParameterArray[1].(string)
 
 	var script *tengo.Script
 
@@ -22,11 +22,11 @@ func ExecuteScripte(inputParameterArray []interface{}) (responseValue string) {
 
 	case "SubCustody_TodayShiftDay":
 		script = tengo.NewScript(myTengoFile2)
-	case "SubCustody_RandomFloatValue":
+
+	case "SubCustody_RandomPositiveFloatValue":
 		script = tengo.NewScript(myTengoFile3)
-	case "SubCustody_RandomFloatValue_ArrayValue":
-		script = tengo.NewScript(myTengoFile3)
-	case "SubCustody.RandomFloatValue.ArrayValue_Sum":
+
+	case "SubCustody_RandomPositiveFloatValue_Sum":
 		return "SubCustody.RandomFloatValue.ArrayValue_Sum is not implemeted"
 
 	default:
@@ -39,7 +39,9 @@ func ExecuteScripte(inputParameterArray []interface{}) (responseValue string) {
 	// Import time module from stdlib
 	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 
-	script.Add("inputArray", inputParameterArray)
+	inputArray := inputParameterArray[1:]
+
+	script.Add("inputArray", inputArray)
 
 	// Compile the script
 	compiled, err := script.Compile()
@@ -52,7 +54,7 @@ func ExecuteScripte(inputParameterArray []interface{}) (responseValue string) {
 		log.Fatalln("Error compiling script:", err)
 	}
 
-	responseVariableInTengoScript := tengoFunctionName + "_out"
+	responseVariableInTengoScript := "TengoScriptResponseValue"
 	functionResponse := compiled.Get(responseVariableInTengoScript)
 
 	// Check if the function variable is nil

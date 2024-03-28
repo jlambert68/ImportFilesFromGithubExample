@@ -111,43 +111,80 @@ func InitiateFileViewe(
 	fileViewerWindow.Show()
 }
 
-func match(text string) (functionValueSlice []interface{}, err error) {
+func match(text string) (mainTengoInputSlice []interface{}, err error) {
 
 	var arrayIndexSlice []interface{}
 	var functionArgumentSlice []interface{}
 
 	//text := "{{SubCustody.Today(1)}}"
-	pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d+(?:,\s*\d+)*)\])?\((([-?\d+],?\s*)*)\)\}\}`
+	//pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d+(?:,\s*\d+)*)\])?\((([-?\d+],?\s*)*)\)\}\}`
+	pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d*(?:,\s*\d*)*)?\])?\((([-?\d+],?\s*)*)\)\}\}`
 
 	re := regexp.MustCompile(pattern)
+
 	matches := re.FindStringSubmatch(text)
 
 	if len(matches) >= 4 {
+		placeholder := matches[0]
 		functionName := matches[1]
 		arrayIndexes := matches[2] // Will be empty if not present
 		functionArgs := matches[3] // Will be empty if not present
 
-		functionName = strings.ReplaceAll(functionName, ".", "_")
-		functionValueSlice = append(functionValueSlice, functionName)
+		// Add 'placeholder' to 'mainTengoInputSlice'
+		mainTengoInputSlice = append(mainTengoInputSlice, placeholder)
 
-		// Split the array indexes and arguments into slices
+		functionName = strings.ReplaceAll(functionName, ".", "_")
+		mainTengoInputSlice = append(mainTengoInputSlice, functionName)
+
+		// Split the array indexes into a slices
 		indexes := strings.Split(arrayIndexes, ",")
+
+		// Create a ArrayIndex-array as s '[]interface{}'
+		var indexAsInt int
 		for i, index := range indexes {
 			indexes[i] = strings.TrimSpace(index)
 
-			indexAsInt, _ := strconv.Atoi(indexes[i])
-			arrayIndexSlice = append(arrayIndexSlice, indexAsInt)
-		}
-		functionValueSlice = append(functionValueSlice, arrayIndexSlice)
+			// Only convert when there is some value
+			if len(indexes[i]) > 0 {
+				indexAsInt, err = strconv.Atoi(indexes[i])
+				if err != nil {
+					err = errors.New(fmt.Sprintf("Couldn't convert array index '%s' in '%s' to an integer. Placeholder = '%s'", indexes[i], indexes, placeholder))
 
+					return nil, err
+
+				}
+
+				arrayIndexSlice = append(arrayIndexSlice, indexAsInt)
+			}
+		}
+
+		// Add the FunctionArguments-array to the main input array
+		mainTengoInputSlice = append(mainTengoInputSlice, arrayIndexSlice)
+
+		// Split the function arguments into a slice
 		args := strings.Split(functionArgs, ",")
+
+		// Create a FunctionArguments-array as a '[]interface{}'
+		var argAsInt int
 		for i, arg := range args {
 			args[i] = strings.TrimSpace(arg)
 
-			argAsInt, _ := strconv.Atoi(args[i])
-			functionArgumentSlice = append(functionArgumentSlice, argAsInt)
+			// Only convert when there is some value
+			if len(args[i]) > 0 {
+				argAsInt, err = strconv.Atoi(args[i])
+				if err != nil {
+					err = errors.New(fmt.Sprintf("Couldn't convert parameter '%s' in '%s' to an integer. Placeholder = '%s'", args[i], args, placeholder))
+
+					return nil, err
+
+				}
+
+				functionArgumentSlice = append(functionArgumentSlice, argAsInt)
+			}
 		}
-		functionValueSlice = append(functionValueSlice, functionArgumentSlice)
+
+		// Add the FunctionArguments-array to the main input array
+		mainTengoInputSlice = append(mainTengoInputSlice, functionArgumentSlice)
 
 		fmt.Println("Text:", text)
 		fmt.Println("Function Name:", functionName)
@@ -161,9 +198,9 @@ func match(text string) (functionValueSlice []interface{}, err error) {
 	}
 
 	// Add an integer to the slice
-	//functionValueSlice = append(functionValueSlice, functionValue)
+	//mainTengoInputSlice = append(mainTengoInputSlice, functionValue)
 
-	return functionValueSlice, err
+	return mainTengoInputSlice, err
 }
 
 func parseAndFormatText(inputText string) (
