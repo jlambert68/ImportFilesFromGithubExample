@@ -200,7 +200,7 @@
             SubCustody_RandomFloatValue_ArrayValue_out = SubCustody_RandomFloatValue_ArrayValue(inputArray[1:])
 
         } else {
-            SubCustody_RandomFloatValue_out := "No known function '" + inputArray[0] + "'"
+            SubCustody_RandomFloatValue_out = "No known function '" + inputArray[0] + "'"
             SubCustody_RandomFloatValue_ArrayValue_out = SubCustody_RandomFloatValue_out
         }
 

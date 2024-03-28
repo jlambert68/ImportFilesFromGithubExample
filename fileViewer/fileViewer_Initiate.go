@@ -111,39 +111,52 @@ func InitiateFileViewe(
 }
 
 func match(text string) (functionValueSlice []interface{}) {
+
+	var arrayIndexSlice []interface{}
+	var functionArgumentSlice []interface{}
+
 	//text := "{{SubCustody.Today(1)}}"
-	pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d+)\])?\((([-?\d+],?\s*)*)\)\}\}`
+	pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d+(?:,\s*\d+)*)\])?\((([-?\d+],?\s*)*)\)\}\}`
 
 	re := regexp.MustCompile(pattern)
 	matches := re.FindStringSubmatch(text)
 
 	if len(matches) >= 4 {
 		functionName := matches[1]
-		arrayIndexAsString := matches[2]
-		functionArgs := matches[3]
+		arrayIndexes := matches[2] // Will be empty if not present
+		functionArgs := matches[3] // Will be empty if not present
 
 		functionName = strings.ReplaceAll(functionName, ".", "_")
 		functionValueSlice = append(functionValueSlice, functionName)
 
-		arrayIndex, _ := strconv.Atoi(arrayIndexAsString)
-		if arrayIndex > 0 {
-			functionValueSlice = append(functionValueSlice, arrayIndex)
-		}
+		// Split the array indexes and arguments into slices
+		indexes := strings.Split(arrayIndexes, ",")
+		for i, index := range indexes {
+			indexes[i] = strings.TrimSpace(index)
 
-		// Split the arguments into a slice
+			indexAsInt, _ := strconv.Atoi(indexes[i])
+			arrayIndexSlice = append(arrayIndexSlice, indexAsInt)
+		}
+		functionValueSlice = append(functionValueSlice, arrayIndexSlice)
+
 		args := strings.Split(functionArgs, ",")
 		for i, arg := range args {
-			args[i] = strings.TrimSpace(arg) // Trim whitespace from each argument
+			args[i] = strings.TrimSpace(arg)
 
 			argAsInt, _ := strconv.Atoi(args[i])
-			functionValueSlice = append(functionValueSlice, argAsInt)
+			functionArgumentSlice = append(functionArgumentSlice, argAsInt)
 		}
+		functionValueSlice = append(functionValueSlice, functionArgumentSlice)
 
+		fmt.Println("Text:", text)
 		fmt.Println("Function Name:", functionName)
-		fmt.Println("Array Index:", arrayIndexAsString)
+		if arrayIndexes != "" {
+			fmt.Println("Array Indexes:", indexes)
+		}
 		fmt.Println("Function Arguments:", args)
+		fmt.Println()
 	} else {
-		fmt.Println("No match found")
+		fmt.Println("No match found for:", text)
 	}
 
 	// Add an integer to the slice

@@ -26,6 +26,9 @@ func ExecuteScripte(inputParameterArray []interface{}) (responseValue string) {
 		script = tengo.NewScript(myTengoFile3)
 	case "SubCustody_RandomFloatValue_ArrayValue":
 		script = tengo.NewScript(myTengoFile3)
+	case "SubCustody.RandomFloatValue.ArrayValue_Sum":
+		return "SubCustody.RandomFloatValue.ArrayValue_Sum is not implemeted"
+
 	default:
 		responseValue = fmt.Sprintf("Unknown 'tengoFunctionName¨ - '%s", tengoFunctionName)
 

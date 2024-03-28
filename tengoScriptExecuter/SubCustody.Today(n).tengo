@@ -1,7 +1,8 @@
 fmt := import("fmt")
 times := import("times")
 
-//inputArray := [1]
+//inputArray := ["TengoFunctionName", [ArrayIndexesArray], [FunctionArgumentsArray], UniqueExecutionRandomness]
+//inputArray := ["SubCustody_RandomFloatValuea", [] ,[0], 0] // OK - Today
 
 // ***********************************************************************************
 // SubCustody_TodayShiftDay
@@ -12,8 +13,36 @@ times := import("times")
 
 SubCustody_TodayShiftDay := func(inputArray) {
 
-    // Extract values from input array
-    shift_days := inputArray[0]
+
+    // Extract ArraysIndexArray
+     arraysIndexArray := inputArray[0]
+
+    // Secure that no ArraysIndexArray is emtpty
+    if len(arraysIndexArray) > 0 {
+        error_message := "Error - array index is not sopported. '" + format("arraysIndexArray: %v", arraysIndexArray) + "'"
+
+        return error_message
+    }
+
+    // Extract FunctionArgumentsArray
+    functionArgumentsArray := inputArray[1]
+
+    // Handle different number of function arguments
+    shift_days := 0
+    if len(functionArgumentsArray) == 0 {
+        shift_days = 0
+
+    } else if len(functionArgumentsArray) == 1 {
+         shift_days = functionArgumentsArray[0]
+
+
+    } else {
+        error_message := "Error - more than 1 parameter argument. '" + format("functionArgumentsArray: %v", functionArgumentsArray) + "'"
+
+        return error_message
+
+    }
+
 
     // Get the current date and time
     today := times.now()
@@ -27,11 +56,49 @@ SubCustody_TodayShiftDay := func(inputArray) {
 
     return  shiftedDate_formated
 }
-SubCustody_TodayShiftDay_out := SubCustody_TodayShiftDay(inputArray)
 
 // ***********************************************************************************
 
+SubCustody_TodayShiftDay_out := "No value was created"
 
-//ou1 := SubCustody_TodayShiftDay([-1])
-//fmt.println("Shifted Date:", ou1)
+if inputArray[0] == "SubCustody_RandomFloatValue" {
+    SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
+} else {
+    SubCustody_TodayShiftDay_out = "ERROR -Unknown function '" + inputArray[0] + "'"
+}
+
+
+/*
+inputArray = ["SubCustody_RandomFloatValue", [], [-1], 0] // OK - Yesterday
+SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
+fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected OK - Yesterday")
+
+
+inputArray = ["SubCustody_RandomFloatValue", [], [0], 0] // OK - Today
+SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
+fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected OK - Today")
+
+inputArray = ["SubCustody_RandomFloatValue", [], [1], 0] // OK - Tomorrow
+SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
+fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected OK - Tomorrow")
+
+
+inputArray = ["SubCustody_RandomFloatValue", [], [], 0] // OK - Today
+SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
+fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected OK - Today")
+
+
+inputArray = ["SubCustody_RandomFloatValue", [1], [1], 0] // ERROR - ArrayIndex values not allowed
+SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
+fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected Error")
+
+inputArray = ["SubCustody_RandomFloatValue", [1, 2], [1], 0] // ERROR - ArrayIndex values not allowed
+SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
+fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected Error")
+
+inputArray = ["SubCustody_RandomFloatValue", [], [1, 2], 0] // ERROR -More then 1 parametera argument
+SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
+fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected Error")
+
+*/
 
