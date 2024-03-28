@@ -12,7 +12,7 @@ var myTengoFile1 []byte
 //go:embed SubCustody.Today(n).tengo
 var myTengoFile2 []byte
 
-//go:embed "SubCustody.RandomFloatValue(integerSize, decimalSize).tengo"
+//go:embed "SubCustody_RandomPositiveFloatValue(integerSize, decimalSize).tengo"
 var myTengoFile3 []byte
 
 var myTengoFile [][]byte

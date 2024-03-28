@@ -1,0 +1,352 @@
+// Tengo script to create an array of 10 random numbers
+
+rand := import("rand")
+math := import("math")
+fmt := import("fmt")
+
+// Define the length of the array
+//length := 20
+//numberOfDecimals := 2
+//maxIntegerPartSize := 2
+
+//inputArray := ["SubCustody_RandomPositiveFloatValue", [], [2, 2], 0]
+//inputArray := ["SubCustody_RandomPositiveFloatValue", [1], [2, 2}, 0]
+
+
+
+// ***********************************************************************************
+// round
+// Function to round a float to a specific number of decimal places
+
+round := func(x, places) {
+    shift := math.pow(10, places)
+    return math.floor(x * shift + 0.5) / shift
+}
+
+// ***********************************************************************************
+
+
+
+// ***********************************************************************************
+// formatFloat
+// Function to format a float with a specific number of decimals
+
+formatFloat := func(number, numberOfDecimals) {
+    str := string(number) // Convert the number to a string
+
+    // Find the position of the decimal point
+    dotIndex := -1
+    for i := 0; i < len(str); i++ {
+        if str[i] == '.' {
+            dotIndex = i
+            break
+        }
+    }
+
+    // Add a decimal point if it doesn't exist
+    if numberOfDecimals > 0 {
+        if dotIndex == -1 {
+            dotIndex = len(str)
+            str += "."
+        }
+    }
+
+
+    // Calculate the number of decimal places currently in the string
+    currentDecimals := len(str) - dotIndex - 1
+
+
+    // Add zeros to reach the desired number of decimal places
+    for currentDecimals < numberOfDecimals {
+        str = str + "0"
+        currentDecimals++
+    }
+
+
+    return str
+}
+
+// ***********************************************************************************
+
+
+
+
+// ***********************************************************************************
+// randomize
+// Function to generate random numbers
+
+randomize := func(index, maxIntegerPartSize, numberOfDecimals, testCaseUuidRandomizer) {
+    rand.seed(testCaseUuidRandomizer + index)
+
+    // Generate Integer part of random number
+    randomIntegerPart :=  rand.float()
+
+    integerPart := math.floor(math.pow(10, maxIntegerPartSize) * randomIntegerPart)
+
+
+    // Generate Decimal part of random number
+    randomDecimalPart :=  rand.float()
+
+    decimalPart := 0
+
+    if numberOfDecimals > 0 {
+
+         decimalPart = math.floor(math.pow(10, numberOfDecimals) * randomDecimalPart)
+    }
+
+
+    // Combine Integer and decimal part into one random number
+    randomNumber := integerPart + math.pow(10, -1 * numberOfDecimals) * decimalPart
+
+
+    randomNumber = round(randomNumber, numberOfDecimals)
+
+	return randomNumber
+}
+
+// ***********************************************************************************
+
+/*
+// Create an empty array
+array := []
+
+// Fill the array to the desired length
+for i := 0; i < length; i++ {
+	array = append(array, "")  // Initialize with default value (e.g., 0)
+}
+
+tempValueAsFloat := 0.0
+
+// Fill the array with random numbers
+for i, v in array {       // array: index and element
+    // 'i' is index
+     // 'v' is value
+     tempValueAsFloat = randomize(0, i, maxIntegerPartSize, numberOfDecimals)
+
+
+     array[i] = formatFloat(tempValueAsFloat, numberOfDecimals)
+
+
+}
+*/
+
+ // ***********************************************************************************
+// SubCustody_RandomFloatValue_ArrayValue // SubCustody.RandomFloatValue[n](maxIntegerPartSize, numberOfDecimals)
+//
+// Function to generate random value with a specif max number of integer and speciic number of decimals
+// inputArray := [arrayPosition, maxIntegerPartSize, numberOfDecimals, testCaseUuidRandomizer]
+
+
+SubCustody_RandomFloatValue_ArrayValue := func(inputArray) {
+
+
+    // Extract values from input array
+    arrayPosition := inputArray[0][0]
+    maxIntegerPartSize := inputArray[1][0]
+    numberOfDecimals := inputArray[1][1]
+    testCaseUuidRandomizer := inputArray[2]
+
+
+    // From users perspektive, position "0" is the number "1"
+    arrayPosition = arrayPosition - 1
+
+    if arrayPosition < 0 {
+        arrayPosition = 0
+    }
+
+    // Generate Random number based on array position
+    tempValueAsFloat := randomize(arrayPosition, maxIntegerPartSize, numberOfDecimals, testCaseUuidRandomizer)
+
+    // Format the value into a string
+     SubCustody_RandomFloatValue_ArrayValue_out := formatFloat(tempValueAsFloat, numberOfDecimals)
+
+     return SubCustody_RandomFloatValue_ArrayValue_out
+
+}
+
+// ***********************************************************************************
+
+
+
+// ***********************************************************************************
+// SubCustody_RandomFloatValue // SubCustody.RandomFloatValue(maxIntegerPartSize, numberOfDecimals)
+//
+// Function to generate random value with a specif max number of integer and speciic number of decimals
+// Always use array value 1, first array position from user perspective
+//
+// inputArray := [[arrayindex], [maxIntegerPartSize, numberOfDecimals], testCaseUuidRandomizer]
+
+SubCustody_RandomPositiveFloatValue := func(inputArray) {
+
+     // Extract ArraysIndexArray
+     arraysIndexArray := inputArray[0]
+
+    // Secure that no ArraysIndexArray is emtpty or only have one value
+    if len(arraysIndexArray) > 1 {
+        error_message := "Error - array index array can only have a maximum of one value. '" + format("arraysIndexArray: %v", arraysIndexArray) + "'"
+
+        return error_message
+    }
+
+    // Extract FunctionArgumentsArray
+    functionArgumentsArray := inputArray[1]
+
+    // Extract randomnizer
+    testcaseExecutionUuidRandomizer :=  inputArray[2]
+
+    // Handle different number of function arguments
+    if len(functionArgumentsArray) == 2 {
+
+        // Array to the function that does stuff
+        inputArray2 := []
+
+
+        // Has user used array definition or not
+        if  len(arraysIndexArray) == 0 {
+            // User has not used array definition
+            inputArray2 = [[1], functionArgumentsArray, testcaseExecutionUuidRandomizer]
+
+
+        }  else {
+            // User has used array definition
+             inputArray2 = [arraysIndexArray, functionArgumentsArray, testcaseExecutionUuidRandomizer]
+
+        }
+
+
+        // Produce the float value
+        SubCustody_RandomPositiveFloatValue_out := SubCustody_RandomFloatValue_ArrayValue(inputArray2)
+
+        return SubCustody_RandomPositiveFloatValue_out
+
+
+    } else {
+        error_message := "Error - must be exactly 2 parameter arguments. '" + format("functionArgumentsArray: %v", functionArgumentsArray) + "'"
+
+        return error_message
+
+    }
+
+
+
+
+
+}
+
+// ***********************************************************************************
+
+
+
+
+
+
+
+// ***********************************************************************************
+// TengoScriptStartingPoint
+//
+// TengoScriptStartingPoint is the function that encapsulate all functionality
+
+// Create standard response variable
+TengoScriptResponseValue := "No value was created"
+
+
+// The function itself
+TengoScriptStartingPoint := func(inputArray) {
+
+
+    if len(inputArray) != 4 {
+        TengoScriptResponseValue = "Error - there should be exxact four parameterrs in InputArray. '" + format("InputArray: %v", inputArray) + "'"
+
+        return TengoScriptResponseValue
+
+
+    } else if inputArray[0] == "SubCustody_RandomPositiveFloatValue" {
+        TengoScriptResponseValue = SubCustody_RandomPositiveFloatValue(inputArray[1:])
+
+        return TengoScriptResponseValue
+
+    } else {
+        TengoScriptResponseValue = "ERROR -Unknown function '" + inputArray[0] + "'"
+
+        return TengoScriptResponseValue
+    }
+}
+
+// ***********************************************************************************
+
+
+
+/*
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [], [2, 3], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '23.346'")
+
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1], [2, 3], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '23.346'")
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [], [1, 2], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '2.34'")
+
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [2], [1, 2], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '3.34'")
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [], [1, 1], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '2.4'")
+
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1], [1, 1], 1]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '2.3'")
+
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [], [0, 1], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '0.4'")
+
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1], [1,0], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '2'")
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1], [0,0], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - i.e. '0'")
+
+inputArray = ["x", [1], [1,0], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected ERROR - Unknown function")
+
+inputArray = ["x", [1], [0,0], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected ERROR - Unknown function")
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1], [0], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected ERROR - Must be exact 2 function parameters")
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1], [], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected ERROR - Must be exact 2 function parameters")
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1], [1,2,3], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected ERROR - Must be exact 2 function parameters")
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1, 2], [2, 3], 0]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected ERROR - Index array can only have a maximum of 1 value")
+
+inputArray = ["SubCustody_RandomPositiveFloatValue", [1, 2], [2, 3]]
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected ERROR - Input array should have exact 4 values")
+
+
+*/
+
