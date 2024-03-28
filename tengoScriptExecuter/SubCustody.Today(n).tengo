@@ -2,7 +2,9 @@ fmt := import("fmt")
 times := import("times")
 
 //inputArray := ["TengoFunctionName", [ArrayIndexesArray], [FunctionArgumentsArray], UniqueExecutionRandomness]
-//inputArray := ["SubCustody_RandomFloatValuea", [] ,[0], 0] // OK - Today
+//inputArray := ["SubCustody_TodayShiftDay", [] ,[0], 0] // OK - Today
+
+
 
 // ***********************************************************************************
 // SubCustody_TodayShiftDay
@@ -59,46 +61,80 @@ SubCustody_TodayShiftDay := func(inputArray) {
 
 // ***********************************************************************************
 
-SubCustody_TodayShiftDay_out := "No value was created"
 
-if inputArray[0] == "SubCustody_RandomFloatValue" {
-    SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
-} else {
-    SubCustody_TodayShiftDay_out = "ERROR -Unknown function '" + inputArray[0] + "'"
+
+
+// ***********************************************************************************
+// TengoScriptStartingPoint
+//
+// TengoScriptStartingPoint is the function that encapsulate all functionality
+
+// Create standard response variable
+TengoScriptResponseValue := "No value was created"
+
+
+// The function itself
+TengoScriptStartingPoint := func(inputArray) {
+
+
+    if len(inputArray) != 4 {
+        TengoScriptResponseValue = "Error - there should be exxact four parameterrs in InputArray. '" + format("InputArray: %v", inputArray) + "'"
+
+        return TengoScriptResponseValue
+
+
+    } else if inputArray[0] == "SubCustody_TodayShiftDay" {
+        TengoScriptResponseValue = SubCustody_TodayShiftDay(inputArray[1:])
+
+        return TengoScriptResponseValue
+
+    } else {
+        TengoScriptResponseValue = "ERROR -Unknown function '" + inputArray[0] + "'"
+
+        return TengoScriptResponseValue
+    }
 }
 
 
+
 /*
-inputArray = ["SubCustody_RandomFloatValue", [], [-1], 0] // OK - Yesterday
-SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
-fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected OK - Yesterday")
+inputArray = ["SubCustody_TodayShiftDay", [], [-1], 0] // OK - Yesterday
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " +   format("%v", TengoScriptResponseValue) + " :: Expected OK - Yesterday")
 
 
-inputArray = ["SubCustody_RandomFloatValue", [], [0], 0] // OK - Today
-SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
-fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected OK - Today")
+inputArray = ["SubCustody_TodayShiftDay", [], [0], 0] // OK - Today
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - Today")
 
-inputArray = ["SubCustody_RandomFloatValue", [], [1], 0] // OK - Tomorrow
-SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
-fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected OK - Tomorrow")
-
-
-inputArray = ["SubCustody_RandomFloatValue", [], [], 0] // OK - Today
-SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
-fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected OK - Today")
+inputArray = ["SubCustody_TodayShiftDay", [], [1], 0] // OK - Tomorrow
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - Tomorrow")
 
 
-inputArray = ["SubCustody_RandomFloatValue", [1], [1], 0] // ERROR - ArrayIndex values not allowed
-SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
-fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected Error")
+inputArray = ["SubCustody_TodayShiftDay", [], [], 0] // OK - Today
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - Today")
 
-inputArray = ["SubCustody_RandomFloatValue", [1, 2], [1], 0] // ERROR - ArrayIndex values not allowed
-SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
-fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected Error")
 
-inputArray = ["SubCustody_RandomFloatValue", [], [1, 2], 0] // ERROR -More then 1 parametera argument
-SubCustody_TodayShiftDay_out = SubCustody_TodayShiftDay(inputArray[1:])
-fmt.println("Shifted Date: ", SubCustody_TodayShiftDay_out + " :: Expected Error")
+inputArray = ["SubCustody_TodayShiftDay", [1], [1], 0] // ERROR - ArrayIndex values not allowed
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected Error")
+
+inputArray = ["SubCustody_TodayShiftDay", [1, 2], [1], 0] // ERROR - ArrayIndex values not allowed
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " +  TengoScriptResponseValue + " :: Expected Error")
+
+inputArray = ["SubCustody_TodayShiftDay", [], [1, 2], 0] // ERROR -More then 1 parametera argument
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected Error")
+
+inputArray = ["SubCustody_TodayShiftDay", [], [1, 2]] // ERROR -Expects exact 4 1 parameters in InputArrar
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " +  TengoScriptResponseValue + " :: Expected Error")
+
+inputArray = ["X", [], [1, 2], 0] // ERROR -Unsupported Function name
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " +  TengoScriptResponseValue + " :: Expected Error")
 
 */
-

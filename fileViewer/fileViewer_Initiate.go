@@ -3,6 +3,7 @@ package fileViewer
 import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
 	"ImportFilesFromGithub/tengoScriptExecuter"
+	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -110,7 +111,7 @@ func InitiateFileViewe(
 	fileViewerWindow.Show()
 }
 
-func match(text string) (functionValueSlice []interface{}) {
+func match(text string) (functionValueSlice []interface{}, err error) {
 
 	var arrayIndexSlice []interface{}
 	var functionArgumentSlice []interface{}
@@ -154,15 +155,15 @@ func match(text string) (functionValueSlice []interface{}) {
 			fmt.Println("Array Indexes:", indexes)
 		}
 		fmt.Println("Function Arguments:", args)
-		fmt.Println()
 	} else {
 		fmt.Println("No match found for:", text)
+		err = errors.New(fmt.Sprintf("No match found for '%s'", text))
 	}
 
 	// Add an integer to the slice
 	//functionValueSlice = append(functionValueSlice, functionValue)
 
-	return functionValueSlice
+	return functionValueSlice, err
 }
 
 func parseAndFormatText(inputText string) (
@@ -199,8 +200,14 @@ func parseAndFormatText(inputText string) (
 
 			// Add the styled text between {{ and }}
 			currentText = inputText[startIndex : endIndex+2] // +2 to include the closing braces
-			functionValueSlice := match(currentText)
-			newTextFromScriptEngine := tengoScriptExecuter.ExecuteScripte(functionValueSlice)
+			functionValueSlice, err := match(currentText)
+			var newTextFromScriptEngine string
+			if err == nil {
+				newTextFromScriptEngine = tengoScriptExecuter.ExecuteScripte(functionValueSlice)
+
+			} else {
+				newTextFromScriptEngine = err.Error()
+			}
 
 			segments = append(segments, &widget.TextSegment{
 				Text: currentText,
