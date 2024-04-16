@@ -153,7 +153,45 @@ TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
 fmt.println("Shifted Date: " +  TengoScriptResponseValue + " :: Expected Error")
 
 inputArray = ["X", [], [1, 2], 0] // ERROR -Unsupported Function name
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)inputArray = ["SubCustody_TodayShiftDay", [], [-1], 0] // OK - Yesterday
 TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " +   format("%v", TengoScriptResponseValue) + " :: Expected OK - Yesterday")
+
+
+inputArray = ["SubCustody_TodayShiftDay", [], [0], 0] // OK - Today
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - Today")
+
+inputArray = ["SubCustody_TodayShiftDay", [], [1], 0] // OK - Tomorrow
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - Tomorrow")
+
+
+inputArray = ["SubCustody_TodayShiftDay", [], [], 0] // OK - Today
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected OK - Today")
+
+
+inputArray = ["SubCustody_TodayShiftDay", [1], [1], 0] // ERROR - ArrayIndex values not allowed
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected Error")
+
+inputArray = ["SubCustody_TodayShiftDay", [1, 2], [1], 0] // ERROR - ArrayIndex values not allowed
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " +  TengoScriptResponseValue + " :: Expected Error")
+
+inputArray = ["SubCustody_TodayShiftDay", [], [1, 2], 0] // ERROR -More then 1 parametera argument
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " + TengoScriptResponseValue + " :: Expected Error")
+
+inputArray = ["SubCustody_TodayShiftDay", [], [1, 2]] // ERROR -Expects exact 4 parameters in InputArrar
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " +  TengoScriptResponseValue + " :: Expected Error")
+
+inputArray = ["X", [], [1, 2], 0] // ERROR -Unsupported Function name
+TengoScriptResponseValue = TengoScriptStartingPoint(inputArray)
+fmt.println("Shifted Date: " +  TengoScriptResponseValue + " :: Expected Error")
+
 fmt.println("Shifted Date: " +  TengoScriptResponseValue + " :: Expected Error")
 
 */

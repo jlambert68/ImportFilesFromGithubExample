@@ -3,15 +3,25 @@ package main
 import (
 	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
+	"ImportFilesFromGithub/luaScriptEngine"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"log"
 	"strings"
 )
 
 func main() {
+
+	var err error
+	// Initiate Lua Script Engine
+	err = luaScriptEngine.InitiateLuaScriptEngine([][]byte{})
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	defer luaScriptEngine.CloseDownLuaScriptEngine()
 
 	repoOwner := "jlambert68"    // Replace with the repository owner's username
 	repoName := "FenixTesterGui" // Replace with the repository name
@@ -39,7 +49,7 @@ func main() {
 
 	filesViewerButton := widget.NewButton("View imported files", func() {
 		myMainWindow.Hide()
-		fileViewer.InitiateFileViewe(myMainWindow, myApp, selectedFiles)
+		fileViewer.InitiateFileViewer(myMainWindow, myApp, selectedFiles)
 
 	})
 

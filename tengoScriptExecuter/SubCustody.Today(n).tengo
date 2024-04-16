@@ -1,7 +1,8 @@
 
 // load module from a local file
 //exportedFunc := import("/home/jlambert/egen_kod/go/go_workspace/src/jlambert/ImportFilesFromGithub/tengoScriptExecuter/SubCustody.Today(n).tengo")
-exportedFunc := import("tengoScriptExecuter/SubCustody.Today(n).tengo")
+//exportedFunc := import("tengoScriptExecuter/SubCustody.Today(n)_exported.tengo")
+//exportedFunc := import("https://github.com/jlambert68/ImportFilesFromGithubExample/blob/master/tengoScriptExecuter/SubCustody.Today(n).tengo")
 
 // Create response variable read from Fenix
 TengoScriptResponseValue := "not set yet"

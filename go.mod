@@ -5,6 +5,7 @@ go 1.22
 require (
 	fyne.io/fyne/v2 v2.4.4
 	github.com/d5/tengo/v2 v2.17.0
+	github.com/yuin/gopher-lua v1.1.1
 )
 
 require (

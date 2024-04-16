@@ -12,3 +12,5 @@ var fenixMainWindow fyne.Window
 var fileViewerWindow fyne.Window
 
 var importedFiles []importFilesFromGitHub.GitHubFile
+
+const testCaseExecutionUuid string = "07f8c5db-5a2a-4f1a-87ca-0c2e11f747a2"

@@ -2,7 +2,7 @@ package fileViewer
 
 import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
-	"ImportFilesFromGithub/tengoScriptExecuter"
+	"ImportFilesFromGithub/luaScriptEngine"
 	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func InitiateFileViewe(
+func InitiateFileViewer(
 	mainWindow fyne.Window,
 	myApp fyne.App,
 	importedFilesPtr *[]importFilesFromGitHub.GitHubFile) {
@@ -111,30 +111,42 @@ func InitiateFileViewe(
 	fileViewerWindow.Show()
 }
 
-func match(text string) (mainTengoInputSlice []interface{}, err error) {
+func match(text string) (mainScriptInputSlice []interface{}, err error) {
 
 	var arrayIndexSlice []interface{}
 	var functionArgumentSlice []interface{}
 
 	//text := "{{SubCustody.Today(1)}}"
 	//pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d+(?:,\s*\d+)*)\])?\((([-?\d+],?\s*)*)\)\}\}`
-	pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d*(?:,\s*\d*)*)?\])?\((([-?\d+],?\s*)*)\)\}\}`
+	regExPattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d*(?:,\s*\d*)*)\])?\((.*?)\)\}(?:\((true|false)(?:,\s*(\d+))?\))?\}`
+	/*placeHolderStartPattern := `\{\{`
+	functionNamePattern := `([a-zA-Z0-9_.]+)`
+	indiciesPattern := `(?:\[(\d*(?:,\s*\d*)*)?\])?`
+	functionParametersPattern := `\(([a-zA-Z0-9-]+(?:,\s*[a-zA-Z0-9-]+)*)\)`
+	useEntropyFromTestCaseExecutionUuidPattern := `\((true|false)`
+	AddExtraEntropyPattern := `(?:,\s*(\d+))?`
+	placeHolderEndPattern := ``
 
-	re := regexp.MustCompile(pattern)
+	regExPattern := placeHolderStartPattern + functionNamePattern + indiciesPattern + functionParametersPattern +
+		useEntropyFromTestCaseExecutionUuidPattern + AddExtraEntropyPattern
+	*/
+	re := regexp.MustCompile(regExPattern)
 
 	matches := re.FindStringSubmatch(text)
 
-	if len(matches) >= 4 {
+	if len(matches) >= 2 {
 		placeholder := matches[0]
 		functionName := matches[1]
-		arrayIndexes := matches[2] // Will be empty if not present
-		functionArgs := matches[3] // Will be empty if not present
+		arrayIndexes := matches[2]
+		functionArgs := matches[3]
+		useEntropyFromTestCaseExecutionUuid := matches[4]
+		addExtraEntropyValue := matches[5]
 
-		// Add 'placeholder' to 'mainTengoInputSlice'
-		mainTengoInputSlice = append(mainTengoInputSlice, placeholder)
+		// Add 'placeholder' to 'mainScriptInputSlice'
+		mainScriptInputSlice = append(mainScriptInputSlice, placeholder)
 
 		functionName = strings.ReplaceAll(functionName, ".", "_")
-		mainTengoInputSlice = append(mainTengoInputSlice, functionName)
+		mainScriptInputSlice = append(mainScriptInputSlice, functionName)
 
 		// Split the array indexes into a slices
 		indexes := strings.Split(arrayIndexes, ",")
@@ -159,7 +171,7 @@ func match(text string) (mainTengoInputSlice []interface{}, err error) {
 		}
 
 		// Add the FunctionArguments-array to the main input array
-		mainTengoInputSlice = append(mainTengoInputSlice, arrayIndexSlice)
+		mainScriptInputSlice = append(mainScriptInputSlice, arrayIndexSlice)
 
 		// Split the function arguments into a slice
 		args := strings.Split(functionArgs, ",")
@@ -184,23 +196,41 @@ func match(text string) (mainTengoInputSlice []interface{}, err error) {
 		}
 
 		// Add the FunctionArguments-array to the main input array
-		mainTengoInputSlice = append(mainTengoInputSlice, functionArgumentSlice)
+		mainScriptInputSlice = append(mainScriptInputSlice, functionArgumentSlice)
 
-		fmt.Println("Text:", text)
-		fmt.Println("Function Name:", functionName)
-		if arrayIndexes != "" {
-			fmt.Println("Array Indexes:", indexes)
+		// When there is no boolean for 'useEntropyFromTestCaseExecutionUuid' then always use 'true'
+		if len(useEntropyFromTestCaseExecutionUuid) == 0 {
+
+			mainScriptInputSlice = append(mainScriptInputSlice, true)
+
+		} else {
+
+			tempBoolean, _ := strconv.ParseBool(useEntropyFromTestCaseExecutionUuid)
+			mainScriptInputSlice = append(mainScriptInputSlice, tempBoolean)
 		}
-		fmt.Println("Function Arguments:", args)
+
+		// When there is no value for 'addExtraEntropyValue' then always use '0'
+		if len(addExtraEntropyValue) == 0 {
+
+			mainScriptInputSlice = append(mainScriptInputSlice, uint64(0))
+
+		} else {
+
+			var tempExtraEntropy uint64
+			tempExtraEntropy, err = strconv.ParseUint(addExtraEntropyValue, 10, 32)
+			if err != nil {
+				return nil, err
+			}
+
+			mainScriptInputSlice = append(mainScriptInputSlice, tempExtraEntropy)
+		}
+
 	} else {
 		fmt.Println("No match found for:", text)
 		err = errors.New(fmt.Sprintf("No match found for '%s'", text))
 	}
 
-	// Add an integer to the slice
-	//mainTengoInputSlice = append(mainTengoInputSlice, functionValue)
-
-	return mainTengoInputSlice, err
+	return mainScriptInputSlice, err
 }
 
 func parseAndFormatText(inputText string) (
@@ -240,7 +270,8 @@ func parseAndFormatText(inputText string) (
 			functionValueSlice, err := match(currentText)
 			var newTextFromScriptEngine string
 			if err == nil {
-				newTextFromScriptEngine = tengoScriptExecuter.ExecuteScripte(functionValueSlice)
+				//newTextFromScriptEngine = tengoScriptExecuter.ExecuteScripte(functionValueSlice)
+				newTextFromScriptEngine = luaScriptEngine.LuaScriptEngineExecute(functionValueSlice, testCaseExecutionUuid)
 
 			} else {
 				newTextFromScriptEngine = err.Error()
