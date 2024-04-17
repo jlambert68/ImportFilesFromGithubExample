@@ -1,9 +1,13 @@
 package luaScriptEngine
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"github.com/yuin/gopher-lua"
 	"hash/crc32"
+	"log"
+	"strings"
 )
 
 // InitiateLuaScriptEngine
@@ -25,13 +29,74 @@ func InitiateLuaScriptEngine(luaScriptFiles [][]byte) (err error) {
 	// Initiate Gopher-Lua Script Engine state variables
 	luaState = lua.NewState()
 
+	// Load standard libraries
+	luaState.OpenLibs()
+
+	// List preloaded libraries
+	listLibraries(luaState)
+
+	// Remove or stub unsafe functions
+	//luaState.SetGlobal("io", lua.LNil) // Remove the 'io' library
+	//luaState.SetGlobal("os", lua.LNil) // Remove the 'os' library
+	//luaState.SetGlobal("dofile", lua.LNil)   // Remove the 'dofile' function
+	//luaState.SetGlobal("loadfile", lua.LNil) // Remove the 'loadfile' function
+
+	// Load the Lua scripts
+	for _, luaScriptFileAsByteArray := range luaScriptFilesAsByteArray {
+		//err = luaState.Load(string(luaScriptFileAsByteArray))
+		//_, err = luaState.Load(bytes.NewReader(luaScriptFileAsByteArray), "script")
+		loadAndExecuteScript(luaState, luaScriptFileAsByteArray)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// Replace the default 'print' with our custom function
+	luaState.SetGlobal("print", luaState.NewFunction(customPrint))
+
+	// Run a Lua script
+	if err := luaState.DoString(`print("Hello", "world", 123)`); err != nil {
+		fmt.Println("Error running Lua script:", err)
+	}
+
 	return err
+}
+
+// customPrint replaces the default Lua print function to capture output in Go.
+func customPrint(L *lua.LState) int {
+	top := L.GetTop()
+	parts := make([]string, top)
+	for i := 1; i <= top; i++ {
+		parts[i-1] = L.ToStringMeta(L.Get(i)).String()
+	}
+	fmt.Println(strings.Join(parts, "\t"))
+	return 0 // Number of results
 }
 
 // CloseDownLuaScriptEngine
 // Close down the Lua Script Engine in a correct way
 func CloseDownLuaScriptEngine() {
 	luaState.Close()
+}
+
+func listLibraries(L *lua.LState) {
+	// Directly access the global 'package' table
+	packageTable := L.GetGlobal("package")
+	if packageTable.Type() == lua.LTNil {
+		fmt.Println("No 'package' global found.")
+		return
+	}
+
+	// Access 'preload' table inside 'package'
+	preloadTable := L.GetField(packageTable, "preload")
+	if tbl, ok := preloadTable.(*lua.LTable); ok {
+		fmt.Println("Preloaded libraries:")
+		tbl.ForEach(func(key lua.LValue, value lua.LValue) {
+			fmt.Println(key.String())
+		})
+	} else {
+		fmt.Println("No preloaded libraries found or 'preload' is not a table.")
+	}
 }
 
 // LuaScriptEngineExecute
@@ -71,7 +136,7 @@ func LuaScriptEngineExecute(inputParameterArray []interface{}, testCaseExecution
 
 	// Create the Lua Input Table
 	var luaInputTable *lua.LTable
-	luaInputTable = convertToLuaTableRecursively(luaState, inputParameterArray)
+	luaInputTable = convertToLuaTableRecursively(luaState, goArrayToBeConvertedIntoLuaTable)
 	/*
 		// Add the 'entropyBasedOnTestCaseExecutionUuid' to the entropy position, which is position 4
 		originalValue := luaState.GetField(luaInputTable, "4")
@@ -112,23 +177,34 @@ func LuaScriptEngineExecute(inputParameterArray []interface{}, testCaseExecution
 			return err.Error()
 		}
 	*/
-	// Call function with input parameters and a response
-	err = luaState.CallByParam(lua.P{
-		Fn:      luaState.GetGlobal(luaFunctionToCall),
-		NRet:    1,
-		Protect: true,
-	},
-		luaInputTable)
 
+	// Call lua function based on Placeholder
+	responseValue, err = callPlaceholderFunctionWithInputTable(luaState, luaFunctionToCall, luaInputTable)
+
+	// If there is an error then create error message with input table as response
 	if err != nil {
-		panic(err)
-	}
-	returnValue := luaState.Get(-1) // returned value
-	luaState.Pop(1)                 // remove received value
 
-	responseValue = returnValue.String()
+		responseValue = err.Error() + "\n" + printLuaTable(luaState, luaInputTable, "-")
+		return responseValue
+	}
 
 	return responseValue
+}
+
+// printLuaTable recursively prints a Lua table and returns the result as a string
+func printLuaTable(L *lua.LState, table *lua.LTable, indent string) string {
+	var builder strings.Builder
+	table.ForEach(func(key lua.LValue, value lua.LValue) {
+		if tbl, ok := value.(*lua.LTable); ok {
+			// If the value is a table, recurse
+			builder.WriteString(fmt.Sprintf("%s%s:\n", indent, key.String()))
+			builder.WriteString(printLuaTable(L, tbl, indent+"  "))
+		} else {
+			// Otherwise, print the key and value
+			builder.WriteString(fmt.Sprintf("%s%s: %s\n", indent, key.String(), value.String()))
+		}
+	})
+	return builder.String()
 }
 
 // 'convertToLuaTableRecursively' recursively converts a Go slice of `[]interface{}` to a Lua table.
@@ -147,4 +223,100 @@ func convertToLuaTableRecursively(tempLuaState *lua.LState, goSlice []interface{
 		}
 	}
 	return luaTable
+}
+
+// Loads and executes Lua code from byte slice to define functions or execute initializations
+func loadAndExecuteScript(L *lua.LState, script []byte) error {
+	if fn, err := L.Load(bytes.NewReader(script), ""); err != nil {
+		return err
+	} else {
+		L.Push(fn)
+		return L.PCall(0, lua.MultRet, nil)
+	}
+}
+
+// Calls a Lua function with parameters and prints the result
+func callPlaceholderFunctionWithInputTable(L *lua.LState, funcName string, placeholderInputTable *lua.LTable) (luaFunctionResponse string, err error) {
+	//L.GetGlobal(funcName)
+	//L.Push(placeholderInputTable)
+	//err = L.PCall(1, 1, nil)
+
+	// Execute the function
+	err = L.CallByParam(lua.P{
+		Fn:      L.GetGlobal(funcName),
+		NRet:    1,
+		Protect: true,
+	},
+		placeholderInputTable)
+
+	if err != nil {
+		return err.Error(), err
+	}
+
+	// Extract the response
+	var luaResponseTable *lua.LTable
+	tbl, ok := L.Get(-1).(*lua.LTable)
+	L.Pop(1) // Remove the result from the stack
+
+	if ok == true {
+		luaResponseTable = tbl
+
+		// Extract response
+		var success, value, errorMessage lua.LValue
+		var successAsBool bool
+		var valueString string
+		var errorMessageAsString string
+
+		success = luaResponseTable.RawGetString("success")
+		value = luaResponseTable.RawGetString("value")
+		errorMessage = luaResponseTable.RawGetString("errorMessage")
+
+		// Check that 'success' of type boolean, and if so then convert into a boolean
+		if success.Type() != lua.LTBool {
+			err = errors.New(fmt.Sprintf("In response from placeholder function: '%s' the responseTable.success is not of type Boolean. Instead the type seems to be a '%s'", funcName, value.Type().String()))
+
+			return "", err
+		} else {
+
+			successAsBool = lua.LVAsBool(success)
+		}
+
+		// Check that 'value' of type string, and if so then convert into a string
+		if value.Type() != lua.LTString {
+			err = errors.New(fmt.Sprintf("In response from placeholder function: '%s' the responseTable.value is not of type String. Instead the type seems to be a '%s'", funcName, value.Type().String()))
+
+			return "", err
+		} else {
+
+			valueString = lua.LVAsString(value)
+		}
+
+		// Check that 'errorMessage' of type string, and if so then convert into a string
+		if errorMessage.Type() != lua.LTString {
+			err = errors.New(fmt.Sprintf("In response from placeholder function: '%s' the responseTable.errorMessage is not of type String. Instead the type seems to be a '%s'", funcName, value.Type().String()))
+
+			return "", err
+		} else {
+
+			errorMessageAsString = lua.LVAsString(errorMessage)
+		}
+
+		// Check if we got any error message back
+		if len(errorMessageAsString) > 0 {
+			return "", errors.New(errorMessageAsString)
+		}
+
+		// Check if we didn't get a OK response and the errorMessage is empty
+		if len(errorMessageAsString) == 0 && successAsBool == false {
+			return "", errors.New(fmt.Sprintf("'errorMessage' from function '%s' is empty but responseTable.success is 'false'. This shouldn't happen", funcName))
+		}
+
+		// Return the response value from Lua
+		return valueString, nil
+
+	} else {
+		err = errors.New(fmt.Sprintf("Expected a table, but didn't get one as a response from the Lua execution for Placeholder function: '%s'", funcName))
+		return "", err
+	}
+
 }

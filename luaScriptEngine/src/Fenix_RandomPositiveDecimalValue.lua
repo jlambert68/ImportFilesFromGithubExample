@@ -7,8 +7,8 @@
 -- 'Fenix.RandomPositiveDecimalValue(IntegerSize, FractionSize)'
 -- 'Fenix.RandomPositiveDecimalValue(IntegerSize, FractionSize, IntergerSpace, FractionSpace)'
 -- 'Fenix.RandomPositiveDecimalValue[ArraysIndex](IntegerSize, FractionSize)'
--- 'Fenix.RandomPositiveDecimalValue[ArraysIndex](IntegerSize, FractionSize)(UseTestCaseExecutionUuidEntropi)'
--- 'Fenix.RandomPositiveDecimalValue[ArraysIndex](IntegerSize, FractionSize)(UseTestCaseExecutionUuidEntropi, ExtraEntropiNumber)'
+-- 'Fenix.RandomPositiveDecimalValue[ArraysIndex](IntegerSize, FractionSize)(UseTestCaseExecutionUuidentropy)'
+-- 'Fenix.RandomPositiveDecimalValue[ArraysIndex](IntegerSize, FractionSize)(UseTestCaseExecutionUuidentropy, ExtraentropyNumber)'
 -- 'Fenix.RandomPositiveDecimalValue['Integer']('Integer', 'Integer')('Boolean', 'Integer')'
 --
 -- Resesponse is a lua table;  {value, success, errorMessage} with the following types {'strings', 'boolean', 'string'}
@@ -16,11 +16,11 @@
 -- Usage exmaples
 -- 'Fenix.RandomPositiveDecimalValue(2, 3)' is same as 'Fenix.RandomPositiveDecimalValue[1](2, 3)' which is the same as 'Fenix.RandomPositiveDecimalValue[1](2, 3)(true)'
 -- They all could produce i.e. '35.693' and with same input the placeholder will allways have the same output.
--- UseTestCaseExecutionUuidEntropi(true/false) is based on the 'TestCaseExecutionUuid' and within one TestCaseExecution values with the same input will have the same output
+-- UseTestCaseExecutionUuidentropy(true/false) is based on the 'TestCaseExecutionUuid' and within one TestCaseExecution values with the same input will have the same output
 --
 -- 'Fenix.RandomPositiveDecimalValue[2](2, 3)(true)' clould have the output of '27.568'
 -- 'Fenix.RandomPositiveDecimalValue[2](2, 3)(false)' will allways produce the same output, independently of 'TestCaseExecutionUuid'
--- 'Fenix.RandomPositiveDecimalValue[2](2, 3)(true, 1)' will add extra entropi to seed, by adding 1 to the value based on 'TestCaseExecutionUuid'.
+-- 'Fenix.RandomPositiveDecimalValue[2](2, 3)(true, 1)' will add extra entropy to seed, by adding 1 to the value based on 'TestCaseExecutionUuid'.
 
 -- 'IntergerSpace' and 'FractionSpace' define the spaces for 'Intergerpart' and 'FractionPart'. Zeros will be added before 'Intergerpart' and after 'FractionPart'
 -- If 'IntergerSpace' is less than 'IntegerSize' then it will be ignored
@@ -187,9 +187,9 @@ end
 -- Function to generate random numbers
 
 
-local function randomize(arrayIndex, maxIntegerPartSize, numberOfDecimals, baseEntropiToUse)
+local function randomize(arrayIndex, maxIntegerPartSize, numberOfDecimals, baseentropyToUse)
 
-    math.randomseed(baseEntropiToUse+ arrayIndex)
+    math.randomseed(baseentropyToUse+ arrayIndex)
 
     -- Generate Integer part of random number
     local randomIntegerPart = math.random()
@@ -221,7 +221,7 @@ end
 -- Fenix_RandomDecimalValue_ArrayValue // Fenix.RandomDecimalValue[n](maxIntegerPartSize, numberOfDecimals)
 --
 -- Function to generate random value with a specif max number of integer and speciic number of decimals
--- inputArray := [arrayPosition, maxIntegerPartSize, numberOfDecimals, testCaseUuidEntropi]
+-- inputArray := [arrayPosition, maxIntegerPartSize, numberOfDecimals, testCaseUuidentropy]
 
 
 local function Fenix_RandomDecimalValue_ArrayValue(inputArray)
@@ -229,9 +229,9 @@ local function Fenix_RandomDecimalValue_ArrayValue(inputArray)
     local maxIntegerPartSize = inputArray[2][1]
     local numberOfDecimals = inputArray[2][2]
 
-    local entropiToUse = inputArray[3]
+    local entropyToUse = inputArray[3]
 
-    local tempValueAsDecimal = randomize(arrayPositionToUse, maxIntegerPartSize, numberOfDecimals, entropiToUse)
+    local tempValueAsDecimal = randomize(arrayPositionToUse, maxIntegerPartSize, numberOfDecimals, entropyToUse)
 
     local valueIsBaseFormated =  formatDecimal(tempValueAsDecimal, numberOfDecimals)
 
@@ -260,7 +260,7 @@ end
 -- Function to generate random value with a specif max number of integer and speciic number of decimals
 -- Always use array value 1, first array position from user perspective
 --
--- inputArray := [[arrayindex], [maxIntegerPartSize, numberOfDecimals], testCaseUuidEntropi]
+-- inputArray := [[arrayindex], [maxIntegerPartSize, numberOfDecimals], testCaseUuidentropy]
 
 function Fenix_RandomPositiveDecimalValue(inputTable)
 
@@ -368,13 +368,13 @@ function Fenix_RandomPositiveDecimalValue(inputTable)
         end
     end
 
-    -- Extract entropi
-    local entropiTable = inputTable[4]
+    -- Extract entropy
+    local entropyTable = inputTable[4]
 
-    -- Verify that content in Entropi is of type 'Table'
-    if type(entropiTable) ~= "table" then
+    -- Verify that content in entropy is of type 'Table'
+    if type(entropyTable) ~= "table" then
 
-        local error_message = "Error - Entropi is not of type 'Table', but is of type '" .. type(entropiTable)  .. "'."
+        local error_message = "Error - entropy is not of type 'Table', but is of type '" .. type(entropyTable)  .. "'."
 
         responseTable.success = false
         responseTable.errorMessage = error_message
@@ -382,39 +382,43 @@ function Fenix_RandomPositiveDecimalValue(inputTable)
         return responseTable
     end
 
-    -- verify that each paramter in Entropi table is a number and sum up all entry values into one
-    local entropiValue = 0
+    -- verify that first parameter is true|false and second paramter in entropy table is a number 
+    local entropyValue = 0
     
-    for _, v in ipairs(entropiTable) do
+     -- verify that first parameter is true|false, ie a boolean
+    if entropyTable type(entropyTable[1]) ~= "boolean" then
+    
+        local tableAsString = tableToString (entropyTable, ",")
+        local error_message = "Error - entropy parameter no. 1 must be of type 'Boolean', " .. tableAsString .. "'"
+        
+        responseTable.success = false
+        responseTable.errorMessage = error_message
 
-        -- Must be an integer 
-        if type(v) ~=  "number" then
-            local tableAsString = tableToString (entropiTable, ",")
-            local error_message = "Error - entropi parameters must be of type 'Integer', expect for first parameter which is a 'Boolean' '" .. tableAsString .. "'"
+        return responseTable
+    end
+    
+    -- verify that second parameter is an Integer
+    if type(entropyTable[2]) ~=  "number" then
+        local tableAsString = tableToString (entropyTable, ",")
+        local error_message = "Error - entropy parameters no. 2 must be of type 'Integer', '" .. tableAsString .. "'"
 
-            responseTable.success = false
-            responseTable.errorMessage = error_message
+        responseTable.success = false
+        responseTable.errorMessage = error_message
 
-
-        else
-            entropiValue = entropiValue + v
-        end
-
+        return responseTable
     end
 
-
-
-
+    entropyValue = entropyTable[2]
 
     -- Make new Array to be send to the function that does stuff
-    local inputTableForProcessingen = {arraysIndexToUse, functionArgumentsTable, entropiValue}
+    local inputTableForProcessing = {arraysIndexToUse, functionArgumentsTable, entropyValue}
 
     -- Call and process Random Decimal Value
-    local respons = Fenix_RandomDecimalValue_ArrayValue(inputTableForProcessingen)
+    local response = Fenix_RandomDecimalValue_ArrayValue(inputTableForProcessing)
 
     responseTable.success = true
     responseTable.errorMessage = ""
-    responseTable.value = respons
+    responseTable.value = response
 
     return responseTable
 
@@ -423,9 +427,9 @@ end
 
 
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{2, 3}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{2, 3}, {true, 0}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
-print("{'Fenix_RandomPositiveDecimalValue', {},{2, 3}, {0}}")
+print("{'Fenix_RandomPositiveDecimalValue', {},{2, 3}, {true, 0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
 print("")
 

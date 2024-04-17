@@ -2,13 +2,14 @@ local date = require('date')
 
 -- Function to shift the current date by a given number of days
 function Fenix_TodayShiftDay(inputTable)
+
     local d = date()
-    
+
     --inputTable = {
     --    functionName = "Fenix_TodayShiftDay",
-    --    functionArrayPositions = {1, 3},
-    --    functionValuesArray = {3, 8, 9},
-    --    randomSeed = 4
+    --    functionArrayPositions = {},
+    --    functionValuesArray = {1},
+    --    randomSeed = {true,0}
     --}
 
     local responseTable = {
@@ -57,7 +58,21 @@ function Fenix_TodayShiftDay(inputTable)
        shift_days = 0
 
    elseif (#functionArgumentsArray == 1) then
-        shift_days = functionArgumentsArray[1]
+        local argumentValue
+        argumentValue = functionArgumentsArray[1]
+
+        -- secure that the value is an integer
+        shift_days = convertToInteger(argumentValue)
+        if shift_days == nil then
+
+             local error_message = "Error - function argument is not an Integer: ''" .. tostring(argumentValue) .. "'"
+
+            responseTable.success = false
+            responseTable.errorMessage = error_message
+
+           return responseTable
+       end
+
 
 
     else
@@ -86,6 +101,34 @@ function Fenix_TodayShiftDay(inputTable)
 
 end
 
+function convertToInteger(value)
+    -- First check if the value is a number or a string that contains only an integer
+    if type(value) == "number" then
+        value = tostring(value)  -- Convert to string for consistent pattern matching
+    end
+
+    -- Check if the string is strictly an integer (handling optional sign)
+    if type(value) == "string" and value:match("^-?%d+$") then
+        local num = tonumber(value)
+        if num then
+            print("Conversion successful:", num)
+            return num
+        end
+    end
+
+    -- If not a valid integer string, handle the error
+    print("Failed to convert to integer.")
+    return nil  -- or handle the error as needed
+end
+
+-- Examples of usage:
+-- convertToInteger("-1")      -- Successfully converts
+-- convertToInteger("123")     -- Successfully converts
+-- convertToInteger("123.456") -- Fails to convert
+-- convertToInteger("hello")   -- Fails to convert
+-- convertToInteger(123.456)   -- Fails to convert
+-- convertToInteger(123)       -- Successfully converts
+
 
 
 
@@ -113,6 +156,6 @@ function TableToString(tbl, sep)
 end
 
 -- Example invocation
---local result = Fenix_TodayShiftDay{"Fenix_TodayShiftDay", {}, {1, 2}, 0}
---print(result)
+--local result = Fenix_TodayShiftDay{"Fenix_TodayShiftDay", {}, {"-1"}, {true,0}}
+--print(result.value)
 
