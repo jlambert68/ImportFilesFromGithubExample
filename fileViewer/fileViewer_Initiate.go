@@ -176,22 +176,26 @@ func match(text string) (mainScriptInputSlice []interface{}, err error) {
 		args := strings.Split(functionArgs, ",")
 
 		// Create a FunctionArguments-array as a '[]interface{}'
-		var argAsInt int
+		//var argAsInt int
 		for i, arg := range args {
 			args[i] = strings.TrimSpace(arg)
 
-			// Only convert when there is some value
-			if len(args[i]) > 0 {
-				argAsInt, err = strconv.Atoi(args[i])
-				if err != nil {
-					err = errors.New(fmt.Sprintf("Couldn't convert parameter '%s' in '%s' to an integer. Placeholder = '%s'", args[i], args, placeholder))
+			/*
+				// Only convert when there is some value
+				if len(args[i]) > 0 {
+					argAsInt, err = strconv.Atoi(args[i])
+					if err != nil {
+						err = errors.New(fmt.Sprintf("Couldn't convert parameter '%s' in '%s' to an integer. Placeholder = '%s'", args[i], args, placeholder))
 
-					return nil, err
+						return nil, err
 
+					}
+
+					functionArgumentSlice = append(functionArgumentSlice, argAsInt)
 				}
 
-				functionArgumentSlice = append(functionArgumentSlice, argAsInt)
-			}
+			*/
+			functionArgumentSlice = append(functionArgumentSlice, args[i]) //argAsInt)
 		}
 
 		// Add the FunctionArguments-array to the main input array

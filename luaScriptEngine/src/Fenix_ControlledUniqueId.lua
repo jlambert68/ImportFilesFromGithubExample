@@ -1,4 +1,4 @@
-function ProcessControlledUniqueId(input, inputTable)
+local function ProcessControlledUniqueId(input, inputTable)
 
     if type(input) ~= "string" then
         error("Input must be a string, got " .. type(input))
@@ -40,7 +40,7 @@ function ProcessControlledUniqueId(input, inputTable)
         end)
     end
 
-    -- Extract from imput table
+    -- Extract from input table
     local arrayPositionTable  = inputTable[1]
     local seedValueTable = inputTable[2]
 
@@ -79,8 +79,8 @@ function ProcessControlledUniqueId(input, inputTable)
     replaceRandomNumber("%%(n+)%%", seedValue)
 
     -- Replace random string patterns with seeding
-    replaceRandomString("%%a%((%d+),%s*(%d+)%)%%", false, seedValue)
-    replaceRandomString("%%A%((%d+),%s*(%d+)%)%%", true, seedValue)
+    replaceRandomString("%%a%((%d+);%s*(%d+)%)%%", false, seedValue)
+    replaceRandomString("%%A%((%d+);%s*(%d+)%)%%", true, seedValue)
 
     return input
 end
@@ -107,8 +107,8 @@ function Fenix_ControlledUniqueId(inputTable)
 
 end
 -- Example usage
-local inputString = "Date: %YYYY-MM-DD%, Date: %YYYYMMDD%, Date: %YYMMDD%, Time: %hh:mm:ss%, Time: %hhmmss%, Time: %hhmm%, Random Number: %nnnnn%, Random String: %a(5, 11)%, Random String Uppercase: %A(5, 10)%, Time: %hh:mm:ss%, Time: %hh.mm.ss% "
-local inputTable = {"ConstrolledUniqueId", {0}, {inputString}, {0}}
+local inputString = "Date: %YYYY-MM-DD%, Date: %YYYYMMDD%, Date: %YYMMDD%, Time: %hh:mm:ss%, Time: %hhmmss%, Time: %hhmm%, Random Number: %nnnnn%, Random String: %a(5; 11)%, Random String Uppercase: %A(5; 10)%, Time: %hh:mm:ss%, Time: %hh.mm.ss% "
+local inputTable = {"ControlledUniqueId", {0}, {inputString}, {0}}
 local result = Fenix_ControlledUniqueId(inputTable)
 print(inputString)
 print(result)
