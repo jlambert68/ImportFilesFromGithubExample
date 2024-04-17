@@ -209,7 +209,7 @@ func ExecuteLuaScriptBasedOnPlaceholder(inputParameterArray []interface{}, testC
 	// If there is an error then create error message with input table as response
 	if err != nil {
 
-		responseValue = err.Error() + "\n" + printLuaTable(luaState, luaInputTable, "-")
+		responseValue = err.Error() //+ "\n" + printLuaTable(luaState, luaInputTable, "-")
 		return responseValue
 	}
 

@@ -220,12 +220,20 @@ end
 --
 -- Converts a string to an integer in Lua
 local function stringToInteger(str)
-    local num = math.tointeger(str)
-    if num then
-        return num, ""
+    local num = tonumber(str)
+    if num and num == math.floor(num) then
+        return num
     else
         return nil, "The provided string is not an integer."
     end
+
+    --local num = math.tointeger(str)
+    --if num then
+    --    return num, ""
+    --else
+    --    return nil, "The provided string is not an integer."
+    --end
+
 end
 
  -- ***********************************************************************************
@@ -293,6 +301,66 @@ end
 -- ***********************************************************************************
 
 
+ -- ***********************************************************************************
+-- Fenix_RandomDecimalValue_Sum_ArrayValue // Fenix.RandomDecimalValue[n](maxIntegerPartSize, numberOfDecimals)
+--
+-- For each arrayPositionValuem the Function  generate random value with a specif max number of integer and speciic number of decimals
+-- Then the function sums the values
+-- inputArray := [arrayPosition, maxIntegerPartSize, numberOfDecimals, testCaseUuidentropy]
+
+
+local function Fenix_RandomDecimalValue_Sum_ArrayValue(inputArray)
+    local arrayPositionArray = inputArray[1]
+    local maxIntegerPartSize = inputArray[2][1]
+    local numberOfDecimals = inputArray[2][2]
+
+    local entropyToUse = inputArray[3]
+
+    local sumOfvalues = 0
+
+    local tempValueAsDecimal
+
+    local valueIsBaseFormated
+    local arrayPositionToUse
+
+    -- Loop every arrayPositionArray
+    for tableIndex, arrayPositionValue in ipairs(arrayPositionArray) do
+
+        -- Extract value from array
+        arrayPositionToUse = math.abs(arrayPositionValue)
+
+        -- Generate value
+        tempValueAsDecimal = randomize(arrayPositionToUse, maxIntegerPartSize, numberOfDecimals, entropyToUse)
+
+        if arrayPositionValue >= 0 then
+            sumOfvalues = sumOfvalues + tempValueAsDecimal
+        else
+            sumOfvalues = sumOfvalues - tempValueAsDecimal
+        end
+
+    end
+
+    -- Format to correct number of decimals
+    valueIsBaseFormated =  formatDecimal(sumOfvalues, numberOfDecimals)
+
+
+    -- No padding should be done
+    if #inputArray[2] == 2 then
+        return valueIsBaseFormated
+    end
+
+    -- extract padding sizes
+    local integerSpace = inputArray[2][3]
+    local fractionSpace = inputArray[2][4]
+
+    local zeroPaddedValue = padValueWithZeros(valueIsBaseFormated, integerSpace, fractionSpace)
+
+    return zeroPaddedValue
+
+end
+
+-- ***********************************************************************************
+
 
 
 -- ***********************************************************************************
@@ -328,7 +396,7 @@ function Fenix_RandomPositiveDecimalValue(inputTable)
     local arraysIndexTable = inputTable[2]
     local arraysIndexToUse
 
-    -- Secure that ArraysIndexArray is not emtpty or only have one value
+    -- Secure that ArraysIndexArray is not emtpy or only have one value
     if #arraysIndexTable > 1 then
         -- Have more then 1 value
 
@@ -352,6 +420,24 @@ function Fenix_RandomPositiveDecimalValue(inputTable)
 
     end
 
+    -- Secure that 'arraysIndexToUse' is an integer
+    if  type(arraysIndexToUse) ~=  "number" then
+
+       -- If not an number then try to convert into an Integer
+        local tempInteger, err = stringToInteger(arraysIndexToUse)
+        if tempInteger then
+            arraysIndexToUse = tempInteger
+        else
+
+            local tableAsString = tableToString (arraysIndexTable, ",")
+            local error_message = "Error - Array index must be of type 'Integer', '" .. tableAsString .. "'"
+
+            responseTable.success = false
+            responseTable.errorMessage = error_message
+
+            return responseTable
+        end
+    end
 
     -- Extract FunctionArgumentsArray
     local functionArgumentsTable = inputTable[3]
@@ -395,16 +481,26 @@ function Fenix_RandomPositiveDecimalValue(inputTable)
     end
 
     -- verify that each function parameter is a number
-    for _, v in ipairs(functionArgumentsTable) do
+    for tableIndex, v in ipairs(functionArgumentsTable) do
 
         -- Must be an integer 
         if type(v) ~=  "number" then
-            local tableAsString = tableToString (functionArgumentsTable, ",")
-            local error_message = "Error - functions parameters must be of type Integer. '" .. tableAsString .. "'"
 
-            responseTable.success = false
-            responseTable.errorMessage = error_message
+          -- If not an number then try to convert into an Integer
+            local tempInteger, err = stringToInteger(v)
+            if tempInteger then
+                functionArgumentsTable[tableIndex] = tempInteger
+            else
 
+                local tableAsString = tableToString (functionArgumentsTable, ",")
+                local error_message = "Error - functions parameters must be of type Integer. '" .. tableAsString .. "'"
+
+                responseTable.success = false
+                responseTable.errorMessage = error_message
+
+                return responseTable
+
+          end
 
         end
     end
@@ -484,19 +580,284 @@ function Fenix_RandomPositiveDecimalValue(inputTable)
 end
 
 
+-- ***********************************************************************************
+-- Fenix_RandomPositiveDecimalValue_Sum
+--
+-- Function to generate random value with a specif max number of integer and speciic number of decimals
+-- Always use array value 1, first array position from user perspective
+--
+-- inputArray := [[integer, integer, ...], [maxIntegerPartSize, numberOfDecimals], testCaseUuidentropy]
+
+function Fenix_RandomPositiveDecimalValue_Sum(inputTable)
+
+    local responseTable = {
+        success = true,
+        value = "",
+        errorMessage = ""
+    }
+
+    -- There must be 4 rows in the InputTable
+    if #inputTable ~= 4 then
+
+        local error_message = "Error - there should be exactly four rows in InputTable."
+
+        responseTable.success = false
+        responseTable.errorMessage = error_message
+
+        return responseTable
+
+    end
 
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{2, 3}, {"true", "0"}}
+    -- Extract ArraysIndexArray
+    local arraysIndexTable = inputTable[2]
+
+    -- Secure that ArraysIndexArray is not emtpy
+    if #arraysIndexTable == 0 then
+        -- zero array index, so use first index position
+
+        arraysIndexTable[1] = 1
+
+    end
+
+    -- Secure that 'arraysIndexTable' only has positive or negative integers
+    local newArraysIndexTable
+    for tableIndex, v in ipairs(arraysIndexTable) do
+        if  type(v) ~=  "number" then
+
+           -- If not an number then try to convert into an Integer
+            local tempInteger, err = stringToInteger(v)
+            if tempInteger then
+                arraysIndexTable[tableIndex] = tempInteger
+            else
+
+                local tableAsString = tableToString (arraysIndexTable, ",")
+                local error_message = "Error - indexArray can only be of type 'Integer', '" .. tableAsString .. "'"
+
+                responseTable.success = false
+                responseTable.errorMessage = error_message
+
+                return responseTable
+            end
+
+        end
+    end
+
+    -- Extract FunctionArgumentsArray
+    local functionArgumentsTable = inputTable[3]
+
+    -- Handle if function arguments is not 2 arguments or 4 arguments
+    if #functionArgumentsTable ~=  2 and #functionArgumentsTable ~=  4 then
+
+        -- More then 2 arguments
+        if #functionArgumentsTable > 2 then
+
+            local tableAsString = tableToString(functionArgumentsTable, ",")
+            local error_message = "Error - there must be exact 2 or 4 function parameter. '" .. tableAsString .. "'"
+
+            responseTable.success = false
+            responseTable.errorMessage = error_message
+
+            return responseTable
+
+            -- Exact one argument
+        elseif #functionArgumentsTable == 1 then
+
+                local result = "[" .. tostring(functionArgumentsTable[1]) .. "]"
+
+                local error_message = "Error - there must be exact 2 or 4 function parameter. '" .. result .. "'"
+
+                responseTable.success = false
+                responseTable.errorMessage = error_message
+
+                return responseTable
+
+            -- Zero values
+        else
+                local error_message = "Error - there must be exact 2 or 4 function parameter but it is empty."
+
+                responseTable.success = false
+                responseTable.errorMessage = error_message
+
+                return responseTable
+
+        end
+    end
+
+    -- verify that each function parameter is a number
+    for tableIndex, v in ipairs(functionArgumentsTable) do
+
+        -- Must be an integer
+        if type(v) ~=  "number" then
+
+          -- If not an number then try to convert into an Integer
+            local tempInteger, err = stringToInteger(v)
+            if tempInteger then
+                functionArgumentsTable[tableIndex] = tempInteger
+            else
+
+                local tableAsString = tableToString (functionArgumentsTable, ",")
+                local error_message = "Error - functions parameters must be of type Integer. '" .. tableAsString .. "'"
+
+                responseTable.success = false
+                responseTable.errorMessage = error_message
+
+                return responseTable
+
+          end
+
+        end
+    end
+
+    -- Extract entropy
+    local entropyTable = inputTable[4]
+
+    -- Verify that content in entropy is of type 'Table'
+    if type(entropyTable) ~= "table" then
+
+        local error_message = "Error - entropy is not of type 'Table', but is of type '" .. type(entropyTable)  .. "'."
+
+        responseTable.success = false
+        responseTable.errorMessage = error_message
+
+        return responseTable
+    end
+
+    -- verify that first parameter is true|false and second paramter in entropy table is a number
+    local entropyValue = 0
+
+     -- verify that first parameter is true|false, ie a boolean
+    if type(entropyTable[1]) ~= "boolean" then
+
+        -- Try to convert into a boolean
+        local stringToBooleanResponse
+        stringToBooleanResponse = stringToBoolean(entropyTable[1])
+
+        if type(stringToBooleanResponse) == "boolean" then
+            entropyTable[1] = stringToBooleanResponse
+
+        else
+            local tableAsString = tableToString (entropyTable, ",")
+            local error_message = "Error - entropy parameter no. 1 must be of type 'Boolean' but is'" .. type(entropyTable[1]) .. "'', " .. tableAsString .. "'"
+
+            responseTable.success = false
+            responseTable.errorMessage = error_message
+
+            return responseTable
+
+        end
+    end
+
+    -- verify that second parameter is an Integer
+    if type(entropyTable[2]) ~=  "number" then
+
+        -- If not an number then try to convert into an Integer
+        local tempInteger, err = stringToInteger(entropyTable[2])
+        if tempInteger then
+            entropyTable[2] = tempInteger
+        else
+
+            local tableAsString = tableToString (entropyTable, ",")
+            local error_message = "Error - entropy parameters no. 2 must be of type 'Integer', '" .. tableAsString .. "'"
+
+            responseTable.success = false
+            responseTable.errorMessage = error_message
+
+            return responseTable
+            end
+    end
+
+    entropyValue = entropyTable[2]
+
+    -- Make new Array to be send to the function that does stuff
+    local inputTableForProcessing = {arraysIndexTable, functionArgumentsTable, entropyValue}
+    
+
+
+    -- Call and process Random Decimal Value
+    local response = Fenix_RandomDecimalValue_Sum_ArrayValue(inputTableForProcessing)
+
+    responseTable.success = true
+    responseTable.errorMessage = ""
+    responseTable.value = response
+
+    return responseTable
+
+end
+
+
+
+
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{"2", "3"}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
-print("{'Fenix_RandomPositiveDecimalValue', {},{2, 3}, {true, 0}}")
+print("{'Fenix_RandomPositiveDecimalValue', {},{'2', '3'}, {'true', '0'}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
 print("")
 
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{"2", "3"}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue', {1},{'2', '3'}, {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
 
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {3},{"2", "3"}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue', {3},{'2', '3'}, {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {2},{"2", "3"}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue', {2},{'2', '3'}, {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue_Sum", {1},{2, 3}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue_Sum(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue', {1},{2, 3},  {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue_Sum", {'-1', '2'},{2, 3}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue_Sum(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue_Sum', {'1', '2'},{2, 3},  {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue_Sum: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue_Sum", {1, -2},{2, 3}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue_Sum(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue_Sum', {1, -2},{2, 3},  {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue_Sum: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue_Sum", {-1, -2},{2, 3}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue_Sum(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue_Sum', {-1, -2},{2, 3},  {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue_Sum: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue_Sum", {1, 2, 3},{2, 3}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue_Sum(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue_Sum', {1, 2, 3},{2, 3},  {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue_Sum: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue_Sum", {1, 2, 3},{2, 3, 2, 3}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue_Sum(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue_Sum', {1, 2, 3},{2, 3, 2, 3},  {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue_Sum: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
+
+local inputArray = {"Fenix_RandomPositiveDecimalValue_Sum", {1, 2, 3},{2, 3, 4, 4}, {"true", "0"}}
+local response = Fenix_RandomPositiveDecimalValue_Sum(inputArray)
+print("{'Fenix_RandomPositiveDecimalValue_Sum', {1, 2, 3},{2, 3, 4, 4},  {'true', '0'}}")
+print("Fenix_RandomPositiveDecimalValue_Sum: " .. response.value .. " :: Expected OK - i.e. '81.986'")
+print("")
 
 local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{2, 3}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
-print("{'Fenix_RandomPositiveDecimalValue', {1},{2, 3}, {0}}")
+print("{'Fenix_RandomPositiveDecimalValue', {1},{2, 3},  {'true', '0'}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
 print("")
 

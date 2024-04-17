@@ -36,15 +36,15 @@ function Fenix_TodayShiftDay(inputTable)
    -- Secure that no ArraysIndexArray is emtpty
    if (#arraysIndexTable > 0) then
 
-    -- Convert array to string
-    local tableAsString = TableToString (arraysIndexTable, ",")
+        -- Convert array to string
+        local tableAsString = TableToString (arraysIndexTable, ",")
 
-       local error_message = "Error - array index is not supported. 'arraysIndexArray: " .. tableAsString .. "'"
+        local error_message = "Error - array index is not supported. 'arraysIndexArray: " .. tableAsString .. "'"
 
-       responseTable.success = false
-       responseTable.errorMessage = error_message
+        responseTable.success = false
+        responseTable.errorMessage = error_message
 
-       return responseTable
+        return responseTable
 
    end
 

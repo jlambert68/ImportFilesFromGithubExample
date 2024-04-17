@@ -27,7 +27,7 @@ func InitiateFileViewer(
 	// Create the window for GitHub files
 	fileViewerWindow = myApp.NewWindow("Imported Files Viewer")
 	// Set initial size of the window
-	fileViewerWindow.Resize(fyne.NewSize(400, 500))
+	fileViewerWindow.Resize(fyne.NewSize(800, 700))
 
 	var leftContainer *fyne.Container
 	var rightContainer *fyne.Container
@@ -116,19 +116,18 @@ func match(text string) (mainScriptInputSlice []interface{}, err error) {
 	var arrayIndexSlice []interface{}
 	var functionArgumentSlice []interface{}
 
-	//text := "{{SubCustody.Today(1)}}"
-	//pattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d+(?:,\s*\d+)*)\])?\((([-?\d+],?\s*)*)\)\}\}`
-	regExPattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d*(?:,\s*\d*)*)\])?\((.*?)\)\}(?:\((true|false)(?:,\s*(\d+))?\))?\}`
-	/*placeHolderStartPattern := `\{\{`
-	functionNamePattern := `([a-zA-Z0-9_.]+)`
-	indiciesPattern := `(?:\[(\d*(?:,\s*\d*)*)?\])?`
-	functionParametersPattern := `\(([a-zA-Z0-9-]+(?:,\s*[a-zA-Z0-9-]+)*)\)`
-	useEntropyFromTestCaseExecutionUuidPattern := `\((true|false)`
-	AddExtraEntropyPattern := `(?:,\s*(\d+))?`
-	placeHolderEndPattern := ``
-
-	regExPattern := placeHolderStartPattern + functionNamePattern + indiciesPattern + functionParametersPattern +
-		useEntropyFromTestCaseExecutionUuidPattern + AddExtraEntropyPattern
+	//regExPattern := `\{\{([a-zA-Z0-9_.]+)(?:\[(\d*(?:,\s*\d*)*)\])?\((.*?)\)\}(?:\((true|false)(?:,\s*(\d+))?\))?\}`
+	regExPattern := `\{\{([a-zA-Z0-9_.]+)(?:\[([-+]?\d*(?:,\s*[-+]?\d*)*)\])?\((.*?)\)\}(?:\((true|false)(?:,\s*(\d+))?\))?\}`
+	/*
+		Explanation of Each Part
+		\{\{: Matches literal {{.
+		([a-zA-Z0-9_.]+): Matches and captures the function name consisting of one or more alphanumeric characters, underscores, or dots.
+		(?:\[([-+]?\d*(?:,\s*[-+]?\d*)*)\])?: Non-capturing group for indices, which can now include negative or positive numbers. It's optional.
+		[-+]?\d*: Matches an optional sign (+ or -), followed by any digits.
+		(?:,\s*[-+]?\d*)*: Matches zero or more repetitions of a comma, optional spaces, an optional sign, and digits, allowing for lists of indices.
+		\((.*?)\): Captures the arguments within parentheses. .*? is used for lazy matching to stop at the first ).
+		\}: Matches literal }.
+		(?:\((true|false)(?:,\s*(\d+))?\))?: Optional non-capturing group for additional parameters like boolean values and numbers, typically used for configurations or flags.
 	*/
 	re := regexp.MustCompile(regExPattern)
 

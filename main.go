@@ -36,7 +36,7 @@ func main() {
 	myMainWindow = myApp.NewWindow("This is Fenix Main Window")
 
 	// Set initial size of the window
-	myMainWindow.Resize(fyne.NewSize(400, 500))
+	myMainWindow.Resize(fyne.NewSize(800, 600))
 
 	var responseChannel chan bool
 	responseChannel = make(chan bool)

@@ -68,7 +68,7 @@ func InitiateImportFilesFromGitHubWindow(
 	generateCancelButton(githubFileImporterWindow)
 
 	// Set initial size of the window
-	githubFileImporterWindow.Resize(fyne.NewSize(400, 500))
+	githubFileImporterWindow.Resize(fyne.NewSize(600, 500))
 
 	// Generate the wow that holds the up/back button and the path itself
 	var pathRowContainer *fyne.Container
