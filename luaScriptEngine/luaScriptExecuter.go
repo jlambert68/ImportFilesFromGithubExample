@@ -51,6 +51,16 @@ func InitiateLuaScriptEngine(luaScriptFiles [][]byte) (err error) {
 		}
 	}
 
+	// Now list all the functions in the global environment
+	global := luaState.Get(lua.GlobalsIndex) // Access the global table
+	if tbl, ok := global.(*lua.LTable); ok {
+		tbl.ForEach(func(key, value lua.LValue) {
+			if _, ok := value.(*lua.LFunction); ok {
+				fmt.Printf("Function: %s\n", key.String())
+			}
+		})
+	}
+
 	// Replace the default 'print' with our custom function
 	luaState.SetGlobal("print", luaState.NewFunction(customPrint))
 
@@ -99,9 +109,9 @@ func listLibraries(L *lua.LState) {
 	}
 }
 
-// LuaScriptEngineExecute
+// ExecuteLuaScriptBasedOnPlaceholder
 // Execute a specific Lua function
-func LuaScriptEngineExecute(inputParameterArray []interface{}, testCaseExecutionUuid string) (responseValue string) {
+func ExecuteLuaScriptBasedOnPlaceholder(inputParameterArray []interface{}, testCaseExecutionUuid string) (responseValue string) {
 
 	var err error
 	var luaFunctionToCall string
@@ -123,20 +133,35 @@ func LuaScriptEngineExecute(inputParameterArray []interface{}, testCaseExecution
 		// Create final entropy
 		entropyToUse = uint64(entropyBasedOnTestCaseExecutionUuid) + addExtraEntropyValue
 
+	} else {
+		entropyToUse = addExtraEntropyValue
 	}
 
-	// Convert Array to the one used for conversion into Lua Table
-	var entropyArray []interface{}
-	entropyArray = append(entropyArray, useEntropyFromTestCaseExecutionUuid)
-	entropyArray = append(entropyArray, entropyToUse)
+	// Create Lua Entropy table
+	entropyTable := luaState.NewTable() // Instantiate the Lua table
+
+	// Append a boolean value
+	luaState.SetTable(entropyTable, lua.LNumber(1), lua.LBool(useEntropyFromTestCaseExecutionUuid))
+
+	// Append an integer value
+	luaState.SetTable(entropyTable, lua.LNumber(2), lua.LNumber(entropyToUse))
 
 	var goArrayToBeConvertedIntoLuaTable []interface{}
 	goArrayToBeConvertedIntoLuaTable = inputParameterArray[1:4]
-	goArrayToBeConvertedIntoLuaTable = append(goArrayToBeConvertedIntoLuaTable, entropyArray)
 
 	// Create the Lua Input Table
 	var luaInputTable *lua.LTable
 	luaInputTable = convertToLuaTableRecursively(luaState, goArrayToBeConvertedIntoLuaTable)
+
+	// Append 'entropyTable' to 'luaInputTable'
+
+	// Get number of elements in table
+	var numberOfElementsInTable int
+	numberOfElementsInTable = luaInputTable.Len()
+
+	// Append an entropy table to 'luaInputTable'
+	luaState.SetTable(luaInputTable, lua.LNumber(numberOfElementsInTable+1), entropyTable)
+
 	/*
 		// Add the 'entropyBasedOnTestCaseExecutionUuid' to the entropy position, which is position 4
 		originalValue := luaState.GetField(luaInputTable, "4")

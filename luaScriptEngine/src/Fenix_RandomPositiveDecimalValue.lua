@@ -215,6 +215,46 @@ end
 -- ***********************************************************************************
 
 
+ -- ***********************************************************************************
+-- stringToInteger
+--
+-- Converts a string to an integer in Lua
+local function stringToInteger(str)
+    local num = math.tointeger(str)
+    if num then
+        return num, ""
+    else
+        return nil, "The provided string is not an integer."
+    end
+end
+
+ -- ***********************************************************************************
+
+ -- ***********************************************************************************
+-- stringToBoolean
+--
+-- Converts a string to a boolean in Lua
+
+local function stringToBoolean(inputString)
+
+    -- Secure that input is a string
+    if type(inputString) ==  "string" then
+
+        inputString = inputString:lower()  -- Convert the string to lower case to make the function case-insensitive
+        if inputString == "true" then
+            return true
+        elseif inputString == "false" then
+            return false
+        else
+            return nil, "Invalid input for boolean conversion: "
+        end
+    else
+        return nil, "Invalid input for boolean conversion: "
+    end
+end
+
+-- ***********************************************************************************
+
 
 
  -- ***********************************************************************************
@@ -251,6 +291,7 @@ local function Fenix_RandomDecimalValue_ArrayValue(inputArray)
 end
 
 -- ***********************************************************************************
+
 
 
 
@@ -386,26 +427,44 @@ function Fenix_RandomPositiveDecimalValue(inputTable)
     local entropyValue = 0
     
      -- verify that first parameter is true|false, ie a boolean
-    if entropyTable type(entropyTable[1]) ~= "boolean" then
-    
-        local tableAsString = tableToString (entropyTable, ",")
-        local error_message = "Error - entropy parameter no. 1 must be of type 'Boolean', " .. tableAsString .. "'"
-        
-        responseTable.success = false
-        responseTable.errorMessage = error_message
+    if type(entropyTable[1]) ~= "boolean" then
 
-        return responseTable
+        -- Try to convert into a boolean
+        local stringToBooleanResponse
+        stringToBooleanResponse = stringToBoolean(entropyTable[1])
+
+        if type(stringToBooleanResponse) == "boolean" then
+            entropyTable[1] = stringToBooleanResponse
+
+        else
+            local tableAsString = tableToString (entropyTable, ",")
+            local error_message = "Error - entropy parameter no. 1 must be of type 'Boolean' but is'" .. type(entropyTable[1]) .. "'', " .. tableAsString .. "'"
+
+            responseTable.success = false
+            responseTable.errorMessage = error_message
+
+            return responseTable
+
+        end
     end
     
     -- verify that second parameter is an Integer
     if type(entropyTable[2]) ~=  "number" then
-        local tableAsString = tableToString (entropyTable, ",")
-        local error_message = "Error - entropy parameters no. 2 must be of type 'Integer', '" .. tableAsString .. "'"
 
-        responseTable.success = false
-        responseTable.errorMessage = error_message
+        -- If not an number then try to convert into an Integer
+        local tempInteger, err = stringToInteger(entropyTable[2])
+        if tempInteger then
+            entropyTable[2] = tempInteger
+        else
 
-        return responseTable
+            local tableAsString = tableToString (entropyTable, ",")
+            local error_message = "Error - entropy parameters no. 2 must be of type 'Integer', '" .. tableAsString .. "'"
+
+            responseTable.success = false
+            responseTable.errorMessage = error_message
+
+            return responseTable
+            end
     end
 
     entropyValue = entropyTable[2]
@@ -427,7 +486,7 @@ end
 
 
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{2, 3}, {true, 0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{2, 3}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {},{2, 3}, {true, 0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
@@ -435,103 +494,103 @@ print("")
 
 
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{2, 3}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{2, 3}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{2, 3}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '81.986'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{1, 2}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{1, 2}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {},{1, 2}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '8.98'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {2},{1, 2}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {2},{1, 2}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {2},{1, 2}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '6.48'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{1, 1}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{1, 1}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {},{1, 1}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '8.9'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{1, 1}, 1}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{1, 1}, {"true", "1"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {},{1, 1}, 1}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '6.4'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{1, 1}, 1}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{1, 1}, {"true", "1"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{1, 1}, 1}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '6.4'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{0, 1}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{0, 1}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {},{0, 1}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '0.9'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{1, 0}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{1, 0}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{1, {0}}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '8'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{0, 0}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{0, 0}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{0, {0}}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '0'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{0, 0, 2, 3}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{0, 0, 2, 3}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{0, 0, 2, 3}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '0'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{0, 2, 3, 4}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{0, 2, 3, 4}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{0, 2, 3, 4}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '0'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{2, 2, 3, 4}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{2, 2, 3, 4}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{2, 2, 3, 4}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '0'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{6, 6}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{6, 6}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {},{6, 6}, {0}}")
 print("Fenix_RandomPositiveDecimalValue: " .. response.value .. " :: Expected OK - i.e. '815587.986577'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{6, 10}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {},{6, 10}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {},{6, 10}, {0}}")
 print("Fenix_RandomPositiveDecimalValue Date: " .. response.value .. " :: Expected OK - i.e. '815587.9865775100'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{0}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{0}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{0}, {0}}")
 print("Fenix_RandomPositiveDecimalValue Date: " .. response.errorMessage .. " :: Expected ERROR - there must be exact 2 function parameter. '[0]'")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{}, {0}}")
 print("Fenix_RandomPositiveDecimalValue Date: " .. response.errorMessage .. " :: Expected Error - there must be exact 2 function parameter but it is empty.")
 print("")
 
-local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{1, 2, 3}, {0}}
+local inputArray = {"Fenix_RandomPositiveDecimalValue", {1},{1, 2, 3}, {"true", "0"}}
 local response = Fenix_RandomPositiveDecimalValue(inputArray)
 print("{'Fenix_RandomPositiveDecimalValue', {1},{1, 2, 3}, {0}}")
 print("Fenix_RandomPositiveDecimalValue Date: " .. response.errorMessage .. " :: Expected Error - there must be exact 2 function parameter. '[1,2,3]'")

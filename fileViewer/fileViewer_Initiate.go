@@ -271,7 +271,7 @@ func parseAndFormatText(inputText string) (
 			var newTextFromScriptEngine string
 			if err == nil {
 				//newTextFromScriptEngine = tengoScriptExecuter.ExecuteScripte(functionValueSlice)
-				newTextFromScriptEngine = luaScriptEngine.LuaScriptEngineExecute(functionValueSlice, testCaseExecutionUuid)
+				newTextFromScriptEngine = luaScriptEngine.ExecuteLuaScriptBasedOnPlaceholder(functionValueSlice, testCaseExecutionUuid)
 
 			} else {
 				newTextFromScriptEngine = err.Error()
