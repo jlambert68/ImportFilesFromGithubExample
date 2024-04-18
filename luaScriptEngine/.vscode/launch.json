@@ -12,8 +12,8 @@
             //"program": "${workspaceFolder}/tests/test_Fenix_TodayDateShift.lua"
             //"program": "${workspaceFolder}/tests/test_Fenix_RandomPositiveDecimalValue.lua"
             //"program": "${workspaceFolder}/src/Fenix_TodayDateShift.lua"
-            "program": "${workspaceFolder}/src/Fenix_RandomPositiveDecimalValue.lua"
-            //"program": "${workspaceFolder}/src/Fenix_ControlledUniqueId.lua"
+            //"program": "${workspaceFolder}/src/Fenix_RandomPositiveDecimalValue.lua"
+            "program": "${workspaceFolder}/src/Fenix_ControlledUniqueId.lua"
             
            
         },
