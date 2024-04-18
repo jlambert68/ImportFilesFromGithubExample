@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"log"
 	"strings"
@@ -38,13 +39,14 @@ func main() {
 	// Set initial size of the window
 	myMainWindow.Resize(fyne.NewSize(800, 600))
 
+	var fileTable *widget.Table
+
 	var responseChannel chan bool
 	responseChannel = make(chan bool)
 	var selectedFiles *[]importFilesFromGitHub.GitHubFile
 	githubFilesImporterButton := widget.NewButton("Import files from GitHub", func() {
 		myMainWindow.Hide()
 		selectedFiles = importFilesFromGitHub.InitiateImportFilesFromGitHubWindow(originalApiUrl, myMainWindow, myApp, &responseChannel)
-		fmt.Println(selectedFiles)
 	})
 
 	filesViewerButton := widget.NewButton("View imported files", func() {
@@ -53,13 +55,28 @@ func main() {
 
 	})
 
-	inputText := "This is {{yellow}} text and this is {{also yellow}} and normal again."
-	var tempRichText *widget.RichText
-	tempRichText = parseAndFormatText(inputText)
+	//inputText := "This is {{bold}} text and this is {{also bold}} and this normal again."
+	//var tempRichText *widget.RichText
+	//tempRichText = parseAndFormatText(inputText)
+
+	// Correctly initialize the fileList as a new table
+	fileTable = widget.NewTable(
+		func() (int, int) { return 0, 2 }, // Start with zero rows, 2 columns
+		func() fyne.CanvasObject {
+			return widget.NewLabel("") // Create cells as labels
+		},
+		func(id widget.TableCellID, obj fyne.CanvasObject) {
+			// This should be filled when updating the table
+		},
+	)
 
 	buttonContainer := container.NewVBox(githubFilesImporterButton, filesViewerButton)
 
-	myContainer := container.NewBorder(buttonContainer, nil, nil, nil, tempRichText)
+	var files []importFilesFromGitHub.GitHubFile
+	files = []importFilesFromGitHub.GitHubFile{}
+	updateTable(fileTable, files)
+
+	myContainer := container.NewBorder(buttonContainer, nil, nil, nil, fileTable)
 	myMainWindow.SetContent(myContainer)
 
 	go func() {
@@ -69,25 +86,28 @@ func main() {
 			responseValue = <-responseChannel
 			fmt.Println(responseValue)
 
-			var files []importFilesFromGitHub.GitHubFile
 			files = *selectedFiles
 
 			if len(files) > 0 {
-				var fileContent string
-				var file importFilesFromGitHub.GitHubFile
+				//var fileContent string
+				//var file importFilesFromGitHub.GitHubFile
 
-				file = files[0]
-				fileContent = file.FileContetAsString
+				updateTable(fileTable, files)
+				/*
+					file = files[0]
+					fileContent = file.FileContentAsString
 
-				myContainerObjects := myContainer.Objects
-				for index, object := range myContainerObjects {
-					if object == tempRichText {
-						tempRichText = parseAndFormatText(fileContent)
-						myContainerObjects[index] = tempRichText
-						myContainer.Refresh()
-						break
+					myContainerObjects := myContainer.Objects
+					for index, object := range myContainerObjects {
+						if object == tempRichText {
+							tempRichText = parseAndFormatText(fileContent)
+							myContainerObjects[index] = tempRichText
+							myContainer.Refresh()
+							break
+						}
 					}
-				}
+
+				*/
 
 			}
 		}
@@ -102,6 +122,38 @@ func main() {
 
 	myMainWindow.ShowAndRun()
 
+}
+
+func updateTable(fileList *widget.Table, files []importFilesFromGitHub.GitHubFile) {
+
+	maxNameWidth := float32(150) // Start with a minimum width
+	for _, file := range files {
+		textWidth := fyne.MeasureText(file.Name, theme.TextSize(), fyne.TextStyle{}).Width
+		if textWidth > maxNameWidth {
+			maxNameWidth = textWidth
+		}
+	}
+
+	fileList.SetColumnWidth(0, maxNameWidth+theme.Padding()*4) // Add padding
+	fileList.SetColumnWidth(1, 250)                            // Path column width can be static or calculated similarly
+
+	fileList.SetColumnWidth(0, 150) // Set width of file name column
+	fileList.SetColumnWidth(1, 400) // Set width of path column
+	fileList.Length = func() (int, int) {
+		return len(files), 2
+	}
+	fileList.CreateCell = func() fyne.CanvasObject {
+		return widget.NewLabel("")
+	}
+	fileList.UpdateCell = func(id widget.TableCellID, cell fyne.CanvasObject) {
+		switch id.Col {
+		case 0:
+			cell.(*widget.Label).SetText(files[id.Row].Name)
+		case 1:
+			cell.(*widget.Label).SetText(files[id.Row].URL)
+		}
+	}
+	fileList.Refresh()
 }
 
 func parseAndFormatText(inputText string) (tempRichText *widget.RichText) {

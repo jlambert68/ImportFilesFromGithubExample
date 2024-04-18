@@ -67,7 +67,7 @@ func InitiateFileViewer(
 				myContainerObjects := leftContainer.Objects
 				for index, object := range myContainerObjects {
 					if object == richText {
-						richText, _ = parseAndFormatText(file.FileContetAsString)
+						richText, _ = parseAndFormatText(file.FileContentAsString)
 						myContainerObjects[index] = richText
 						leftContainer.Refresh()
 					}
@@ -76,7 +76,7 @@ func InitiateFileViewer(
 				myContainerObjects = rightContainer.Objects
 				for index, object := range myContainerObjects {
 					if object == richTextWithValues {
-						_, richTextWithValues = parseAndFormatText(file.FileContetAsString)
+						_, richTextWithValues = parseAndFormatText(file.FileContentAsString)
 						myContainerObjects[index] = richTextWithValues
 						rightContainer.Refresh()
 					}

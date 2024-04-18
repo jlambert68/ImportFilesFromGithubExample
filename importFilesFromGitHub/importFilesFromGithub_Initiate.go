@@ -85,7 +85,7 @@ func InitiateImportFilesFromGitHubWindow(
 	var importCancelRow *fyne.Container
 	importCancelRow = container.NewHBox(layout.NewSpacer(), importSelectedFilesFromGithubButton, cancelButton)
 
-	// Crate the full content that should be plaved in the window
+	// Create the full content that should be showed in the window
 	content := container.NewBorder(myTopLayout, importCancelRow, nil, nil, splitContainer)
 
 	// Set content

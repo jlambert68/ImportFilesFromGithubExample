@@ -2,12 +2,12 @@ package importFilesFromGitHub
 
 // Struct for parsing JSON response
 type GitHubFile struct {
-	Name               string `json:"name"`
-	Type               string `json:"type"` // "file" or "dir"
-	URL                string `json:"url"`  // URL to fetch contents if it's a directory
-	Content            []byte `json:"content"`
-	SHA                string `json:"sha"`
-	FileContetAsString string
+	Name                string `json:"name"`
+	Type                string `json:"type"` // "file" or "dir"
+	URL                 string `json:"url"`  // URL to fetch contents if it's a directory
+	Content             []byte `json:"content"`
+	SHA                 string `json:"sha"`
+	FileContentAsString string
 }
 type GitHubFileDetail struct {
 	Name        string `json:"name"`
