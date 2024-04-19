@@ -3,7 +3,6 @@ package importFilesFromGitHub
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
@@ -33,7 +32,7 @@ func generateImportSelectedFilesFromGithubButton(parentWindow fyne.Window) {
 				log.Fatalf("Failed to decode content: %s", err)
 			}
 			// 'content' now contains the decoded file content as a string
-			fmt.Println(contentAsString)
+			//fmt.Println(contentAsString)
 
 			// Save the file content
 			selectedFiles[fileIndex].FileContentAsString = contentAsString

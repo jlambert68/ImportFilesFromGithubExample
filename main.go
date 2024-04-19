@@ -44,9 +44,12 @@ func main() {
 	var responseChannel chan bool
 	responseChannel = make(chan bool)
 	var selectedFiles *[]importFilesFromGitHub.GitHubFile
+	selectedFiles = &[]importFilesFromGitHub.GitHubFile{}
 	githubFilesImporterButton := widget.NewButton("Import files from GitHub", func() {
 		myMainWindow.Hide()
-		selectedFiles = importFilesFromGitHub.InitiateImportFilesFromGitHubWindow(originalApiUrl, myMainWindow, myApp, &responseChannel)
+		var tempselectedFiles []importFilesFromGitHub.GitHubFile
+		tempselectedFiles = *selectedFiles
+		selectedFiles = importFilesFromGitHub.InitiateImportFilesFromGitHubWindow(originalApiUrl, myMainWindow, myApp, &responseChannel, tempselectedFiles)
 	})
 
 	filesViewerButton := widget.NewButton("View imported files", func() {
@@ -93,6 +96,7 @@ func main() {
 				//var file importFilesFromGitHub.GitHubFile
 
 				updateTable(fileTable, files)
+				importFilesFromGitHub.UpdateSelectedFilesTable()
 				/*
 					file = files[0]
 					fileContent = file.FileContentAsString
@@ -127,18 +131,23 @@ func main() {
 func updateTable(fileList *widget.Table, files []importFilesFromGitHub.GitHubFile) {
 
 	maxNameWidth := float32(150) // Start with a minimum width
+	maxUrlWidth := float32(250)  // Start with a minimum width
 	for _, file := range files {
-		textWidth := fyne.MeasureText(file.Name, theme.TextSize(), fyne.TextStyle{}).Width
-		if textWidth > maxNameWidth {
-			maxNameWidth = textWidth
+		textNameWidth := fyne.MeasureText(file.Name, theme.TextSize(), fyne.TextStyle{}).Width
+		textUrlWidth := fyne.MeasureText(file.URL, theme.TextSize(), fyne.TextStyle{}).Width
+		if textNameWidth > maxNameWidth {
+			maxNameWidth = textNameWidth
+		}
+		if textUrlWidth > maxUrlWidth {
+			maxUrlWidth = textUrlWidth
 		}
 	}
 
 	fileList.SetColumnWidth(0, maxNameWidth+theme.Padding()*4) // Add padding
-	fileList.SetColumnWidth(1, 250)                            // Path column width can be static or calculated similarly
+	fileList.SetColumnWidth(1, maxUrlWidth+theme.Padding()*4)  // Path column width can be static or calculated similarly
 
-	fileList.SetColumnWidth(0, 150) // Set width of file name column
-	fileList.SetColumnWidth(1, 400) // Set width of path column
+	//fileList.SetColumnWidth(0, 150) // Set width of file name column
+	//fileList.SetColumnWidth(1, 400) // Set width of path column
 	fileList.Length = func() (int, int) {
 		return len(files), 2
 	}

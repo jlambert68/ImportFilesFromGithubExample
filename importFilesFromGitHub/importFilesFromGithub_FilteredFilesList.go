@@ -57,7 +57,8 @@ func generateFilteredList(parentWindow fyne.Window) {
 
 					if shouldAddFile == true {
 						selectedFiles = append(selectedFiles, selectedFile)
-						selectedFilesList.Refresh()
+						UpdateSelectedFilesTable()
+						selectedFilesTable.Refresh()
 
 					}
 

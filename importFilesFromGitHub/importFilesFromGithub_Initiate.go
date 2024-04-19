@@ -14,7 +14,10 @@ func InitiateImportFilesFromGitHubWindow(
 	originalApiUrl string,
 	mainWindow fyne.Window,
 	myApp fyne.App,
-	responseChannel *chan bool) *[]GitHubFile {
+	responseChannel *chan bool,
+	tempSelectedFiles []GitHubFile) *[]GitHubFile {
+
+	selectedFiles = tempSelectedFiles
 
 	// Cleare list from Previous Import
 	githubFilesFiltered = nil
@@ -47,7 +50,10 @@ func InitiateImportFilesFromGitHubWindow(
 	filterFileListFromGitHub()
 
 	// Create the UI-list that holds the selected files
-	generateSelectedFilesList(githubFileImporterWindow)
+	generateSelectedFilesListTable(githubFileImporterWindow)
+
+	// Update the table
+	UpdateSelectedFilesTable()
 
 	// Create the UI-list that holds the filtered files and folders from GitHub
 	generateFilteredList(githubFileImporterWindow)
@@ -77,8 +83,12 @@ func InitiateImportFilesFromGitHubWindow(
 	// Create the top element which has the Filter button and the path.label and the back/upp button
 	myTopLayout := container.NewVBox(fileFilterPopupButton, pathRowContainer)
 
+	// Create the container that 'selectedFilesTable' will be placed in
+	var selectedFilesTableContainer *fyne.Container
+	selectedFilesTableContainer = container.NewStack(selectedFilesTable)
+
 	// Generate the container which has the filtered folders and files to the left and the selected files to the right
-	splitContainer := container.NewHSplit(filteredFileList, selectedFilesList)
+	splitContainer := container.NewHSplit(filteredFileList, selectedFilesTableContainer)
 	splitContainer.Offset = 0.5 // Adjust if you want different initial proportions
 
 	// Generate the row that has the import button and the cancel button

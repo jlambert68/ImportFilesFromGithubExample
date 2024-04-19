@@ -30,7 +30,7 @@ var githubFiles, githubFilesFiltered, selectedFiles []GitHubFile
 // Create a string data binding
 var currentPathShowedinGUI binding.String
 
-var selectedFilesList *widget.List
+var selectedFilesTable *widget.Table
 var filteredFileList *widget.List
 var fileFilterPopupButton *widget.Button
 
