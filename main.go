@@ -4,7 +4,6 @@ import (
 	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
 	"ImportFilesFromGithub/luaScriptEngine"
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -47,9 +46,9 @@ func main() {
 	selectedFiles = &[]importFilesFromGitHub.GitHubFile{}
 	githubFilesImporterButton := widget.NewButton("Import files from GitHub", func() {
 		myMainWindow.Hide()
-		var tempselectedFiles []importFilesFromGitHub.GitHubFile
-		tempselectedFiles = *selectedFiles
-		selectedFiles = importFilesFromGitHub.InitiateImportFilesFromGitHubWindow(originalApiUrl, myMainWindow, myApp, &responseChannel, tempselectedFiles)
+		var tempSelectedFiles []importFilesFromGitHub.GitHubFile
+		tempSelectedFiles = *selectedFiles
+		selectedFiles = importFilesFromGitHub.InitiateImportFilesFromGitHubWindow(originalApiUrl, myMainWindow, myApp, &responseChannel, tempSelectedFiles)
 	})
 
 	filesViewerButton := widget.NewButton("View imported files", func() {
@@ -84,10 +83,11 @@ func main() {
 
 	go func() {
 
+		//var responseValue bool
+
 		for {
-			var responseValue bool
-			responseValue = <-responseChannel
-			fmt.Println(responseValue)
+
+			_ = <-responseChannel
 
 			files = *selectedFiles
 
