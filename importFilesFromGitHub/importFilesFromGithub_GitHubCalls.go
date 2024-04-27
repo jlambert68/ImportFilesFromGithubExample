@@ -27,8 +27,8 @@ func getFileListFromGitHub(apiUrl string) {
 		log.Fatalf("Error occurred while calling GitHub API: %s", err.Error())
 	}
 	defer resp.Body.Close()
-	if err != nil {
-		log.Fatalf("Error reading API response: %s", err.Error())
+	if resp.StatusCode != 200 {
+		log.Fatalf("Error in response from Github: Status code '%d' with message '%s'", resp.StatusCode, resp.Status)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)

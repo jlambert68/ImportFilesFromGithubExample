@@ -4,6 +4,7 @@ import (
 	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
 	"ImportFilesFromGithub/luaScriptEngine"
+	"ImportFilesFromGithub/testDataSelector"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -57,6 +58,14 @@ func main() {
 
 	})
 
+	// Create the button for handling TestDataGroups and TestDataPoints
+	openTestDataWindow := widget.NewButton("Open TestData Window", func() {
+		myMainWindow.Hide()
+		testDataSelector.MainTestDataSelector(
+			myApp,
+			myMainWindow)
+	})
+
 	//inputText := "This is {{bold}} text and this is {{also bold}} and this normal again."
 	//var tempRichText *widget.RichText
 	//tempRichText = parseAndFormatText(inputText)
@@ -72,7 +81,7 @@ func main() {
 		},
 	)
 
-	buttonContainer := container.NewVBox(githubFilesImporterButton, filesViewerButton)
+	buttonContainer := container.NewVBox(githubFilesImporterButton, filesViewerButton, openTestDataWindow)
 
 	var files []importFilesFromGitHub.GitHubFile
 	files = []importFilesFromGitHub.GitHubFile{}
