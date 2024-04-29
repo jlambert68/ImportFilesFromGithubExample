@@ -155,10 +155,10 @@ func MainTestDataSelector(
 	}
 
 	var testDataPointGroupsContainer *fyne.Container
-	testDataPointGroupsContainer = container.NewBorder(testDataPointGroupsSelect, widget.NewSeparator(), nil, nil, testDataPointGroupsList)
+	testDataPointGroupsContainer = container.NewBorder(testDataPointGroupsSelect, nil, nil, nil, testDataPointGroupsList)
 
 	var testDataPointsForAGroupContainer *fyne.Container
-	testDataPointsForAGroupContainer = container.NewBorder(testDataPointsForAGroupSelect, widget.NewSeparator(), nil, nil, testDataPointsForAGroupList)
+	testDataPointsForAGroupContainer = container.NewBorder(testDataPointsForAGroupSelect, nil, nil, nil, testDataPointsForAGroupList)
 
 	// Create Split Container used for 'testDataPointGroups' and 'testDataPointsForAGroup'
 	var testDataGroupsAndPointsContainer *container.Split
