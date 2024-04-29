@@ -45,7 +45,67 @@ func MainTestDataSelector(
 
 		// Update List for  'testDataPointsForAGroup'
 		updateTestDataPointsForAGroupList(testDataPointGroups[id])
+
+		// Select correct Group in Select-dropdown
+		testDataPointGroupsSelect.SetSelected(string(testDataPointGroups[id]))
 	}
+
+	// Create function that converts a GroupSlice into a string slice
+	testDataPointGroupsToStringSliceFunction := func() []string {
+		var tempStringSlice []string
+
+		for _, testDataPointGroup := range testDataPointGroups {
+			tempStringSlice = append(tempStringSlice, string(testDataPointGroup))
+		}
+
+		return tempStringSlice
+	}
+
+	// Create function that converts a TestDataPointsSlice into a string slice
+	testDataPointsToStringSliceFunction := func() []string {
+		var tempStringSlice []string
+
+		for _, testDataPointForAGroup := range testDataPointsForAGroup {
+			tempStringSlice = append(tempStringSlice, string(testDataPointForAGroup))
+		}
+
+		return tempStringSlice
+	}
+
+	// Create the Group dropdown
+	testDataPointGroupsSelect = widget.NewSelect(testDataPointGroupsToStringSliceFunction(), func(selected string) {
+
+		// Select the correct item in the Groups-List
+
+		// Find Listöitem to select
+		for index, group := range testDataPointGroups {
+			if string(group) == selected {
+				selectedIndexForGroups = index
+
+			}
+		}
+		testDataPointsForAGroupList.Select(selectedIndexForGroups)
+		testDataPointsForAGroupList.Refresh()
+
+		/*
+			// When an option is selected, update the second dropdown options
+			switch selected {
+			case "Fruits":
+				secondaryOptions.Set(fruitsOptions)
+			case "Colors":
+				secondaryOptions.Set(colorsOptions)
+			}
+
+			// Reset second dropdown's selection
+			secondarySelect.SetSelected("")
+
+		*/
+	})
+
+	// Create the Groups TestDataPoints dropdown
+	testDataPointsForAGroupSelect = widget.NewSelect(testDataPointsToStringSliceFunction(), func(selected string) {
+		// Here you can handle the secondary selection change
+	})
 
 	// Create List UI for 'testDataPointsForAGroup'
 	testDataPointsForAGroupList = widget.NewList(
@@ -58,9 +118,15 @@ func MainTestDataSelector(
 		},
 	)
 
+	var testDataPointGroupsContainer *fyne.Container
+	testDataPointGroupsContainer = container.NewBorder(testDataPointGroupsSelect, nil, nil, nil, testDataPointGroupsList)
+
+	var testDataPointsForAGroupContainer *fyne.Container
+	testDataPointsForAGroupContainer = container.NewBorder(testDataPointsForAGroupSelect, nil, nil, nil, testDataPointsForAGroupList)
+
 	// Create Split Container used for 'testDataPointGroups' and 'testDataPointsForAGroup'
 	var testDataGroupsAndPointsContainer *container.Split
-	testDataGroupsAndPointsContainer = container.NewHSplit(testDataPointGroupsList, testDataPointsForAGroupList)
+	testDataGroupsAndPointsContainer = container.NewHSplit(testDataPointGroupsContainer, testDataPointsForAGroupContainer)
 
 	var responseChannel chan responseChannelStruct
 	responseChannel = make(chan responseChannelStruct)
@@ -178,6 +244,10 @@ func MainTestDataSelector(
 				testDataPointGroupsList.UnselectAll()
 				testDataPointGroupsList.Select(groupNameIndexToSelect)
 				selectedIndexForGroups = groupNameIndexToSelect
+
+				testDataPointGroupsSelect.SetSelected(string(shouldListBeUpdated.testDataPointGroupName))
+				testDataPointGroupsSelect.Refresh()
+
 			}
 		}
 	}()
