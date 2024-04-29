@@ -28,8 +28,6 @@ func MainTestDataSelector(
 	}
 
 	// Create List UI for 'testDataPointGroups'
-	var selectedIndexForGroups int = -1
-
 	testDataPointGroupsList = widget.NewList(
 		func() int { return len(testDataPointGroups) },
 		func() fyne.CanvasObject {
@@ -48,6 +46,12 @@ func MainTestDataSelector(
 
 		// Select correct Group in Select-dropdown
 		testDataPointGroupsSelect.SetSelected(string(testDataPointGroups[id]))
+
+		// UnSelect in DropDown- and List for TestDataPoints
+		testDataPointsForAGroupSelect.ClearSelected()
+		testDataPointsForAGroupList.UnselectAll()
+		selectedIndexForGroupTestDataPoints = -1
+
 	}
 
 	// Create function that converts a GroupSlice into a string slice
@@ -75,17 +79,26 @@ func MainTestDataSelector(
 	// Create the Group dropdown
 	testDataPointGroupsSelect = widget.NewSelect(testDataPointGroupsToStringSliceFunction(), func(selected string) {
 
-		// Select the correct item in the Groups-List
-
-		// Find Listöitem to select
+		// Find List-item to select
 		for index, group := range testDataPointGroups {
 			if string(group) == selected {
 				selectedIndexForGroups = index
 
 			}
 		}
-		testDataPointsForAGroupList.Select(selectedIndexForGroups)
-		testDataPointsForAGroupList.Refresh()
+
+		// Select the correct TestDataPoint in the dropdown for TestDataPoints
+		testDataPointsForAGroupSelect.SetOptions(testDataPointsToStringSliceFunction())
+		testDataPointsForAGroupSelect.Refresh()
+
+		// Select the correct item in the Groups-List
+		testDataPointGroupsList.Select(selectedIndexForGroups)
+		testDataPointGroupsList.Refresh()
+
+		// UnSelect in DropDown- and List for TestDataPoints
+		testDataPointsForAGroupSelect.ClearSelected()
+		testDataPointsForAGroupList.UnselectAll()
+		selectedIndexForGroupTestDataPoints = -1
 
 		/*
 			// When an option is selected, update the second dropdown options
@@ -104,7 +117,18 @@ func MainTestDataSelector(
 
 	// Create the Groups TestDataPoints dropdown
 	testDataPointsForAGroupSelect = widget.NewSelect(testDataPointsToStringSliceFunction(), func(selected string) {
-		// Here you can handle the secondary selection change
+
+		// Find List-item to select
+		for index, group := range testDataPointsForAGroup {
+			if string(group) == selected {
+				selectedIndexForGroupTestDataPoints = index
+
+			}
+		}
+
+		// Select the correct item in the TestDataPoints-List
+		testDataPointsForAGroupList.Select(selectedIndexForGroupTestDataPoints)
+		testDataPointsForAGroupList.Refresh()
 	})
 
 	// Create List UI for 'testDataPointsForAGroup'
@@ -118,11 +142,23 @@ func MainTestDataSelector(
 		},
 	)
 
+	testDataPointsForAGroupList.OnSelected = func(id widget.ListItemID) {
+		selectedIndexForGroupTestDataPoints = id
+
+		// Select correct Group in Select-dropdown
+		testDataPointsForAGroupSelect.SetSelected(string(testDataPointsForAGroup[id]))
+
+		// Select the correct TestDataPoint in the dropdown for TestDataPoints
+		testDataPointsForAGroupSelect.SetOptions(testDataPointsToStringSliceFunction())
+		testDataPointsForAGroupSelect.Refresh()
+
+	}
+
 	var testDataPointGroupsContainer *fyne.Container
-	testDataPointGroupsContainer = container.NewBorder(testDataPointGroupsSelect, nil, nil, nil, testDataPointGroupsList)
+	testDataPointGroupsContainer = container.NewBorder(testDataPointGroupsSelect, widget.NewSeparator(), nil, nil, testDataPointGroupsList)
 
 	var testDataPointsForAGroupContainer *fyne.Container
-	testDataPointsForAGroupContainer = container.NewBorder(testDataPointsForAGroupSelect, nil, nil, nil, testDataPointsForAGroupList)
+	testDataPointsForAGroupContainer = container.NewBorder(testDataPointsForAGroupSelect, widget.NewSeparator(), nil, nil, testDataPointsForAGroupList)
 
 	// Create Split Container used for 'testDataPointGroups' and 'testDataPointsForAGroup'
 	var testDataGroupsAndPointsContainer *container.Split
@@ -195,6 +231,11 @@ func MainTestDataSelector(
 				// Clear the TestDataPointsList
 				testDataPointsForAGroup = nil
 				testDataPointsForAGroupList.Refresh()
+
+				// UnSelect in DropDown- and List for TestDataPoints
+				testDataPointsForAGroupSelect.ClearSelected()
+				testDataPointsForAGroupList.UnselectAll()
+				selectedIndexForGroupTestDataPoints = -1
 			}
 		}, myWindow)
 	})
@@ -245,8 +286,14 @@ func MainTestDataSelector(
 				testDataPointGroupsList.Select(groupNameIndexToSelect)
 				selectedIndexForGroups = groupNameIndexToSelect
 
+				// Select the correct group in the dropdown for groups
+				testDataPointGroupsSelect.SetOptions(testDataPointGroupsToStringSliceFunction())
 				testDataPointGroupsSelect.SetSelected(string(shouldListBeUpdated.testDataPointGroupName))
 				testDataPointGroupsSelect.Refresh()
+
+				// Select the correct TestDataPoint in the dropdown for TestDataPoints
+				testDataPointsForAGroupSelect.SetOptions(testDataPointsToStringSliceFunction())
+				testDataPointsForAGroupSelect.Refresh()
 
 			}
 		}

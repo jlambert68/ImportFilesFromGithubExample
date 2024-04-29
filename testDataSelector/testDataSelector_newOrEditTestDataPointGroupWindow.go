@@ -99,14 +99,19 @@ func showNewOrEditGroupWindow(
 		allSelectedPoints = append(allSelectedPoints, allPointsAvailable[id])
 		allPointsAvailable = append(allPointsAvailable[:id], allPointsAvailable[id+1:]...)
 
+		allAvailablePointsList.UnselectAll()
+
 		allAvailablePointsList.Refresh()
 		selectedPointsList.Refresh()
+
 	}
 
 	// Functionality to remove a point from 'selectedPoints'
 	selectedPointsList.OnSelected = func(id widget.ListItemID) {
 		allPointsAvailable = append(allPointsAvailable, allSelectedPoints[id])
 		allSelectedPoints = append(allSelectedPoints[:id], allSelectedPoints[id+1:]...)
+
+		selectedPointsList.UnselectAll()
 
 		allAvailablePointsList.Refresh()
 		selectedPointsList.Refresh()

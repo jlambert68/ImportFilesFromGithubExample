@@ -10,6 +10,10 @@ var testDataPointsForAGroup []testDataPointNameType  // Define testDataPointGrou
 var testDataPointGroupsList *widget.List
 var testDataPointsForAGroupList *widget.List
 
+// Current selected index for List items
+var selectedIndexForGroups int = -1
+var selectedIndexForGroupTestDataPoints int = -1
+
 // The Select-items for Groups ans TestDataPoints for a Group
 var testDataPointGroupsSelect *widget.Select
 var testDataPointsForAGroupSelect *widget.Select
