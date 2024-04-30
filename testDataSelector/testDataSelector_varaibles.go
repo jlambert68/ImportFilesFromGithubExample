@@ -4,25 +4,52 @@ import "fyne.io/fyne/v2/widget"
 
 // TestDataModelMapType
 // Model holding Testdata for one or more Domains
-type TestDataModelMapType map[TestDataDomainUuidType]*TestDataDomainModelMapStruct
+type TestDataModelMapType map[TestDataDomainUuidType]*TestDataDomainModeStruct
 
-// TestDataDomainModelMapStruct
+// TestDataDomainModeStruct
 // DataData for one Domain
-type TestDataDomainModelMapStruct struct {
+type TestDataDomainModeStruct struct {
 	TestDataDomainUuid TestDataDomainUuidType
 	TestDataDomainName TestDataDomainNameType
-	TestDataAreasMap   map[TestDataAreaUuidType]*TestDataAreaStruct
+	TestDataAreasMap   *map[TestDataAreaUuidType]*TestDataAreaStruct
 }
 
 // TestDataAreaStruct
 // TestData for one Area within one Domain
 type TestDataAreaStruct struct {
+	TestDataDomainUuid                   TestDataDomainUuidType
+	TestDataDomainName                   TestDataDomainNameType
+	TestDataAreaUuid                     TestDataAreaUuidType
+	TestDataAreaName                     TestDataAreaNameType
+	TestDataValuesForRowMap              *map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+	TestDataValuesForColumnMap           *map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
+	TestDataValuesForColumnAndRowUuidMap *map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
+	TestDataColumnsMetaDataMap           *map[TestDataColumnUuidType]*[]*TestDataColumnMetaDataStruct
+}
+
+// TestDataPointValueStruct
+// Holding all information about one TestDataValue
+type TestDataPointValueStruct struct {
 	TestDataDomainUuid       TestDataDomainUuidType
 	TestDataDomainName       TestDataDomainNameType
 	TestDataAreaUuid         TestDataAreaUuidType
 	TestDataAreaName         TestDataAreaNameType
-	TestDataForDomainAreaMap map[TestDataRowMapUuidType]*[]*TestDataRowStruct // All TestData for a specific area in a specific Domain
+	TestDataColumnUuid       TestDataColumnUuidType
+	TestDataColumnDataName   TestDataColumnDataNameType
+	TestDataColumnUIName     TestDataColumnUINameType
+	TestDataPointRowUuid     TestDataPointRowUuidType
+	TestDataColumnAndRowUuid TestDataColumnAndRowUuidType
+	TestDataValue            TestDataValueType
+}
 
+// TestDataColumnMetaDataStruct
+// Holds the information about a column regarding if data should be visible when selecting for data, and some other stuff
+type TestDataColumnMetaDataStruct struct {
+	TestDataColumnUuid                      TestDataColumnUuidType
+	TestDataColumnDataName                  TestDataColumnDataNameType
+	TestDataColumnUIName                    TestDataColumnUINameType
+	ShouldColumnBeUsedForFindingTestData    bool
+	ShouldColumnBeUsedWithinTestDataSetName bool
 }
 
 // TestDataDomainUuidType
@@ -41,42 +68,6 @@ type TestDataAreaUuidType string
 // The Name for a specific TestData-area within the Domain
 type TestDataAreaNameType string
 
-// TestDataRowMapUuidType
-// The Uuid for one TestDataRow. This uuid is unique within a Domain
-type TestDataRowMapUuidType string
-
-// TestDataRowStruct
-// A specific Row of TestData
-type TestDataRowStruct struct {
-	TestDataDomainUuid          TestDataDomainUuidType
-	TestDataDomainName          TestDataDomainNameType
-	TestDataAreaUuid            TestDataAreaUuidType
-	TestDataAreaName            TestDataAreaNameType
-	TestDataValuesFromRowMap    *map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-	TestDataValuesFromColumnMap map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
-	TestDataColumnsMetaDataMap  map[TestDataColumnUuidType]*[]*TestDataColumnMetaDataStruct
-}
-
-// TestDataPointValueStruct
-// Holding all information about one TestDataValue
-type TestDataPointValueStruct struct {
-	TestDataColumnUuid     TestDataColumnUuidType
-	TestDataColumnDataName TestDataColumnDataNameType
-	TestDataColumnUIName   TestDataColumnUINameType
-	TestDataPointRowUuid   TestDataPointRowUuidType
-	TestDataValue          TestDataValueType
-}
-
-// TestDataColumnMetaDataStruct
-// Holds the information about a column regarding if data should be visible when selecting for data, and some other stuff
-type TestDataColumnMetaDataStruct struct {
-	TestDataColumnUuid                      TestDataColumnUuidType
-	TestDataColumnDataName                  TestDataColumnDataNameType
-	TestDataColumnUIName                    TestDataColumnUINameType
-	ShouldColumnBeUsedForFindingTestData    bool
-	ShouldColumnBeUsedWithinTestDataSetName bool
-}
-
 // TestDataPointRowUuidType
 // Identifies one TestDataPoint/TestDataRow
 type TestDataPointRowUuidType string
@@ -92,6 +83,10 @@ type TestDataColumnDataNameType string
 // TestDataColumnUINameType
 // The Name used in UI connected to a specific column in the TestDataSet
 type TestDataColumnUINameType string
+
+// TestDataColumnAndRowUuidType
+// The hash ColumnUuid 'concat' RowUuid: SHA256(TestDataColumnUuidType 'concat' TestDataPointRowUuidType)
+type TestDataColumnAndRowUuidType string
 
 // TestDataValueType
 // The value for specific TestDataPoint-value

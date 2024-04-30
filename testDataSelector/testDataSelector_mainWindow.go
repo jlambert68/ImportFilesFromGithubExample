@@ -8,6 +8,16 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+func ImportTestData() (testDataModelMap *map[TestDataDomainUuidType]*TestDataDomainModeStruct) {
+
+	var testDataRows []TestDataRowType
+	testDataRows = ImportTestDataFromFile2()
+
+	testDataModelMap = buildTestDataMap(testDataRows)
+
+	return testDataModelMap
+}
+
 func MainTestDataSelector(
 	app fyne.App,
 	parent fyne.Window) {

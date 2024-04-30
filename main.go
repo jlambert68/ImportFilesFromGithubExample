@@ -5,6 +5,7 @@ import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
 	"ImportFilesFromGithub/luaScriptEngine"
 	"ImportFilesFromGithub/testDataSelector"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -82,6 +83,11 @@ func main() {
 	)
 
 	buttonContainer := container.NewVBox(githubFilesImporterButton, filesViewerButton, openTestDataWindow)
+
+	var testDataModelMapPtr *map[testDataSelector.TestDataDomainUuidType]*testDataSelector.TestDataDomainModeStruct
+	testDataModelMapPtr = testDataSelector.ImportTestData()
+
+	fmt.Println(testDataModelMapPtr)
 
 	var files []importFilesFromGitHub.GitHubFile
 	files = []importFilesFromGitHub.GitHubFile{}
