@@ -89,8 +89,6 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		"ContraCurrency":               true,
 	}
 
-	// SLice that holds the UI-name for alla TestDataRows
-	var testDataPointNames []string
 
 	// Iterate through the CSV records to extract the TestDataPoints
 	for _, tempTestDataRow := range testData {
@@ -148,8 +146,11 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 
 		}
 
-		// Add 'TestDataPointName' to slice of names
-		testDataPointNames = append(testDataPointNames, testDataPointName)
+
+		// Loop the Values in the row and add 'TestDataPointName'
+		for _, testDataPoint := range testDataPointsForRow {
+			testDataPoint.TestDataValueName = TestDataValueNameType(testDataPointName)
+		}
 
 		// Add 'testDataPointsForRow' to Map for TestDataPoints in one row
 		tempTestDataValuesForRowMap[TestDataPointRowUuidType(rowUuid.String())] = &testDataPointsForRow
