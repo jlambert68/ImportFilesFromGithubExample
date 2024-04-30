@@ -24,7 +24,7 @@ type TestDataAreaStruct struct {
 	TestDataValuesForRowMap              *map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
 	TestDataValuesForColumnMap           *map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	TestDataValuesForColumnAndRowUuidMap *map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
-	TestDataColumnsMetaDataMap           *map[TestDataColumnUuidType]*[]*TestDataColumnMetaDataStruct
+	TestDataColumnsMetaDataMap           *map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
 }
 
 // TestDataPointValueStruct
@@ -40,6 +40,7 @@ type TestDataPointValueStruct struct {
 	TestDataPointRowUuid     TestDataPointRowUuidType
 	TestDataColumnAndRowUuid TestDataColumnAndRowUuidType
 	TestDataValue            TestDataValueType
+	TestDataValueName        TestDataValueNameType
 }
 
 // TestDataColumnMetaDataStruct
@@ -91,6 +92,10 @@ type TestDataColumnAndRowUuidType string
 // TestDataValueType
 // The value for specific TestDataPoint-value
 type TestDataValueType string
+
+// TestDataValueNameType
+// The name for a TestDataPoint. Used to show/describe the TestDataPoint in the UI
+type TestDataValueNameType string
 
 // The slices for Groups ans TestDataPoints for a Group
 var testDataPointGroups []testDataPointGroupNameType // Define testDataPointGroups
