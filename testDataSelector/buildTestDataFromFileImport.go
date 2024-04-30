@@ -74,21 +74,19 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 	// Add the TestArea to under the TestDataDomain in the full TestDataModelMap
 	testDataModelMap[testDataDomainUuid] = &tempTestDataDomainModel
 
-
 	// Columns that require true for specific properties
 	trueColumns := map[string]bool{
-		"AccountCurrency":              true,
-		"AccountEnvironment":           true,
+		"AccountCurrency":               true,
+		"AccountEnvironment":            true,
 		"ClientJuristictionCountryCode": true,
-		"DebitOrCredit":                true,
-		"MarketCountry":                true,
-		"MarketName":                   true,
-		"MarketSubType":                true,
-		"MarketCurrency":               true,
-		"InterimCurrency":              true,
-		"ContraCurrency":               true,
+		"DebitOrCredit":                 true,
+		"MarketCountry":                 true,
+		"MarketName":                    true,
+		"MarketSubType":                 true,
+		"MarketCurrency":                true,
+		"InterimCurrency":               true,
+		"ContraCurrency":                true,
 	}
-
 
 	// Iterate through the CSV records to extract the TestDataPoints
 	for _, tempTestDataRow := range testData {
@@ -96,6 +94,9 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		rowUuid := uuidGenerator.NewSHA1(namespace, []byte(tempTestDataRow[0]))
 
 		var testDataPointsForRow []*TestDataPointValueStruct
+
+		// The Description of how the name is constructed for one TestDataPoint (row)
+		var testDataPointNameDescription string
 
 		// The name for one TestDataPoint (row)
 		var testDataPointName string
@@ -110,17 +111,18 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 			// Create the TestDataPoint
 			var testDataPoint *TestDataPointValueStruct
 			testDataPoint = &TestDataPointValueStruct{
-				TestDataDomainUuid:       testDataDomainUuid,
-				TestDataDomainName:       testDataDomainName,
-				TestDataAreaUuid:         testDataAreaUuid,
-				TestDataAreaName:         testDataAreaName,
-				TestDataColumnUuid:       TestDataColumnUuidType(columnUuid.String()),
-				TestDataColumnDataName:   TestDataColumnDataNameType(testDataHeaders[testDataColumnIndex]),
-				TestDataColumnUIName:     TestDataColumnUINameType(testDataHeaders[testDataColumnIndex]),
-				TestDataPointRowUuid:     TestDataPointRowUuidType(rowUuid.String()),
-				TestDataColumnAndRowUuid: TestDataColumnAndRowUuidType(columnAndRowUuid.String()),
-				TestDataValue:            TestDataValueType(tempTestDataPoint),
-				TestDataValueName: "",
+				TestDataDomainUuid:           testDataDomainUuid,
+				TestDataDomainName:           testDataDomainName,
+				TestDataAreaUuid:             testDataAreaUuid,
+				TestDataAreaName:             testDataAreaName,
+				TestDataColumnUuid:           TestDataColumnUuidType(columnUuid.String()),
+				TestDataColumnDataName:       TestDataColumnDataNameType(testDataHeaders[testDataColumnIndex]),
+				TestDataColumnUIName:         TestDataColumnUINameType(testDataHeaders[testDataColumnIndex]),
+				TestDataPointRowUuid:         TestDataPointRowUuidType(rowUuid.String()),
+				TestDataColumnAndRowUuid:     TestDataColumnAndRowUuidType(columnAndRowUuid.String()),
+				TestDataValue:                TestDataValueType(tempTestDataPoint),
+				TestDataValueNameDescription: "",
+				TestDataValueName:            "",
 			}
 
 			// Add TestDataPoint to 'testDataPointsForRow'
@@ -137,18 +139,20 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 
 			// If this column is in the TestDataPointName the add it
 			if trueColumns[string(testDataPoint.TestDataColumnDataName)] == true {
-				if len(testDataPointName) == 0 {
-					testDataPointName = string(testDataPoint.TestDataColumnDataName)
+				if len(testDataPointNameDescription) == 0 {
+					testDataPointNameDescription = string(testDataPoint.TestDataColumnDataName)
+					testDataPointName = string(testDataPoint.TestDataValue)
 				} else {
-					testDataPointName = testDataPointName + "/" + string(testDataPoint.TestDataColumnDataName)
+					testDataPointNameDescription = testDataPointNameDescription + "/" + string(testDataPoint.TestDataColumnDataName)
+					testDataPointName = testDataPointName + "/" + string(testDataPoint.TestDataValue)
 				}
 			}
 
 		}
 
-
 		// Loop the Values in the row and add 'TestDataPointName'
 		for _, testDataPoint := range testDataPointsForRow {
+			testDataPoint.TestDataValueNameDescription = TestDataValueNameDescriptionType(testDataPointNameDescription)
 			testDataPoint.TestDataValueName = TestDataValueNameType(testDataPointName)
 		}
 
@@ -165,7 +169,7 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		tempTestDataValuesForColumnMap[tempTestDataColumnUuid] = &testDataPointsForColumn
 
 		// Create column MetaData
-		var tempTestDataColumnMetaDataStruct  *TestDataColumnMetaDataStruct
+		var tempTestDataColumnMetaDataStruct *TestDataColumnMetaDataStruct
 		tempTestDataColumnMetaDataStruct = &TestDataColumnMetaDataStruct{
 			TestDataColumnUuid:                      testDataPointsForColumn[0].TestDataColumnUuid,
 			TestDataColumnDataName:                  testDataPointsForColumn[0].TestDataColumnDataName,
@@ -177,10 +181,6 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		// Add Column MetaData to Map
 		tempTestDataColumnsMetaDataMap[tempTestDataColumnUuid] = tempTestDataColumnMetaDataStruct
 	}
-
-	// Loop all TestDataPoints and add 'TestDataPointName'
-	for
-
 
 	return &testDataModelMap
 }

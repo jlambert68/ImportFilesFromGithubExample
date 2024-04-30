@@ -30,17 +30,18 @@ type TestDataAreaStruct struct {
 // TestDataPointValueStruct
 // Holding all information about one TestDataValue
 type TestDataPointValueStruct struct {
-	TestDataDomainUuid       TestDataDomainUuidType
-	TestDataDomainName       TestDataDomainNameType
-	TestDataAreaUuid         TestDataAreaUuidType
-	TestDataAreaName         TestDataAreaNameType
-	TestDataColumnUuid       TestDataColumnUuidType
-	TestDataColumnDataName   TestDataColumnDataNameType
-	TestDataColumnUIName     TestDataColumnUINameType
-	TestDataPointRowUuid     TestDataPointRowUuidType
-	TestDataColumnAndRowUuid TestDataColumnAndRowUuidType
-	TestDataValue            TestDataValueType
-	TestDataValueName        TestDataValueNameType
+	TestDataDomainUuid           TestDataDomainUuidType
+	TestDataDomainName           TestDataDomainNameType
+	TestDataAreaUuid             TestDataAreaUuidType
+	TestDataAreaName             TestDataAreaNameType
+	TestDataColumnUuid           TestDataColumnUuidType
+	TestDataColumnDataName       TestDataColumnDataNameType
+	TestDataColumnUIName         TestDataColumnUINameType
+	TestDataPointRowUuid         TestDataPointRowUuidType
+	TestDataColumnAndRowUuid     TestDataColumnAndRowUuidType
+	TestDataValue                TestDataValueType
+	TestDataValueNameDescription TestDataValueNameDescriptionType
+	TestDataValueName            TestDataValueNameType
 }
 
 // TestDataColumnMetaDataStruct
@@ -92,6 +93,10 @@ type TestDataColumnAndRowUuidType string
 // TestDataValueType
 // The value for specific TestDataPoint-value
 type TestDataValueType string
+
+// TestDataValueNameDescriptionType
+// The Description of how the name for a TestDataPoint is constructed. Used to show/describe the TestDataPoint in the UI
+type TestDataValueNameDescriptionType string
 
 // TestDataValueNameType
 // The name for a TestDataPoint. Used to show/describe the TestDataPoint in the UI
