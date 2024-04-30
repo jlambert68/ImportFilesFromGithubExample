@@ -14,9 +14,9 @@ var embeddedFile embed.FS
 // Define your struct based on the CSV file structure
 type TestDataRowType []string
 
-func ImportTestDataFromFile2() []TestDataRowType {
+func ImportTestDataFromFile2() ([]string, []TestDataRowType) {
 	// Read the embedded file
-	data, err := embeddedFile.ReadFile("FenixRawTestdata_646rows_211220.csv")
+	data, err := embeddedFile.ReadFile("testData/FenixRawTestdata_646rows_211220.csv")
 	if err != nil {
 		log.Fatalf("Error reading the embedded file: %v", err)
 	}
@@ -26,9 +26,10 @@ func ImportTestDataFromFile2() []TestDataRowType {
 	r.Comma = ';' // CSV is semicolon-delimited
 
 	var testDataRows []TestDataRowType
-	// Skip header row if necessary
-	if _, err := r.Read(); err != nil {
-		log.Fatal(err)
+	// Read the header row first
+	headers, err := r.Read()
+	if err != nil {
+		log.Fatalf("Error reading headers: %v", err)
 	}
 
 	// Iterate through the records
@@ -52,5 +53,5 @@ func ImportTestDataFromFile2() []TestDataRowType {
 
 	}
 
-	return testDataRows
+	return headers, testDataRows
 }

@@ -11,9 +11,10 @@ import (
 func ImportTestData() (testDataModelMap *map[TestDataDomainUuidType]*TestDataDomainModeStruct) {
 
 	var testDataRows []TestDataRowType
-	testDataRows = ImportTestDataFromFile2()
+	var headers []string
+	headers, testDataRows = ImportTestDataFromFile2()
 
-	testDataModelMap = buildTestDataMap(testDataRows)
+	testDataModelMap = buildTestDataMap(headers, testDataRows)
 
 	return testDataModelMap
 }

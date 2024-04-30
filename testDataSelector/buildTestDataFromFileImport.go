@@ -2,7 +2,6 @@ package testDataSelector
 
 import (
 	uuidGenerator "github.com/google/uuid"
-	"log"
 )
 
 // ... (All your type definitions here)
@@ -20,10 +19,14 @@ const (
 	testDataAreaName   TestDataAreaNameType   = "Main TestData Area"
 )
 
-func buildTestDataMap(testData []TestDataRowType) *map[TestDataDomainUuidType]*TestDataDomainModeStruct {
+func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDataDomainUuidType]*TestDataDomainModeStruct {
+
+	// Define a namespace UUID; this could be any valid UUID that you choose to use as a namespace for your IDs.
+	// Here, we use the DNS namespace provided by the UUID package for demonstration purposes.
+	namespace := uuidGenerator.NameSpaceDNS
 
 	var testDataHeaders TestDataRowType
-	testDataHeaders = testData[0]
+	testDataHeaders = headers
 
 	// Initialize your map
 	var testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModeStruct
@@ -72,31 +75,18 @@ func buildTestDataMap(testData []TestDataRowType) *map[TestDataDomainUuidType]*T
 	testDataModelMap[testDataDomainUuid] = &tempTestDataDomainModel
 
 	// Iterate through the CSV records to extract the TestDataPoints
-	for testDataRowIndex, tempTestDataRow := range testData {
+	for _, tempTestDataRow := range testData {
 
-		// Don't process header row
-		if testDataRowIndex == 0 {
-			continue
-		}
-		rowUuid, err := uuidGenerator.Parse(tempTestDataRow[0])
-		if err != nil {
-			log.Fatalln(err)
-		}
+		rowUuid := uuidGenerator.NewSHA1(namespace, []byte(tempTestDataRow[0]))
 
 		var testDataPointsForRow []*TestDataPointValueStruct
 
 		// Loop over all TestDataPoints in the row
 		for testDataColumnIndex, tempTestDataPoint := range tempTestDataRow {
 
-			columnUuid, err := uuidGenerator.Parse(testDataHeaders[testDataColumnIndex])
-			if err != nil {
-				log.Fatalln(err)
-			}
+			columnUuid := uuidGenerator.NewSHA1(namespace, []byte(testDataHeaders[testDataColumnIndex]))
 
-			columnAndRowUuid, err := uuidGenerator.Parse(columnUuid.String() + rowUuid.String())
-			if err != nil {
-				log.Fatalln(err)
-			}
+			columnAndRowUuid := uuidGenerator.NewSHA1(namespace, []byte(columnUuid.String()+rowUuid.String()))
 
 			// Create the TestDataPoint
 			var testDataPoint *TestDataPointValueStruct
@@ -120,6 +110,9 @@ func buildTestDataMap(testData []TestDataRowType) *map[TestDataDomainUuidType]*T
 			tempTestDataValuesForColumnAndRowUuidMap[TestDataColumnAndRowUuidType(columnAndRowUuid.String())] = testDataPoint
 
 			// Add the TestDataPoint to correct slice for columns
+			if testDataPointsForColumns == nil || len(testDataPointsForColumns) == testDataColumnIndex {
+				testDataPointsForColumns = append(testDataPointsForColumns, []*TestDataPointValueStruct{})
+			}
 			testDataPointsForColumns[testDataColumnIndex] = append(testDataPointsForColumns[testDataColumnIndex], testDataPoint)
 
 		}
