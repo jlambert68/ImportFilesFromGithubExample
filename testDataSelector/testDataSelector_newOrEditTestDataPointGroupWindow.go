@@ -357,16 +357,23 @@ func showNewOrEditGroupWindow(
 	var buttonsContainer *fyne.Container
 	var entryContainer *fyne.Container
 	var upperSplitContainer *fyne.Container
-	var lowerSplitContainer *fyne.Container
+	//var lowerSplitContainer *fyne.Container
 
-	listsSplitContainer = container.NewHSplit(allAvailablePointsList, selectedPointsList)
+	var lowerLeftSideContainer *fyne.Container
+	lowerLeftSideContainer = container.NewBorder(widget.NewLabel("TestDataPoints based on filter"), nil, nil, nil, allAvailablePointsList)
+
 	buttonsContainer = container.NewHBox(saveButton, cancelButton)
 	entryContainer = container.NewBorder(nil, nil, nil, nameStatusLabel, nameEntry)
 
-	upperSplitContainer = container.NewVBox(entryContainer, buttonsContainer, testDataSelectionsContainer, searchAndClearButtonsContainer)
-	lowerSplitContainer = container.NewVBox(listsSplitContainer)
+	var lowerRightSideContainer *fyne.Container
+	lowerRightSideContainer = container.NewBorder(container.NewVBox(widget.NewLabel("TestDataGroup and its TestDataPoints"), entryContainer, buttonsContainer), nil, nil, nil, selectedPointsList)
 
-	upperAndLowerSplitContainer = container.NewVSplit(upperSplitContainer, lowerSplitContainer)
+	listsSplitContainer = container.NewHSplit(lowerLeftSideContainer, lowerRightSideContainer)
+
+	upperSplitContainer = container.NewBorder(nil, searchAndClearButtonsContainer, nil, nil, testDataSelectionsContainer)
+	//lowerSplitContainer = container.NewVBox(entryContainer, buttonsContainer, searchAndClearButtonsContainer, listsSplitContainer)
+
+	upperAndLowerSplitContainer = container.NewVSplit(upperSplitContainer, listsSplitContainer)
 
 	//windowContent = container.NewBorder(container.NewVBox(entryContainer, buttonsContainer, testDataSelectionsContainer, searchAndClearButtonsContainer), nil, nil, nil, listsSplitContainer)
 
