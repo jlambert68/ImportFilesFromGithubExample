@@ -68,7 +68,9 @@ func showNewOrEditGroupWindow(
 
 	// Create label for Domains
 	domainsLabel = widget.NewLabel(testDataDomainLabelText)
+	domainsLabel.TextStyle.Bold = true
 	testAreasLabel = widget.NewLabel(testDataTestAreaLabelText)
+	testAreasLabel.TextStyle.Bold = true
 
 	// Extract TestData on Domain-level
 	for _, tempTestDataDomainModel := range *testDataModelMap {
@@ -114,9 +116,13 @@ func showNewOrEditGroupWindow(
 						var tempTestDataColumnContainer *fyne.Container
 
 						// Set Label
+						var newColumnFilterLabel *widget.Label
+						newColumnFilterLabel = widget.NewLabel(string(testDataColumnsMetaData.TestDataColumnUIName))
+						newColumnFilterLabel.TextStyle.Bold = true
+
 						var testDataValueSelection *testDataValueSelectionStruct
 						testDataValueSelection = &testDataValueSelectionStruct{
-							testDataSelectionLabel: widget.NewLabel(string(testDataColumnsMetaData.TestDataColumnUIName)),
+							testDataSelectionLabel: newColumnFilterLabel,
 							testDataCheckGroup:     nil,
 						}
 
@@ -359,15 +365,22 @@ func showNewOrEditGroupWindow(
 	var upperSplitContainer *fyne.Container
 	//var lowerSplitContainer *fyne.Container
 
+	var tempTestDataPointsLabel *widget.Label
+	tempTestDataPointsLabel = widget.NewLabel("TestDataPoints based on filter")
+	tempTestDataPointsLabel.TextStyle.Bold = true
+
 	var lowerLeftSideContainer *fyne.Container
-	lowerLeftSideContainer = container.NewBorder(widget.NewLabel("TestDataPoints based on filter"), nil, nil, nil, allAvailablePointsList)
+	lowerLeftSideContainer = container.NewBorder(tempTestDataPointsLabel, nil, nil, nil, allAvailablePointsList)
 
 	buttonsContainer = container.NewHBox(saveButton, cancelButton)
 	entryContainer = container.NewBorder(nil, nil, nil, nameStatusLabel, nameEntry)
 
-	var lowerRightSideContainer *fyne.Container
-	lowerRightSideContainer = container.NewBorder(container.NewVBox(widget.NewLabel("TestDataGroup and its TestDataPoints"), entryContainer, buttonsContainer), nil, nil, nil, selectedPointsList)
+	var tempTestGroupLabel *widget.Label
+	tempTestGroupLabel = widget.NewLabel("TestDataGroup and its TestDataPoints")
+	tempTestGroupLabel.TextStyle.Bold = true
 
+	var lowerRightSideContainer *fyne.Container
+	lowerRightSideContainer = container.NewBorder(container.NewVBox(tempTestGroupLabel, entryContainer, buttonsContainer), nil, nil, nil, selectedPointsList)
 	listsSplitContainer = container.NewHSplit(lowerLeftSideContainer, lowerRightSideContainer)
 
 	upperSplitContainer = container.NewBorder(nil, searchAndClearButtonsContainer, nil, nil, testDataSelectionsContainer)
