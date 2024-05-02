@@ -32,12 +32,12 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 	var tempTestDataValuesForColumnMap map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnAndRowUuidMap map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	var tempTestDataColumnsMetaDataMap map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
-	var tempUniqueTestDataValuesForColumnMap map[TestDataColumnUuidType]*map[TestDataValueType]TestDataValueType
+	var tempUniqueTestDataValuesForColumnMap map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType
 	tempTestDataValuesForRowMap = make(map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnAndRowUuidMap = make(map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct)
 	tempTestDataColumnsMetaDataMap = make(map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct)
-	tempUniqueTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*map[TestDataValueType]TestDataValueType)
+	tempUniqueTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType)
 
 	// TestData for one Area within one Domain
 	var testDataArea *TestDataAreaStruct
@@ -164,13 +164,22 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		tempTestDataValuesForColumnMap[tempTestDataColumnUuid] = &testDataPointsForColumn
 
 		// initialized the 'inner' map for unique values in the column
-		var innerMapWithUniqueColumnValues map[TestDataValueType]TestDataValueType
-		innerMapWithUniqueColumnValues = make(map[TestDataValueType]TestDataValueType)
+		var innerMapWithUniqueColumnValues map[TestDataValueType][]TestDataPointRowUuidType
+		innerMapWithUniqueColumnValues = make(map[TestDataValueType][]TestDataPointRowUuidType)
 
 		// Loop all Column data and add to the 'inner' Map, witch will create a map with only one value per occurrence of the value
 		tempTestDataValuesForColumnMap[tempTestDataColumnUuid] = &testDataPointsForColumn
 		for _, testDataPoint := range testDataPointsForColumn {
-			innerMapWithUniqueColumnValues[testDataPoint.TestDataValue] = testDataPoint.TestDataValue
+
+			// Extract existing slice
+			var testDataPointRowUuidSlice []TestDataPointRowUuidType
+			testDataPointRowUuidSlice, _ = innerMapWithUniqueColumnValues[testDataPoint.TestDataValue]
+
+			// Append to slice
+			testDataPointRowUuidSlice = append(testDataPointRowUuidSlice, testDataPoint.TestDataPointRowUuid)
+
+			// Store back the slice
+			innerMapWithUniqueColumnValues[testDataPoint.TestDataValue] = testDataPointRowUuidSlice
 		}
 
 		// Add the 'inner' map to the Column-Map
@@ -179,9 +188,10 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		// Create column MetaData
 		var tempTestDataColumnMetaDataStruct *TestDataColumnMetaDataStruct
 		tempTestDataColumnMetaDataStruct = &TestDataColumnMetaDataStruct{
-			TestDataColumnUuid:                      testDataPointsForColumn[0].TestDataColumnUuid,
-			TestDataColumnDataName:                  testDataPointsForColumn[0].TestDataColumnDataName,
-			TestDataColumnUIName:                    testDataPointsForColumn[0].TestDataColumnUIName,
+			TestDataColumnUuid:     testDataPointsForColumn[0].TestDataColumnUuid,
+			TestDataColumnDataName: testDataPointsForColumn[0].TestDataColumnDataName,
+			TestDataColumnUIName:   testDataPointsForColumn[0].TestDataColumnUIName,
+			//TestDataPointRowsUuid: 						,
 			ShouldColumnBeUsedForFindingTestData:    trueColumns[string(testDataPointsForColumn[0].TestDataColumnDataName)],
 			ShouldColumnBeUsedWithinTestDataSetName: trueColumns[string(testDataPointsForColumn[0].TestDataColumnDataName)],
 		}

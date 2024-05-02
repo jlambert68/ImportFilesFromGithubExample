@@ -65,6 +65,9 @@ func showNewOrEditGroupWindow(
 	type testDataValueSelectionStruct struct {
 		testDataSelectionLabel *widget.Label
 		testDataCheckGroup     *widget.CheckGroup
+		TestDataColumnUuid     TestDataColumnUuidType
+		TestDataColumnDataName TestDataColumnDataNameType
+		TestDataPointRowUuid   *map[TestDataValueType][]TestDataPointRowUuidType
 	}
 	var testDataValueSelections []*testDataValueSelectionStruct
 	var testDataValuesSelectionContainer *fyne.Container
@@ -138,19 +141,25 @@ func showNewOrEditGroupWindow(
 						testDataValueSelection = &testDataValueSelectionStruct{
 							testDataSelectionLabel: newColumnFilterLabel,
 							testDataCheckGroup:     nil,
+							TestDataColumnUuid:     testDataColumnsMetaData.TestDataColumnUuid,
+							TestDataColumnDataName: testDataColumnsMetaData.TestDataColumnDataName,
+							TestDataPointRowUuid:   nil,
 						}
 
 						// Extract the Map with the values
-						var uniqueTestDataValuesForColumnMapPtr *map[TestDataValueType]TestDataValueType
+						var uniqueTestDataValuesForColumnMapPtr *map[TestDataValueType][]TestDataPointRowUuidType
 						UniqueTestDataValuesForColumnMap := *testDataArea.UniqueTestDataValuesForColumnMap
 
 						uniqueTestDataValuesForColumnMapPtr = UniqueTestDataValuesForColumnMap[testDataColumnsMetaData.TestDataColumnUuid]
 
 						// Loop Values in Column and create Checkboxes
-						for _, uniqueTestDataValue := range *uniqueTestDataValuesForColumnMapPtr {
+						for uniqueTestDataValue, testDataPointRowsUuid := range *uniqueTestDataValuesForColumnMapPtr {
 
 							// Add value to slice for CheckBox-labels
 							checkGroupOptions = append(checkGroupOptions, string(uniqueTestDataValue))
+
+							// Add existing slice with 'TestDataPointRowsUuid'
+							testDataValueSelection.TestDataPointRowUuid = append(testDataValueSelection.TestDataPointRowUuid, testDataPointRowsUuid...)
 
 						}
 
@@ -213,8 +222,6 @@ func showNewOrEditGroupWindow(
 		testAreasLabel.SetText(fmt.Sprintf(testDataTestAreaLabelText+"'%s'", domainOptions[0]))
 	}
 
-	//
-
 	// Create the separate TestData-selection-containers
 	testDomainContainer = container.NewVBox(domainsLabel, domainsSelect)
 	testAreasContainer = container.NewVBox(testAreasLabel, testAreaSelect)
@@ -226,7 +233,35 @@ func showNewOrEditGroupWindow(
 	var searchTestDataButton *widget.Button
 	searchTestDataButton = widget.NewButton("Search for TestDataPoints", func() {
 
-		//var searchResult []string
+		var searchResult []TestDataPointRowUuidType
+
+		// Loop all Columns and extract selected checkboxes in the CheckGroups
+		for _, testDataValueSelection := range testDataValueSelections {
+
+			// Extract the Selected CheckBoxes
+			var selectedCheckBoxes []string
+			selectedCheckBoxes = testDataValueSelection.testDataCheckGroup.Selected
+
+			// Extract 'TestDataPointRowUuid' for the Selected CheckBox-value-rows
+			var testDataPointRowUuidMap map[TestDataValueType][]TestDataPointRowUuidType
+			testDataPointRowUuidMap = *testDataValueSelection.TestDataPointRowUuid
+
+			var testDataPointRowsUuid []TestDataPointRowUuidType
+
+			for _, selectedCheckBox := range selectedCheckBoxes {
+				tempTestDataPointRowsUuid, _ := testDataPointRowUuidMap[TestDataValueType(selectedCheckBox)]
+
+				testDataPointRowsUuid = append(testDataPointRowsUuid, tempTestDataPointRowsUuid...)
+			}
+
+			searchResult = append(searchResult, testDataPointRowsUuid...)
+
+		}
+
+		// Convert into []string
+		for _, testDataPointRowUuid := range searchResult {
+			filteredTestDataPoints = append(filteredTestDataPoints, string(testDataPointRowUuid))
+		}
 
 	})
 
@@ -234,7 +269,7 @@ func showNewOrEditGroupWindow(
 	var clearTestDataFilterCheckBoxesButton *widget.Button
 	clearTestDataFilterCheckBoxesButton = widget.NewButton("Clear checkboxes", func() {
 
-		selected := []string{}
+		var selected []string
 
 		// Loop all Columns and clear all checkboxes in the CheckGroups
 		for _, testDataValueSelection := range testDataValueSelections {

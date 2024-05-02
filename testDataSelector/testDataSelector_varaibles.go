@@ -25,7 +25,7 @@ type TestDataAreaStruct struct {
 	TestDataValuesForColumnMap           *map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	TestDataValuesForColumnAndRowUuidMap *map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	TestDataColumnsMetaDataMap           *map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
-	UniqueTestDataValuesForColumnMap     *map[TestDataColumnUuidType]*map[TestDataValueType]TestDataValueType
+	UniqueTestDataValuesForColumnMap     *map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType
 }
 
 // TestDataPointValueStruct
@@ -48,9 +48,10 @@ type TestDataPointValueStruct struct {
 // TestDataColumnMetaDataStruct
 // Holds the information about a column regarding if data should be visible when selecting for data, and some other stuff
 type TestDataColumnMetaDataStruct struct {
-	TestDataColumnUuid                      TestDataColumnUuidType
-	TestDataColumnDataName                  TestDataColumnDataNameType
-	TestDataColumnUIName                    TestDataColumnUINameType
+	TestDataColumnUuid     TestDataColumnUuidType
+	TestDataColumnDataName TestDataColumnDataNameType
+	TestDataColumnUIName   TestDataColumnUINameType
+	//TestDataPointRowsUuid                   []TestDataPointRowUuidType
 	ShouldColumnBeUsedForFindingTestData    bool
 	ShouldColumnBeUsedWithinTestDataSetName bool
 }
