@@ -65,10 +65,10 @@ func showNewOrEditGroupWindow(
 	}
 	var testDataValueSelections []*testDataValueSelectionStruct
 	var testDataValuesSelectionContainer *fyne.Container
-	testDataValuesSelectionContainer = container.NewHBox()
 
 	// Create label for Domains
-	domainsLabel.SetText(testDataDomainLabelText)
+	domainsLabel = widget.NewLabel(testDataDomainLabelText)
+	testAreasLabel = widget.NewLabel(testDataTestAreaLabelText)
 
 	// Extract TestData on Domain-level
 	for _, tempTestDataDomainModel := range *testDataModelMap {
@@ -78,6 +78,8 @@ func showNewOrEditGroupWindow(
 
 	// Create Domain-Select-DropDown
 	domainsSelect = widget.NewSelect(domainOptions, func(selected string) {
+
+		// Clear UI object that need to be recreated
 
 		// Extract correct TestArea
 		for index, domain := range domains {
@@ -99,6 +101,9 @@ func showNewOrEditGroupWindow(
 			// Create available TestDataSelections for TestArea
 			for _, testDataArea := range *testAreaMap {
 
+				// Clear UI component that holds 'TestDataValuesSelections'
+				testDataValuesSelectionContainer = container.NewHBox()
+
 				// Loop 'TestDataColumnsMetaDataMap' for Columns to present
 				for _, testDataColumnsMetaData := range *testDataArea.TestDataColumnsMetaDataMap {
 
@@ -115,15 +120,18 @@ func showNewOrEditGroupWindow(
 							testDataCheckGroup:     nil,
 						}
 
+						// Extract the Map with the values
+						var uniqueTestDataValuesForColumnMapPtr *map[TestDataValueType]TestDataValueType
+						UniqueTestDataValuesForColumnMap := *testDataArea.UniqueTestDataValuesForColumnMap
+
+						uniqueTestDataValuesForColumnMapPtr = UniqueTestDataValuesForColumnMap[testDataColumnsMetaData.TestDataColumnUuid]
+
 						// Loop Values in Column and create Checkboxes
-						for _, uniqueTestDataValuesForColumnMapPtr := range *testDataArea.UniqueTestDataValuesForColumnMap {
+						for _, uniqueTestDataValue := range *uniqueTestDataValuesForColumnMapPtr {
 
-							for _, uniqueTestDataValue := range *uniqueTestDataValuesForColumnMapPtr {
+							// Add value to slice for CheckBox-labels
+							checkGroupOptions = append(checkGroupOptions, string(uniqueTestDataValue))
 
-								// Add value to slice for CheckBox-labels
-								checkGroupOptions = append(checkGroupOptions, string(uniqueTestDataValue))
-
-							}
 						}
 
 						// Create the CheckGroup
@@ -174,7 +182,7 @@ func showNewOrEditGroupWindow(
 
 	// Create the separate TestData-selection-containers
 	testDomainContainer = container.NewVBox(domainsLabel, domainsSelect)
-	testDomainContainer = container.NewVBox(testAreasLabel, testAreaSelect)
+	testAreasContainer = container.NewVBox(testAreasLabel, testAreaSelect)
 
 	// Create the main TestData-selection-container
 	testDataSelectionsContainer = container.NewHBox(testDomainContainer, testAreasContainer, testDataValuesSelectionContainer)
@@ -343,12 +351,26 @@ func showNewOrEditGroupWindow(
 	setStateForSaveButtonAndGroupNameTextEntry(nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName)
 
 	// Layout configuration for the new/edit window
-	listsSplitContainer := container.NewHSplit(allAvailablePointsList, selectedPointsList)
-	buttonsContainer := container.NewHBox(saveButton, cancelButton)
-	entryContainer := container.NewBorder(nil, nil, nil, nameStatusLabel, nameEntry)
-	content := container.NewBorder(container.NewVBox(entryContainer, buttonsContainer, testDataSelectionsContainer, searchAndClearButtonsContainer), nil, nil, nil, listsSplitContainer)
+	// Create the UpperAndLowerSplitContainer
+	var upperAndLowerSplitContainer *container.Split
+	var listsSplitContainer *container.Split
+	var buttonsContainer *fyne.Container
+	var entryContainer *fyne.Container
+	var upperSplitContainer *fyne.Container
+	var lowerSplitContainer *fyne.Container
 
-	newOrEditTestDataPointGroupWindow.SetContent(content)
+	listsSplitContainer = container.NewHSplit(allAvailablePointsList, selectedPointsList)
+	buttonsContainer = container.NewHBox(saveButton, cancelButton)
+	entryContainer = container.NewBorder(nil, nil, nil, nameStatusLabel, nameEntry)
+
+	upperSplitContainer = container.NewVBox(entryContainer, buttonsContainer, testDataSelectionsContainer, searchAndClearButtonsContainer)
+	lowerSplitContainer = container.NewVBox(listsSplitContainer)
+
+	upperAndLowerSplitContainer = container.NewVSplit(upperSplitContainer, lowerSplitContainer)
+
+	//windowContent = container.NewBorder(container.NewVBox(entryContainer, buttonsContainer, testDataSelectionsContainer, searchAndClearButtonsContainer), nil, nil, nil, listsSplitContainer)
+
+	newOrEditTestDataPointGroupWindow.SetContent(upperAndLowerSplitContainer)
 	newOrEditTestDataPointGroupWindow.Show()
 
 }
