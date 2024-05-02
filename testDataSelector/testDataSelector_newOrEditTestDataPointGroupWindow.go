@@ -146,11 +146,8 @@ func showNewOrEditGroupWindow(
 						// Add 'tempTestDataColumnContainer' to 'testDataValuesSelectionContainer'
 						testDataValuesSelectionContainer.Add(tempTestDataColumnContainer)
 					}
-
 				}
-
 			}
-
 		})
 
 		// Set label for TestAreas
@@ -181,6 +178,22 @@ func showNewOrEditGroupWindow(
 
 	// Create the main TestData-selection-container
 	testDataSelectionsContainer = container.NewHBox(testDomainContainer, testAreasContainer, testDataValuesSelectionContainer)
+
+	// Create Search TestData-button
+	var searchTestDataButton *widget.Button
+	searchTestDataButton = widget.NewButton("Search for TestDataPoints", func() {
+
+	})
+
+	// Create Clear checkboxes-button
+	var clearTestDataFilterCheckBoxesButton *widget.Button
+	clearTestDataFilterCheckBoxesButton = widget.NewButton("Clear checkboxes", func() {
+
+	})
+
+	// Create the container for Search- and Clear- buttons
+	var searchAndClearButtonsContainer *fyne.Container
+	searchAndClearButtonsContainer = container.NewHBox(searchTestDataButton, clearTestDataFilterCheckBoxesButton)
 
 	// Sample data for demonstration
 	allPoints := []string{"Point_1", "Point_2", "Point_3", "Point_4", "Point_5", "Point_6", "Point_7", "Point_8", "Point_9", "Point_10"}
@@ -275,7 +288,15 @@ func showNewOrEditGroupWindow(
 
 		// Loop all points and add them the 'newTestDataPointNameMap'
 		for _, selectedPoint := range allSelectedPoints {
-			newTestDataPointNameMap[testDataPointUuidType(selectedPoint)] = testDataPointUuidType(selectedPoint)
+
+			var testDataPoint testDataPointStruct
+			testDataPoint = testDataPointStruct{
+				testDataPointUuid:            testDataPointUuidType(selectedPoint),
+				testDataPointName:            testDataPointNameType(selectedPoint),
+				testDataPointNameDescription: testDataPointNameDescriptionType(selectedPoint),
+				testDatapointValue:           testDatapointValueType(selectedPoint),
+			}
+			newTestDataPointNameMap[testDataPointUuidType(selectedPoint)] = testDataPoint
 		}
 
 		// When GroupName is changed and the Group is in 'Edit'-mode the remove the old Group
@@ -325,7 +346,7 @@ func showNewOrEditGroupWindow(
 	listsSplitContainer := container.NewHSplit(allAvailablePointsList, selectedPointsList)
 	buttonsContainer := container.NewHBox(saveButton, cancelButton)
 	entryContainer := container.NewBorder(nil, nil, nil, nameStatusLabel, nameEntry)
-	content := container.NewBorder(container.NewVBox(entryContainer, buttonsContainer, testDataSelectionsContainer), nil, nil, nil, listsSplitContainer)
+	content := container.NewBorder(container.NewVBox(entryContainer, buttonsContainer, testDataSelectionsContainer, searchAndClearButtonsContainer), nil, nil, nil, listsSplitContainer)
 
 	newOrEditTestDataPointGroupWindow.SetContent(content)
 	newOrEditTestDataPointGroupWindow.Show()
