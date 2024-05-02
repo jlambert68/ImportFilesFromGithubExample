@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"sort"
 )
 
 const (
@@ -22,6 +23,8 @@ func showNewOrEditGroupWindow(
 	testDataModelMap *map[TestDataDomainUuidType]*TestDataDomainModelStruct) {
 
 	parent.Hide()
+
+	var filteredTestDataPoints []string
 
 	var shouldUpdateMainWindow responseChannelStruct
 
@@ -106,8 +109,19 @@ func showNewOrEditGroupWindow(
 				// Clear UI component that holds 'TestDataValuesSelections'
 				testDataValuesSelectionContainer = container.NewHBox()
 
-				// Loop 'TestDataColumnsMetaDataMap' for Columns to present
+				// Create a slice with 'testDataColumnsMetaData' that can be sorted
+				var testDataColumnsMetaDataToBeSorted []*TestDataColumnMetaDataStruct
 				for _, testDataColumnsMetaData := range *testDataArea.TestDataColumnsMetaDataMap {
+					testDataColumnsMetaDataToBeSorted = append(testDataColumnsMetaDataToBeSorted, testDataColumnsMetaData)
+				}
+
+				// Sort the slice based on TestDataColumnUIName
+				sort.Slice(testDataColumnsMetaDataToBeSorted, func(i, j int) bool {
+					return testDataColumnsMetaDataToBeSorted[i].TestDataColumnUIName < testDataColumnsMetaDataToBeSorted[j].TestDataColumnUIName
+				})
+
+				// Loop 'testDataColumnsMetaDataToBeSorted' for Columns to present
+				for _, testDataColumnsMetaData := range testDataColumnsMetaDataToBeSorted {
 
 					// Check if column should be used for filtering TestData
 					if testDataColumnsMetaData.ShouldColumnBeUsedForFindingTestData == true {
@@ -140,6 +154,9 @@ func showNewOrEditGroupWindow(
 
 						}
 
+						// Sort values in CheckGroup
+						sort.Strings(checkGroupOptions)
+
 						// Create the CheckGroup
 						var tempTestDataCheckGroup *widget.CheckGroup
 						tempTestDataCheckGroup = widget.NewCheckGroup(checkGroupOptions, func(changed []string) {
@@ -152,13 +169,25 @@ func showNewOrEditGroupWindow(
 						// Add 'testDataValueSelections' to slice
 						testDataValueSelections = append(testDataValueSelections, testDataValueSelection)
 
+						// Get the minimum size of the check group
+						var testDataCheckGroupMinSize fyne.Size
+						testDataCheckGroupMinSize = testDataValueSelection.testDataCheckGroup.MinSize()
+
+						// Create the container having scrollbar the TestDataCheckGroup
+						testDataCheckGroupContainer := container.NewScroll(testDataValueSelection.testDataCheckGroup)
+
+						// Set
+						testDataCheckGroupContainer.SetMinSize(fyne.NewSize(testDataCheckGroupContainer.Size().Height, testDataCheckGroupMinSize.Width))
+
 						// Add to TestDataColumn-container
-						tempTestDataColumnContainer = container.NewVBox(
+						tempTestDataColumnContainer = container.NewBorder(
 							testDataValueSelection.testDataSelectionLabel,
-							testDataValueSelection.testDataCheckGroup)
+							nil, nil, nil,
+							testDataCheckGroupContainer)
 
 						// Add 'tempTestDataColumnContainer' to 'testDataValuesSelectionContainer'
 						testDataValuesSelectionContainer.Add(tempTestDataColumnContainer)
+
 					}
 				}
 			}
@@ -197,11 +226,22 @@ func showNewOrEditGroupWindow(
 	var searchTestDataButton *widget.Button
 	searchTestDataButton = widget.NewButton("Search for TestDataPoints", func() {
 
+		//var searchResult []string
+
 	})
 
 	// Create Clear checkboxes-button
 	var clearTestDataFilterCheckBoxesButton *widget.Button
 	clearTestDataFilterCheckBoxesButton = widget.NewButton("Clear checkboxes", func() {
+
+		selected := []string{}
+
+		// Loop all Columns and clear all checkboxes in the CheckGroups
+		for _, testDataValueSelection := range testDataValueSelections {
+
+			testDataValueSelection.testDataCheckGroup.SetSelected(selected)
+
+		}
 
 	})
 
@@ -210,7 +250,7 @@ func showNewOrEditGroupWindow(
 	searchAndClearButtonsContainer = container.NewHBox(searchTestDataButton, clearTestDataFilterCheckBoxesButton)
 
 	// Sample data for demonstration
-	allPoints := []string{"Point_1", "Point_2", "Point_3", "Point_4", "Point_5", "Point_6", "Point_7", "Point_8", "Point_9", "Point_10"}
+	filteredTestDataPoints = []string{} // {"Point_1", "Point_2", "Point_3", "Point_4", "Point_5", "Point_6", "Point_7", "Point_8", "Point_9", "Point_10"}
 	var allPointsAvailable []string
 	var allSelectedPoints []string
 
@@ -231,7 +271,7 @@ func showNewOrEditGroupWindow(
 
 	// Create the list that holds all points that are available to chose from
 	// Create the list that holds all points that are chosen
-	for _, point := range allPoints {
+	for _, point := range filteredTestDataPoints {
 
 		// Check if the point exists in the map with chosen points
 		_, existsInMap = selectedPoints[testDataPointUuidType(point)]
