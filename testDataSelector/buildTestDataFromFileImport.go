@@ -11,7 +11,7 @@ const (
 	testDataAreaName   TestDataAreaNameType   = "Main TestData Area"
 )
 
-func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDataDomainUuidType]*TestDataDomainModeStruct {
+func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDataDomainUuidType]*TestDataDomainModelStruct {
 
 	// Define a namespace UUID; this could be any valid UUID that you choose to use as a namespace for your IDs.
 	// Here, we use the DNS namespace provided by the UUID package for demonstration purposes.
@@ -21,8 +21,8 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 	testDataHeaders = headers
 
 	// Initialize your map
-	var testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModeStruct
-	testDataModelMap = make(map[TestDataDomainUuidType]*TestDataDomainModeStruct)
+	var testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
+	testDataModelMap = make(map[TestDataDomainUuidType]*TestDataDomainModelStruct)
 
 	// Keeping track of all TestDataPoints for each Column
 	var testDataPointsForColumns [][]*TestDataPointValueStruct
@@ -57,8 +57,8 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 	var tempTestDataAreasMap map[TestDataAreaUuidType]*TestDataAreaStruct
 	tempTestDataAreasMap = make(map[TestDataAreaUuidType]*TestDataAreaStruct)
 
-	var tempTestDataDomainModel TestDataDomainModeStruct
-	tempTestDataDomainModel = TestDataDomainModeStruct{
+	var tempTestDataDomainModel TestDataDomainModelStruct
+	tempTestDataDomainModel = TestDataDomainModelStruct{
 		TestDataDomainUuid: testDataDomainUuid,
 		TestDataDomainName: testDataDomainName,
 		TestDataAreasMap:   &tempTestDataAreasMap,

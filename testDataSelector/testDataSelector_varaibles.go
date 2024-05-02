@@ -4,11 +4,11 @@ import "fyne.io/fyne/v2/widget"
 
 // TestDataModelMapType
 // Model holding Testdata for one or more Domains
-type TestDataModelMapType map[TestDataDomainUuidType]*TestDataDomainModeStruct
+type TestDataModelMapType map[TestDataDomainUuidType]*TestDataDomainModelStruct
 
-// TestDataDomainModeStruct
+// TestDataDomainModelStruct
 // DataData for one Domain
-type TestDataDomainModeStruct struct {
+type TestDataDomainModelStruct struct {
 	TestDataDomainUuid TestDataDomainUuidType
 	TestDataDomainName TestDataDomainNameType
 	TestDataAreasMap   *map[TestDataAreaUuidType]*TestDataAreaStruct
@@ -105,7 +105,7 @@ type TestDataValueNameType string
 
 // The slices for Groups ans TestDataPoints for a Group
 var testDataPointGroups []testDataPointGroupNameType // Define testDataPointGroups
-var testDataPointsForAGroup []testDataPointNameType  // Define testDataPointGroups
+var testDataPointsForAGroup []testDataPointUuidType  // Define testDataPointGroups
 
 // The List-items for Groups ans TestDataPoints for a Group
 var testDataPointGroupsList *widget.List
@@ -123,10 +123,20 @@ var testDataPointsForAGroupSelect *widget.Select
 var chosenTestDataPointsPerGroupMap map[testDataPointGroupNameType]*testDataPointNameMapType
 
 // Types used for data structures
+type testDataPointUuidType string
 type testDataPointNameType string
+type testDataPointNameDescriptionType string
+type testDatapointValueType string
+type testDataPointStruct struct {
+	testDataPointUuid            testDataPointUuidType
+	testDataPointName            testDataPointNameType
+	testDataPointNameDescription testDataPointNameDescriptionType
+	testDatapointValue           testDatapointValueType
+}
 type testDataPointGroupNameType string
-type testDataPointNameMapType map[testDataPointNameType]testDataPointNameType
+type testDataPointNameMapType map[testDataPointUuidType]testDataPointStruct
 
+// Error/warning texts for control of Group Name
 const (
 	groupNameIsUnique                  string = "Group name is OK!"
 	groupNameIsNotUnique               string = "Group name already exists!"
@@ -134,6 +144,7 @@ const (
 	groupNameCanNotStartOrEndWithSpace string = "Group name can not start or end with a space"
 )
 
+// Message sent back when a Group is Created or is Edited
 type responseChannelStruct struct {
 	shouldBeUpdated        bool
 	testDataPointGroupName testDataPointGroupNameType

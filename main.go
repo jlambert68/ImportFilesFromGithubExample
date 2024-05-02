@@ -5,7 +5,6 @@ import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
 	"ImportFilesFromGithub/luaScriptEngine"
 	"ImportFilesFromGithub/testDataSelector"
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -16,6 +15,9 @@ import (
 )
 
 func main() {
+
+	var testDataModelMapPtr *map[testDataSelector.TestDataDomainUuidType]*testDataSelector.TestDataDomainModelStruct
+	testDataModelMapPtr = testDataSelector.ImportTestData()
 
 	var err error
 	// Initiate Lua Script Engine
@@ -64,7 +66,8 @@ func main() {
 		myMainWindow.Hide()
 		testDataSelector.MainTestDataSelector(
 			myApp,
-			myMainWindow)
+			myMainWindow,
+			testDataModelMapPtr)
 	})
 
 	//inputText := "This is {{bold}} text and this is {{also bold}} and this normal again."
@@ -83,11 +86,6 @@ func main() {
 	)
 
 	buttonContainer := container.NewVBox(githubFilesImporterButton, filesViewerButton, openTestDataWindow)
-
-	var testDataModelMapPtr *map[testDataSelector.TestDataDomainUuidType]*testDataSelector.TestDataDomainModeStruct
-	testDataModelMapPtr = testDataSelector.ImportTestData()
-
-	fmt.Println(testDataModelMapPtr)
 
 	var files []importFilesFromGitHub.GitHubFile
 	files = []importFilesFromGitHub.GitHubFile{}

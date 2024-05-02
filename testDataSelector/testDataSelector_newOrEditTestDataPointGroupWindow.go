@@ -1,9 +1,15 @@
 package testDataSelector
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+)
+
+const (
+	testDataDomainLabelText   string = "Available Domains for TestData"
+	testDataTestAreaLabelText string = "Available TestAreas for domain "
 )
 
 func showNewOrEditGroupWindow(
@@ -12,7 +18,8 @@ func showNewOrEditGroupWindow(
 	isNew bool,
 	responseChannel *chan responseChannelStruct,
 	incomingGroupName testDataPointGroupNameType,
-	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataPointGroupNameType]*testDataPointNameMapType) {
+	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataPointGroupNameType]*testDataPointNameMapType,
+	testDataModelMap *map[TestDataDomainUuidType]*TestDataDomainModelStruct) {
 
 	parent.Hide()
 
@@ -35,6 +42,79 @@ func showNewOrEditGroupWindow(
 		parent.Show()
 		*responseChannel <- shouldUpdateMainWindow
 	})
+
+	// *** Create the selection boxes for selecting TestDataValues values
+	var testDataSelectionsContainer *fyne.Container
+
+	var domainOptions []string
+	var domains []*TestDataDomainModelStruct
+	var domainsLabel *widget.Label
+	var domainsSelect *widget.Select
+	var testDomainContainer *fyne.Container
+	var testAreaOptions []string
+	var testAreas []*TestDataAreaStruct
+	var testAreasLabel *widget.Label
+	var testAreaSelect *widget.Select
+	var testAreasContainer *fyne.Container
+	var testAreaMap *map[TestDataAreaUuidType]*TestDataAreaStruct
+
+	// Create label for Domains
+	domainsLabel.SetText(testDataDomainLabelText)
+
+	// Extract TestData on Domain-level
+	for _, tempTestDataDomainModel := range *testDataModelMap {
+		domainOptions = append(domainOptions, string(tempTestDataDomainModel.TestDataDomainName))
+		domains = append(domains, tempTestDataDomainModel)
+	}
+
+	// Create Domain-Select-DropDown
+	domainsSelect = widget.NewSelect(domainOptions, func(selected string) {
+
+		// Extract correct TestArea
+		for index, domain := range domains {
+			if selected == string(domain.TestDataDomainName) {
+				testAreaMap = domains[index].TestDataAreasMap
+				break
+			}
+		}
+
+		// Extract TestData on TestArea Level
+		for _, tempTestDataArea := range *testAreaMap {
+			testAreaOptions = append(testAreaOptions, string(tempTestDataArea.TestDataAreaName))
+			testAreas = append(testAreas, tempTestDataArea)
+		}
+
+		// Create TestArea-Select-DropDown
+		testAreaSelect = widget.NewSelect(testAreaOptions, func(selected string) {
+
+		})
+
+		// Set label for TestAreas
+		testAreasLabel.SetText(fmt.Sprintf(testDataTestAreaLabelText+"'%s'", domainOptions[0]))
+
+		// If there is only one item in TestArea-item then select that one
+		if len(testAreaOptions) == 1 {
+			testAreaSelect.SetSelected(testAreaOptions[0])
+			testAreaSelect.Refresh()
+		}
+
+	})
+
+	// If there is only one item in Domains-dropdown then select that one
+	if len(domainOptions) == 1 {
+		domainsSelect.SetSelected(domainOptions[0])
+		domainsSelect.Refresh()
+
+		// Set label for TestAreas
+		testAreasLabel.SetText(fmt.Sprintf(testDataTestAreaLabelText+"'%s'", domainOptions[0]))
+	}
+
+	// Create the separet TestData-selection-containers
+	testDomainContainer = container.NewVBox(domainsLabel, domainsSelect)
+	testDomainContainer = container.NewVBox(testAreasLabel, testAreaSelect)
+
+	// Create the main TestData-selection-container
+	testDataSelectionsContainer = container.NewHBox(testDomainContainer, testAreasContainer)
 
 	// Sample data for demonstration
 	allPoints := []string{"Point_1", "Point_2", "Point_3", "Point_4", "Point_5", "Point_6", "Point_7", "Point_8", "Point_9", "Point_10"}
@@ -61,7 +141,7 @@ func showNewOrEditGroupWindow(
 	for _, point := range allPoints {
 
 		// Check if the point exists in the map with chosen points
-		_, existsInMap = selectedPoints[testDataPointNameType(point)]
+		_, existsInMap = selectedPoints[testDataPointUuidType(point)]
 		if existsInMap == false {
 			// Add it to the list of available points
 			allPointsAvailable = append(allPointsAvailable, point)
@@ -129,7 +209,7 @@ func showNewOrEditGroupWindow(
 
 		// Loop all points and add them the 'newTestDataPointNameMap'
 		for _, selectedPoint := range allSelectedPoints {
-			newTestDataPointNameMap[testDataPointNameType(selectedPoint)] = testDataPointNameType(selectedPoint)
+			newTestDataPointNameMap[testDataPointUuidType(selectedPoint)] = testDataPointUuidType(selectedPoint)
 		}
 
 		// When GroupName is changed and the Group is in 'Edit'-mode the remove the old Group
@@ -179,7 +259,7 @@ func showNewOrEditGroupWindow(
 	listsSplitContainer := container.NewHSplit(allAvailablePointsList, selectedPointsList)
 	buttonsContainer := container.NewHBox(saveButton, cancelButton)
 	entryContainer := container.NewBorder(nil, nil, nil, nameStatusLabel, nameEntry)
-	content := container.NewBorder(container.NewVBox(entryContainer, buttonsContainer), nil, nil, nil, listsSplitContainer)
+	content := container.NewBorder(container.NewVBox(entryContainer, buttonsContainer, testDataSelectionsContainer), nil, nil, nil, listsSplitContainer)
 
 	newOrEditTestDataPointGroupWindow.SetContent(content)
 	newOrEditTestDataPointGroupWindow.Show()
