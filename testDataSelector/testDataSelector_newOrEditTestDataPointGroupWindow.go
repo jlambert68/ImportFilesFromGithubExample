@@ -51,12 +51,21 @@ func showNewOrEditGroupWindow(
 	var domainsLabel *widget.Label
 	var domainsSelect *widget.Select
 	var testDomainContainer *fyne.Container
+
 	var testAreaOptions []string
 	var testAreas []*TestDataAreaStruct
 	var testAreasLabel *widget.Label
 	var testAreaSelect *widget.Select
 	var testAreasContainer *fyne.Container
 	var testAreaMap *map[TestDataAreaUuidType]*TestDataAreaStruct
+
+	type testDataValueSelectionStruct struct {
+		testDataSelectionLabel *widget.Label
+		testDataCheckGroup     *widget.CheckGroup
+	}
+	var testDataValueSelections []*testDataValueSelectionStruct
+	var testDataValuesSelectionContainer *fyne.Container
+	testDataValuesSelectionContainer = container.NewHBox()
 
 	// Create label for Domains
 	domainsLabel.SetText(testDataDomainLabelText)
@@ -87,6 +96,61 @@ func showNewOrEditGroupWindow(
 		// Create TestArea-Select-DropDown
 		testAreaSelect = widget.NewSelect(testAreaOptions, func(selected string) {
 
+			// Create available TestDataSelections for TestArea
+			for _, testDataArea := range *testAreaMap {
+
+				// Loop 'TestDataColumnsMetaDataMap' for Columns to present
+				for _, testDataColumnsMetaData := range *testDataArea.TestDataColumnsMetaDataMap {
+
+					// Check if column should be used for filtering TestData
+					if testDataColumnsMetaData.ShouldColumnBeUsedForFindingTestData == true {
+
+						var checkGroupOptions []string
+						var tempTestDataColumnContainer *fyne.Container
+
+						// Set Label
+						var testDataValueSelection *testDataValueSelectionStruct
+						testDataValueSelection = &testDataValueSelectionStruct{
+							testDataSelectionLabel: widget.NewLabel(string(testDataColumnsMetaData.TestDataColumnUIName)),
+							testDataCheckGroup:     nil,
+						}
+
+						// Loop Values in Column and create Checkboxes
+						for _, uniqueTestDataValuesForColumnMapPtr := range *testDataArea.UniqueTestDataValuesForColumnMap {
+
+							for _, uniqueTestDataValue := range *uniqueTestDataValuesForColumnMapPtr {
+
+								// Add value to slice for CheckBox-labels
+								checkGroupOptions = append(checkGroupOptions, string(uniqueTestDataValue))
+
+							}
+						}
+
+						// Create the CheckGroup
+						var tempTestDataCheckGroup *widget.CheckGroup
+						tempTestDataCheckGroup = widget.NewCheckGroup(checkGroupOptions, func(changed []string) {
+							// Handle check change
+						})
+
+						// Add the CheckGroup
+						testDataValueSelection.testDataCheckGroup = tempTestDataCheckGroup
+
+						// Add 'testDataValueSelections' to slice
+						testDataValueSelections = append(testDataValueSelections, testDataValueSelection)
+
+						// Add to TestDataColumn-container
+						tempTestDataColumnContainer = container.NewVBox(
+							testDataValueSelection.testDataSelectionLabel,
+							testDataValueSelection.testDataCheckGroup)
+
+						// Add 'tempTestDataColumnContainer' to 'testDataValuesSelectionContainer'
+						testDataValuesSelectionContainer.Add(tempTestDataColumnContainer)
+					}
+
+				}
+
+			}
+
 		})
 
 		// Set label for TestAreas
@@ -109,12 +173,14 @@ func showNewOrEditGroupWindow(
 		testAreasLabel.SetText(fmt.Sprintf(testDataTestAreaLabelText+"'%s'", domainOptions[0]))
 	}
 
-	// Create the separet TestData-selection-containers
+	//
+
+	// Create the separate TestData-selection-containers
 	testDomainContainer = container.NewVBox(domainsLabel, domainsSelect)
 	testDomainContainer = container.NewVBox(testAreasLabel, testAreaSelect)
 
 	// Create the main TestData-selection-container
-	testDataSelectionsContainer = container.NewHBox(testDomainContainer, testAreasContainer)
+	testDataSelectionsContainer = container.NewHBox(testDomainContainer, testAreasContainer, testDataValuesSelectionContainer)
 
 	// Sample data for demonstration
 	allPoints := []string{"Point_1", "Point_2", "Point_3", "Point_4", "Point_5", "Point_6", "Point_7", "Point_8", "Point_9", "Point_10"}
