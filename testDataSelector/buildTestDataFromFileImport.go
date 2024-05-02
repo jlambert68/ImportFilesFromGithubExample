@@ -4,14 +4,6 @@ import (
 	uuidGenerator "github.com/google/uuid"
 )
 
-// ... (All your type definitions here)
-
-// Placeholder function to generate domain UUID from domain name
-func getDomainUUID(domainName string) TestDataDomainUuidType {
-	// In a real application, you would have a proper mechanism to generate or retrieve UUIDs
-	return TestDataDomainUuidType("domain-uuid-" + domainName)
-}
-
 const (
 	testDataDomainUuid TestDataDomainUuidType = "7edf2269-a8d3-472c-aed6-8cdcc4a8b6ae"
 	testDataDomainName TestDataDomainNameType = "Sub Custody"
@@ -40,10 +32,12 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 	var tempTestDataValuesForColumnMap map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnAndRowUuidMap map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	var tempTestDataColumnsMetaDataMap map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
+	var tempUniqueTestDataValuesForColumnMap map[TestDataColumnUuidType]*map[TestDataValueType]TestDataValueType
 	tempTestDataValuesForRowMap = make(map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnAndRowUuidMap = make(map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct)
 	tempTestDataColumnsMetaDataMap = make(map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct)
+	tempUniqueTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*map[TestDataValueType]TestDataValueType)
 
 	// TestData for one Area within one Domain
 	var testDataArea *TestDataAreaStruct
@@ -56,6 +50,7 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		TestDataValuesForColumnMap:           &tempTestDataValuesForColumnMap,
 		TestDataValuesForColumnAndRowUuidMap: &tempTestDataValuesForColumnAndRowUuidMap,
 		TestDataColumnsMetaDataMap:           &tempTestDataColumnsMetaDataMap,
+		UniqueTestDataValuesForColumnMap:     &tempUniqueTestDataValuesForColumnMap,
 	}
 
 	// Create the TestDataAreaMap and TestData for Area
@@ -167,6 +162,19 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 
 		tempTestDataColumnUuid = testDataPointsForColumn[0].TestDataColumnUuid
 		tempTestDataValuesForColumnMap[tempTestDataColumnUuid] = &testDataPointsForColumn
+
+		// initialized the 'inner' map for unique values in the column
+		var innerMapWithUniqueColumnValues map[TestDataValueType]TestDataValueType
+		innerMapWithUniqueColumnValues = make(map[TestDataValueType]TestDataValueType)
+
+		// Loop all Column data and add to the 'inner' Map, witch will create a map with only one value per occurrence of the value
+		tempTestDataValuesForColumnMap[tempTestDataColumnUuid] = &testDataPointsForColumn
+		for _, testDataPoint := range testDataPointsForColumn {
+			innerMapWithUniqueColumnValues[testDataPoint.TestDataValue] = testDataPoint.TestDataValue
+		}
+
+		// Add the 'inner' map to the Column-Map
+		tempUniqueTestDataValuesForColumnMap[tempTestDataColumnUuid] = &innerMapWithUniqueColumnValues
 
 		// Create column MetaData
 		var tempTestDataColumnMetaDataStruct *TestDataColumnMetaDataStruct
