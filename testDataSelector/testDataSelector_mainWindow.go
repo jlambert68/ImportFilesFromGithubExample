@@ -112,19 +112,6 @@ func MainTestDataSelector(
 		testDataPointsForAGroupList.UnselectAll()
 		selectedIndexForGroupTestDataPoints = -1
 
-		/*
-			// When an option is selected, update the second dropdown options
-			switch selected {
-			case "Fruits":
-				secondaryOptions.Set(fruitsOptions)
-			case "Colors":
-				secondaryOptions.Set(colorsOptions)
-			}
-
-			// Reset second dropdown's selection
-			secondarySelect.SetSelected("")
-
-		*/
 	})
 
 	// Create the Groups TestDataPoints dropdown

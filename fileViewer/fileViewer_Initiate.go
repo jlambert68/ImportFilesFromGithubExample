@@ -3,6 +3,7 @@ package fileViewer
 import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
 	"ImportFilesFromGithub/luaScriptEngine"
+	"ImportFilesFromGithub/testDataSelector"
 	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -21,6 +22,14 @@ func InitiateFileViewer(
 	// Disable the main window
 	mainWindow.Hide()
 
+	// The Select-items for Groups ans TestDataPoints for a Group
+	var testDataPointGroupsSelect *widget.Select
+	var testDataPointsForAGroupSelect *widget.Select
+
+	// The slices for Groups ans TestDataPoints for a Group
+	var testDataPointGroups []string     // Define testDataPointGroups
+	var testDataPointsForAGroup []string // Define testDataPointGroups
+
 	// Store reference to Fenix Main Window
 	fenixMainWindow = mainWindow
 
@@ -32,14 +41,14 @@ func InitiateFileViewer(
 	var leftContainer *fyne.Container
 	var rightContainer *fyne.Container
 
-	// Extract filenames for the dropdown
+	// Extract filenames for the fileSelectordropdown
 	var fileNames []string
 	for _, file := range *importedFilesPtr {
 		fileNames = append(fileNames, file.Name)
 	}
 
-	// Create UI components
-	dropdown := widget.NewSelect(fileNames, nil)
+	// Create UI component for 'fileSelectordropdown'
+	fileSelectordropdown := widget.NewSelect(fileNames, nil)
 	urlLabel := widget.NewLabel("")
 	var richText *widget.RichText
 	richText = &widget.RichText{
@@ -58,8 +67,8 @@ func InitiateFileViewer(
 		Truncation: 0,
 	}
 
-	// Set the dropdown change handler
-	dropdown.OnChanged = func(selected string) {
+	// Set the fileSelectordropdown change handler
+	fileSelectordropdown.OnChanged = func(selected string) {
 		for _, file := range *importedFilesPtr {
 			if file.Name == selected {
 				urlLabel.SetText(file.URL)
@@ -87,7 +96,49 @@ func InitiateFileViewer(
 		}
 	}
 
-	topContainer := container.NewVBox(dropdown, urlLabel)
+	// Create function that converts a GroupSlice into a string slice
+	getTestGroupsFromTestDataEngineFunction := func() []string {
+
+		testDataPointGroups = testDataSelector.ListTestDataGroups()
+
+		return testDataPointGroups
+	}
+
+	// Create function that converts a TestDataPointsSlice into a string slice
+	testDataPointsToStringSliceFunction := func(testDataGroup string) []string {
+
+		if testDataGroup == "" {
+			return []string{}
+		}
+
+		testDataPointsForAGroup = testDataSelector.ListTestDataGroupPointsForAGroup(testDataGroup)
+
+		return testDataPointsForAGroup
+	}
+
+	// Create the Group dropdown
+	var testDataPointGroupsSelectSelected string
+	testDataPointGroupsSelect = widget.NewSelect(getTestGroupsFromTestDataEngineFunction(), func(selected string) {
+
+		testDataPointGroupsSelectSelected = selected
+
+		// Select the correct TestDataPoint in the dropdown for TestDataPoints
+		testDataPointsForAGroupSelect.SetOptions(testDataPointsToStringSliceFunction(selected))
+		testDataPointsForAGroupSelect.Refresh()
+
+		// UnSelect in DropDown- and List for TestDataPoints
+		testDataPointsForAGroupSelect.ClearSelected()
+
+	})
+
+	// Create the Groups TestDataPoints dropdown
+	testDataPointsForAGroupSelect = widget.NewSelect(testDataPointsToStringSliceFunction(testDataPointGroupsSelectSelected), func(selected string) {
+
+	})
+
+	// Create UI component for 'TestDataGroupPointSelector'
+
+	topContainer := container.NewVBox(fileSelectordropdown, urlLabel, testDataPointGroupsSelect, testDataPointsForAGroupSelect)
 
 	// Placeholder for rightContainer - add your form view here
 	rightContainer = container.NewBorder(nil, nil, nil, nil, richTextWithValues)
