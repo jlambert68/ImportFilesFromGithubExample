@@ -348,19 +348,10 @@ func showNewOrEditGroupWindow(
 	var searchAndClearButtonsContainer *fyne.Container
 	searchAndClearButtonsContainer = container.NewHBox(searchTestDataButton, clearTestDataFilterCheckBoxesButton)
 
-	// Create the list that holds all points that are available to chose from
 	// Create the list that holds all points that are chosen
-	for _, point := range filteredTestDataPoints {
+	for _, point := range selectedPoints {
 
-		// Check if the point exists in the map with chosen points
-		_, existInMap = selectedPoints[testDataPointUuidType(point)]
-		if existInMap == false {
-			// Add it to the list of available points
-			allPointsAvailable = append(allPointsAvailable, point)
-
-		} else {
-			allSelectedPoints = append(allSelectedPoints, point)
-		}
+		allSelectedPoints = append(allSelectedPoints, string(point.testDataPointName))
 
 	}
 
@@ -387,7 +378,9 @@ func showNewOrEditGroupWindow(
 	)
 
 	// Functionality to add a point from 'allPointsAvailable' to 'allSelectedPoints'
+
 	allAvailablePointsList.OnSelected = func(id widget.ListItemID) {
+
 		allSelectedPoints = append(allSelectedPoints, allPointsAvailable[id])
 		allPointsAvailable = append(allPointsAvailable[:id], allPointsAvailable[id+1:]...)
 
@@ -400,7 +393,7 @@ func showNewOrEditGroupWindow(
 
 	// Functionality to remove a point from 'selectedPoints'
 	selectedPointsList.OnSelected = func(id widget.ListItemID) {
-		allPointsAvailable = append(allPointsAvailable, allSelectedPoints[id])
+		//allPointsAvailable = append(allPointsAvailable, allSelectedPoints[id])
 		allSelectedPoints = append(allSelectedPoints[:id], allSelectedPoints[id+1:]...)
 
 		selectedPointsList.UnselectAll()
