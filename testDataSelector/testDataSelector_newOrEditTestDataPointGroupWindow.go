@@ -24,8 +24,6 @@ func showNewOrEditGroupWindow(
 
 	parent.Hide()
 
-	var filteredTestDataPoints []string
-
 	var shouldUpdateMainWindow responseChannelStruct
 
 	var newOrEditedChosenTestDataPointsThisGroupMap map[testDataPointGroupNameType]*testDataPointNameMapType
@@ -46,6 +44,24 @@ func showNewOrEditGroupWindow(
 		*responseChannel <- shouldUpdateMainWindow
 	})
 
+	var existInMap bool
+
+	// Slices used to keep track of filtered, available and selected DataPoints
+	var filteredTestDataPoints []string
+	var allPointsAvailable []string
+	var allSelectedPoints []string
+
+	// If existing groupToEdit then extract points from it otherwise create an empty selected points slice
+	var selectedPointsPtr *testDataPointNameMapType
+	var selectedPoints testDataPointNameMapType
+
+	if isNew == false {
+
+		selectedPointsPtr = newOrEditedChosenTestDataPointsThisGroupMap[incomingGroupName]
+		selectedPoints = *selectedPointsPtr
+
+	}
+
 	// *** Create the selection boxes for selecting TestDataValues values
 	var testDataSelectionsContainer *fyne.Container
 
@@ -63,11 +79,11 @@ func showNewOrEditGroupWindow(
 	var testAreaMap *map[TestDataAreaUuidType]*TestDataAreaStruct
 
 	type testDataValueSelectionStruct struct {
-		testDataSelectionLabel *widget.Label
-		testDataCheckGroup     *widget.CheckGroup
-		TestDataColumnUuid     TestDataColumnUuidType
-		TestDataColumnDataName TestDataColumnDataNameType
-		TestDataPointRowUuid   *map[TestDataValueType][]TestDataPointRowUuidType
+		testDataSelectionLabel       *widget.Label
+		testDataCheckGroup           *widget.CheckGroup
+		TestDataColumnUuid           TestDataColumnUuidType
+		TestDataColumnDataName       TestDataColumnDataNameType
+		TestDataPointValueRowUuidMap *map[TestDataValueType]*[]TestDataPointRowUuidType
 	}
 	var testDataValueSelections []*testDataValueSelectionStruct
 	var testDataValuesSelectionContainer *fyne.Container
@@ -123,10 +139,10 @@ func showNewOrEditGroupWindow(
 					return testDataColumnsMetaDataToBeSorted[i].TestDataColumnUIName < testDataColumnsMetaDataToBeSorted[j].TestDataColumnUIName
 				})
 
-				// Loop 'testDataColumnsMetaDataToBeSorted' for Columns to present
+				// Loop 'testDataColumnsMetaDataToBeSorted' for Columns to present as separate CheckGroups
 				for _, testDataColumnsMetaData := range testDataColumnsMetaDataToBeSorted {
 
-					// Check if column should be used for filtering TestData
+					// Check if column should be used for filtering TestData as a CheckGroup
 					if testDataColumnsMetaData.ShouldColumnBeUsedForFindingTestData == true {
 
 						var checkGroupOptions []string
@@ -137,13 +153,16 @@ func showNewOrEditGroupWindow(
 						newColumnFilterLabel = widget.NewLabel(string(testDataColumnsMetaData.TestDataColumnUIName))
 						newColumnFilterLabel.TextStyle.Bold = true
 
+						var tempTestDataPointValueRowUuidMap map[TestDataValueType]*[]TestDataPointRowUuidType
+						tempTestDataPointValueRowUuidMap = make(map[TestDataValueType]*[]TestDataPointRowUuidType)
+
 						var testDataValueSelection *testDataValueSelectionStruct
 						testDataValueSelection = &testDataValueSelectionStruct{
-							testDataSelectionLabel: newColumnFilterLabel,
-							testDataCheckGroup:     nil,
-							TestDataColumnUuid:     testDataColumnsMetaData.TestDataColumnUuid,
-							TestDataColumnDataName: testDataColumnsMetaData.TestDataColumnDataName,
-							TestDataPointRowUuid:   nil,
+							testDataSelectionLabel:       newColumnFilterLabel,
+							testDataCheckGroup:           nil,
+							TestDataColumnUuid:           testDataColumnsMetaData.TestDataColumnUuid,
+							TestDataColumnDataName:       testDataColumnsMetaData.TestDataColumnDataName,
+							TestDataPointValueRowUuidMap: &tempTestDataPointValueRowUuidMap,
 						}
 
 						// Extract the Map with the values
@@ -152,14 +171,27 @@ func showNewOrEditGroupWindow(
 
 						uniqueTestDataValuesForColumnMapPtr = UniqueTestDataValuesForColumnMap[testDataColumnsMetaData.TestDataColumnUuid]
 
-						// Loop Values in Column and create Checkboxes
+						// Loop Values in Column and create Checkboxes, and store RowUuids for unique values
 						for uniqueTestDataValue, testDataPointRowsUuid := range *uniqueTestDataValuesForColumnMapPtr {
 
 							// Add value to slice for CheckBox-labels
 							checkGroupOptions = append(checkGroupOptions, string(uniqueTestDataValue))
 
-							// Add existing slice with 'TestDataPointRowsUuid'
-							testDataValueSelection.TestDataPointRowUuid = append(testDataValueSelection.TestDataPointRowUuid, testDataPointRowsUuid...)
+							// Add 'TestDataPointRowUuid' to correct slice for each unique value in the column
+							var testDataPointRowUuidSlicePtr *[]TestDataPointRowUuidType
+							var testDataPointRowUuidSlice []TestDataPointRowUuidType
+							testDataPointRowUuidSlicePtr, existInMap = tempTestDataPointValueRowUuidMap[uniqueTestDataValue]
+
+							if existInMap == false {
+								var tempTestDataPointRowUuidSlice []TestDataPointRowUuidType
+								testDataPointRowUuidSlice = tempTestDataPointRowUuidSlice
+							} else {
+								testDataPointRowUuidSlice = *testDataPointRowUuidSlicePtr
+							}
+
+							testDataPointRowUuidSlice = append(testDataPointRowUuidSlice, testDataPointRowsUuid...)
+
+							tempTestDataPointValueRowUuidMap[uniqueTestDataValue] = &testDataPointRowUuidSlice
 
 						}
 
@@ -243,24 +275,56 @@ func showNewOrEditGroupWindow(
 			selectedCheckBoxes = testDataValueSelection.testDataCheckGroup.Selected
 
 			// Extract 'TestDataPointRowUuid' for the Selected CheckBox-value-rows
-			var testDataPointRowUuidMap map[TestDataValueType][]TestDataPointRowUuidType
-			testDataPointRowUuidMap = *testDataValueSelection.TestDataPointRowUuid
+			var testDataPointRowUuidMap map[TestDataValueType]*[]TestDataPointRowUuidType
+			testDataPointRowUuidMap = *testDataValueSelection.TestDataPointValueRowUuidMap
 
 			var testDataPointRowsUuid []TestDataPointRowUuidType
 
 			for _, selectedCheckBox := range selectedCheckBoxes {
 				tempTestDataPointRowsUuid, _ := testDataPointRowUuidMap[TestDataValueType(selectedCheckBox)]
 
-				testDataPointRowsUuid = append(testDataPointRowsUuid, tempTestDataPointRowsUuid...)
+				testDataPointRowsUuid = append(testDataPointRowsUuid, *tempTestDataPointRowsUuid...)
 			}
 
 			searchResult = append(searchResult, testDataPointRowsUuid...)
 
 		}
 
+		var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
+		var tempTestDataDomainModel TestDataDomainModelStruct
+		var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
+		var tempTestDataArea TestDataAreaStruct
+		var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+		var tempTestDataPointValueSlice []*TestDataPointValueStruct
+
+		tempTestDataModelMap = *testDataModelMap
+		tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
+		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
+		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
+		tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
+
 		// Convert into []string
 		for _, testDataPointRowUuid := range searchResult {
-			filteredTestDataPoints = append(filteredTestDataPoints, string(testDataPointRowUuid))
+
+			tempTestDataPointValueSlice = *tempTestDataValuesForRowMap[testDataPointRowUuid]
+
+			filteredTestDataPoints = append(filteredTestDataPoints, string(tempTestDataPointValueSlice[0].TestDataValueName))
+		}
+
+		// Create the list that holds all points that are available to chose from
+		// Create the list that holds all points that are chosen
+		for _, point := range filteredTestDataPoints {
+
+			// Check if the point exists in the map with chosen points
+			_, existInMap = selectedPoints[testDataPointUuidType(point)]
+			if existInMap == false {
+				// Add it to the list of available points
+				allPointsAvailable = append(allPointsAvailable, point)
+
+			} else {
+				allSelectedPoints = append(allSelectedPoints, point)
+			}
+
 		}
 
 	})
@@ -284,33 +348,13 @@ func showNewOrEditGroupWindow(
 	var searchAndClearButtonsContainer *fyne.Container
 	searchAndClearButtonsContainer = container.NewHBox(searchTestDataButton, clearTestDataFilterCheckBoxesButton)
 
-	// Sample data for demonstration
-	filteredTestDataPoints = []string{} // {"Point_1", "Point_2", "Point_3", "Point_4", "Point_5", "Point_6", "Point_7", "Point_8", "Point_9", "Point_10"}
-	var allPointsAvailable []string
-	var allSelectedPoints []string
-
-	var existsInMap bool
-
-	// If existing groupToEdit then extract points from it otherwise create an empty selected points slice
-	var selectedPointsPtr *testDataPointNameMapType
-	var selectedPoints testDataPointNameMapType
-
-	if isNew == false {
-
-		selectedPointsPtr = newOrEditedChosenTestDataPointsThisGroupMap[incomingGroupName]
-		selectedPoints = *selectedPointsPtr
-
-	} else {
-
-	}
-
 	// Create the list that holds all points that are available to chose from
 	// Create the list that holds all points that are chosen
 	for _, point := range filteredTestDataPoints {
 
 		// Check if the point exists in the map with chosen points
-		_, existsInMap = selectedPoints[testDataPointUuidType(point)]
-		if existsInMap == false {
+		_, existInMap = selectedPoints[testDataPointUuidType(point)]
+		if existInMap == false {
 			// Add it to the list of available points
 			allPointsAvailable = append(allPointsAvailable, point)
 
