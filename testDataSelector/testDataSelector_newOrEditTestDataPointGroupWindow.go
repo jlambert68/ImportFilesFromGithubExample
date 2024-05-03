@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"sort"
+	"strings"
 )
 
 const (
@@ -50,6 +51,9 @@ func showNewOrEditGroupWindow(
 	var filteredTestDataPoints []string
 	var allPointsAvailable []string
 	var allSelectedPoints []string
+
+	// The List-widget holding all available TestDataPoints from Search
+	var allAvailablePointsList *widget.List
 
 	// If existing groupToEdit then extract points from it otherwise create an empty selected points slice
 	var selectedPointsPtr *testDataPointNameMapType
@@ -265,6 +269,7 @@ func showNewOrEditGroupWindow(
 	var searchTestDataButton *widget.Button
 	searchTestDataButton = widget.NewButton("Search for TestDataPoints", func() {
 
+		//var allTestDataPointRowsUuid []TestDataPointRowUuidType
 		var searchResult []TestDataPointRowUuidType
 
 		// Loop all Columns and extract selected checkboxes in the CheckGroups
@@ -284,10 +289,17 @@ func showNewOrEditGroupWindow(
 				tempTestDataPointRowsUuid, _ := testDataPointRowUuidMap[TestDataValueType(selectedCheckBox)]
 
 				testDataPointRowsUuid = append(testDataPointRowsUuid, *tempTestDataPointRowsUuid...)
+
 			}
 
-			searchResult = append(searchResult, testDataPointRowsUuid...)
-
+			if testDataPointRowsUuid != nil {
+				if len(searchResult) == 0 {
+					searchResult = testDataPointRowsUuid
+				} else {
+					intersectionSlice := testDataPointIntersectionOfTwoSlices(searchResult, testDataPointRowsUuid)
+					searchResult = intersectionSlice
+				}
+			}
 		}
 
 		var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
@@ -303,7 +315,8 @@ func showNewOrEditGroupWindow(
 		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
 		tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
 
-		// Convert into []string
+		// Convert into all 'TestDataValueName' in []string to be used in Available TestDataPoints-list
+		filteredTestDataPoints = nil
 		for _, testDataPointRowUuid := range searchResult {
 
 			tempTestDataPointValueSlice = *tempTestDataValuesForRowMap[testDataPointRowUuid]
@@ -313,19 +326,48 @@ func showNewOrEditGroupWindow(
 
 		// Create the list that holds all points that are available to chose from
 		// Create the list that holds all points that are chosen
+		allPointsAvailable = nil
+		var existInSelectedPoints bool
 		for _, point := range filteredTestDataPoints {
 
-			// Check if the point exists in the map with chosen points
-			_, existInMap = selectedPoints[testDataPointUuidType(point)]
-			if existInMap == false {
-				// Add it to the list of available points
+			// Add it to the list of available points, if it doesn't exist in the Selected-List
+			if len(allSelectedPoints) == 0 {
 				allPointsAvailable = append(allPointsAvailable, point)
-
 			} else {
-				allSelectedPoints = append(allSelectedPoints, point)
+				for _, selectedPoint := range allSelectedPoints {
+
+					if selectedPoint == point {
+						existInSelectedPoints = true
+						break
+					}
+					if existInSelectedPoints == false {
+						allPointsAvailable = append(allPointsAvailable, point)
+					} else {
+						existInSelectedPoints = false
+					}
+				}
+			}
+		}
+
+		// Custom sort: we sort by splitting each string into parts and comparing the parts
+		sort.Slice(allPointsAvailable, func(i, j int) bool {
+			// Split both strings by '/'
+			partsI := strings.Split(allPointsAvailable[i], "/")
+			partsJ := strings.Split(allPointsAvailable[j], "/")
+
+			// Compare each part; the first non-equal part determines the order
+			for k := 0; k < len(partsI) && k < len(partsJ); k++ {
+				if partsI[k] != partsJ[k] {
+					return partsI[k] < partsJ[k]
+				}
 			}
 
-		}
+			// If all compared parts are equal, but one slice is shorter, it comes first
+			return len(partsI) < len(partsJ)
+		})
+
+		// Refresh the List-widget
+		allAvailablePointsList.Refresh()
 
 	})
 
@@ -356,7 +398,7 @@ func showNewOrEditGroupWindow(
 	}
 
 	// Create and configure the list of all TestDataPoints
-	allAvailablePointsList := widget.NewList(
+	allAvailablePointsList = widget.NewList(
 		func() int { return len(allPointsAvailable) },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("")
@@ -562,4 +604,29 @@ func setStateForSaveButtonAndGroupNameTextEntry(
 			saveButton.Enable()
 		}
 	}
+}
+
+// testDataPointIntersectionOfTwoSlices returns a new slice containing only the elements that appear in both a and b.
+func testDataPointIntersectionOfTwoSlices(firstSlice, secondSlice []TestDataPointRowUuidType) []TestDataPointRowUuidType {
+	// Use firstSlice map to count occurrences of elements in the first slice
+	elemCount := make(map[TestDataPointRowUuidType]bool)
+
+	// Fill the map with elements from the first slice
+	for _, item := range firstSlice {
+		elemCount[item] = true
+	}
+
+	// Create firstSlice slice to hold the intersectionSlice
+	var intersectionSlice []TestDataPointRowUuidType
+
+	// Check each element in the second slice; if it's in the map, add to the intersectionSlice
+	for _, item := range secondSlice {
+		if _, found := elemCount[item]; found {
+			intersectionSlice = append(intersectionSlice, item)
+			// Optional: Remove item from map if you don't expect duplicates or don't need to count them
+			delete(elemCount, item)
+		}
+	}
+
+	return intersectionSlice
 }
