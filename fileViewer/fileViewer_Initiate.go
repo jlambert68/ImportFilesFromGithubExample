@@ -72,7 +72,10 @@ func InitiateFileViewer(
 	var testDataPointValues map[string]string
 
 	// Set the fileSelectordropdown change handler
+	var selectedFile string
 	fileSelectordropdown.OnChanged = func(selected string) {
+
+		selectedFile = selected
 
 		testDataPointValues = testDataSelector.GetTestDataPointValues(testDataPointsForAGroupSelectSelected)
 
@@ -141,6 +144,8 @@ func InitiateFileViewer(
 	testDataPointsForAGroupSelect = widget.NewSelect(testDataPointsToStringSliceFunction(testDataPointGroupsSelectSelected), func(selected string) {
 
 		testDataPointsForAGroupSelectSelected = selected
+
+		fileSelectordropdown.SetSelected(selectedFile)
 
 	})
 
@@ -336,21 +341,26 @@ func parseAndFormatText(inputText string, testDataPointValuesPtr *map[string]str
 			var newTextFromScriptEngine string
 			if strings.Contains(currentText, ".TestData.") == true {
 
+				// Filter out Start and End '{{' and '}}'
+
+				var testDataToReplace string
+				testDataToReplace = currentText[2 : len(currentText)-2]
+
 				var existInMap bool
 
 				// Substring to find
 				substr := ".TestData."
 
 				// Find the position of ".TestData."
-				pos := strings.Index(currentText, substr)
+				pos := strings.Index(testDataToReplace, substr)
 
 				// Extract the text to the right of ".TestData." if it exists
 				var testDataColumnDataName string
 				if pos != -1 {
 					// Adjust position to skip ".TestData."
 					start := pos + len(substr)
-					if start < len(currentText) {
-						testDataColumnDataName = currentText[start:]
+					if start < len(testDataToReplace) {
+						testDataColumnDataName = testDataToReplace[start:]
 					}
 				} else {
 					testDataColumnDataName = ""
