@@ -29,11 +29,13 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 
 	// Initiate the maps used
 	var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnMap map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnAndRowUuidMap map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	var tempTestDataColumnsMetaDataMap map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
 	var tempUniqueTestDataValuesForColumnMap map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType
 	tempTestDataValuesForRowMap = make(map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct)
+	tempTestDataValuesForRowNameMap = make(map[TestDataValueNameType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnAndRowUuidMap = make(map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct)
 	tempTestDataColumnsMetaDataMap = make(map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct)
@@ -47,6 +49,7 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		TestDataAreaUuid:                     testDataAreaUuid,
 		TestDataAreaName:                     testDataAreaName,
 		TestDataValuesForRowMap:              &tempTestDataValuesForRowMap,
+		TestDataValuesForRowNameMap:          &tempTestDataValuesForRowNameMap,
 		TestDataValuesForColumnMap:           &tempTestDataValuesForColumnMap,
 		TestDataValuesForColumnAndRowUuidMap: &tempTestDataValuesForColumnAndRowUuidMap,
 		TestDataColumnsMetaDataMap:           &tempTestDataColumnsMetaDataMap,
@@ -153,6 +156,9 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 
 		// Add 'testDataPointsForRow' to Map for TestDataPoints in one row
 		tempTestDataValuesForRowMap[TestDataPointRowUuidType(rowUuid.String())] = &testDataPointsForRow
+
+		// Add 'testDataPointsForRowName' to Map for TestDataPoints in one row
+		tempTestDataValuesForRowNameMap[TestDataValueNameType(testDataPointName)] = &testDataPointsForRow
 
 	}
 

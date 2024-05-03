@@ -25,6 +25,8 @@ func InitiateFileViewer(
 	// The Select-items for Groups ans TestDataPoints for a Group
 	var testDataPointGroupsSelect *widget.Select
 	var testDataPointsForAGroupSelect *widget.Select
+	var testDataPointGroupsSelectSelected string
+	var testDataPointsForAGroupSelectSelected string
 
 	// The slices for Groups ans TestDataPoints for a Group
 	var testDataPointGroups []string     // Define testDataPointGroups
@@ -67,8 +69,13 @@ func InitiateFileViewer(
 		Truncation: 0,
 	}
 
+	var testDataPointValues map[string]string
+
 	// Set the fileSelectordropdown change handler
 	fileSelectordropdown.OnChanged = func(selected string) {
+
+		testDataPointValues = testDataSelector.GetTestDataPointValues(testDataPointsForAGroupSelectSelected)
+
 		for _, file := range *importedFilesPtr {
 			if file.Name == selected {
 				urlLabel.SetText(file.URL)
@@ -76,7 +83,7 @@ func InitiateFileViewer(
 				myContainerObjects := leftContainer.Objects
 				for index, object := range myContainerObjects {
 					if object == richText {
-						richText, _ = parseAndFormatText(file.FileContentAsString)
+						richText, _ = parseAndFormatText(file.FileContentAsString, &testDataPointValues)
 						myContainerObjects[index] = richText
 						leftContainer.Refresh()
 					}
@@ -85,7 +92,7 @@ func InitiateFileViewer(
 				myContainerObjects = rightContainer.Objects
 				for index, object := range myContainerObjects {
 					if object == richTextWithValues {
-						_, richTextWithValues = parseAndFormatText(file.FileContentAsString)
+						_, richTextWithValues = parseAndFormatText(file.FileContentAsString, &testDataPointValues)
 						myContainerObjects[index] = richTextWithValues
 						rightContainer.Refresh()
 					}
@@ -117,7 +124,6 @@ func InitiateFileViewer(
 	}
 
 	// Create the Group dropdown
-	var testDataPointGroupsSelectSelected string
 	testDataPointGroupsSelect = widget.NewSelect(getTestGroupsFromTestDataEngineFunction(), func(selected string) {
 
 		testDataPointGroupsSelectSelected = selected
@@ -133,6 +139,8 @@ func InitiateFileViewer(
 
 	// Create the Groups TestDataPoints dropdown
 	testDataPointsForAGroupSelect = widget.NewSelect(testDataPointsToStringSliceFunction(testDataPointGroupsSelectSelected), func(selected string) {
+
+		testDataPointsForAGroupSelectSelected = selected
 
 	})
 
@@ -287,9 +295,12 @@ func match(text string) (mainScriptInputSlice []interface{}, err error) {
 	return mainScriptInputSlice, err
 }
 
-func parseAndFormatText(inputText string) (
+func parseAndFormatText(inputText string, testDataPointValuesPtr *map[string]string) (
 	tempRichText *widget.RichText,
 	tempRichTextWithValues *widget.RichText) {
+
+	var testDataPointValues map[string]string
+	testDataPointValues = *testDataPointValuesPtr
 
 	var segments []widget.RichTextSegment
 	var segmentsWithValues []widget.RichTextSegment
@@ -321,16 +332,50 @@ func parseAndFormatText(inputText string) (
 
 			// Add the styled text between {{ and }}
 			currentText = inputText[startIndex : endIndex+2] // +2 to include the closing braces
-			functionValueSlice, err := match(currentText)
+
 			var newTextFromScriptEngine string
-			if err == nil {
-				//newTextFromScriptEngine = tengoScriptExecuter.ExecuteScripte(functionValueSlice)
-				newTextFromScriptEngine = luaScriptEngine.ExecuteLuaScriptBasedOnPlaceholder(functionValueSlice, testCaseExecutionUuid)
+			if strings.Contains(currentText, ".TestData.") == true {
+
+				var existInMap bool
+
+				// Substring to find
+				substr := ".TestData."
+
+				// Find the position of ".TestData."
+				pos := strings.Index(currentText, substr)
+
+				// Extract the text to the right of ".TestData." if it exists
+				var testDataColumnDataName string
+				if pos != -1 {
+					// Adjust position to skip ".TestData."
+					start := pos + len(substr)
+					if start < len(currentText) {
+						testDataColumnDataName = currentText[start:]
+					}
+				} else {
+					testDataColumnDataName = ""
+				}
+
+				if testDataColumnDataName != "" {
+					newTextFromScriptEngine, existInMap = testDataPointValues[testDataColumnDataName]
+					if existInMap == false {
+						newTextFromScriptEngine = fmt.Sprintf("TestDataColumnDataName '%s' does not exist in the TestDataMap", testDataColumnDataName)
+					}
+
+				} else {
+					newTextFromScriptEngine = currentText + " - is not a correct TestData-reference"
+				}
 
 			} else {
-				newTextFromScriptEngine = err.Error()
-			}
+				functionValueSlice, err := match(currentText)
+				if err == nil {
+					//newTextFromScriptEngine = tengoScriptExecuter.ExecuteScripte(functionValueSlice)
+					newTextFromScriptEngine = luaScriptEngine.ExecuteLuaScriptBasedOnPlaceholder(functionValueSlice, testCaseExecutionUuid)
 
+				} else {
+					newTextFromScriptEngine = err.Error()
+				}
+			}
 			segments = append(segments, &widget.TextSegment{
 				Text: currentText,
 				Style: widget.RichTextStyle{

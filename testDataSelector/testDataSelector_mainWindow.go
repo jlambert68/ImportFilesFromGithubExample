@@ -19,12 +19,16 @@ func ImportTestData() (testDataModelMap *map[TestDataDomainUuidType]*TestDataDom
 	return testDataModelMap
 }
 
+var testDataModelMapRef *map[TestDataDomainUuidType]*TestDataDomainModelStruct
+
 func MainTestDataSelector(
 	app fyne.App,
 	parent fyne.Window,
 	testDataModelMapPtr *map[TestDataDomainUuidType]*TestDataDomainModelStruct) {
 
 	parent.Hide()
+
+	testDataModelMapRef = testDataModelMapPtr
 
 	myWindow := app.NewWindow("TestData Management")
 	myWindow.Resize(fyne.NewSize(600, 500))
