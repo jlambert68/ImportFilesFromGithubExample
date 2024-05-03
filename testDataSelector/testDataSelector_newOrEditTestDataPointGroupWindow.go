@@ -272,8 +272,30 @@ func showNewOrEditGroupWindow(
 		//var allTestDataPointRowsUuid []TestDataPointRowUuidType
 		var searchResult []TestDataPointRowUuidType
 
+		var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
+		var tempTestDataDomainModel TestDataDomainModelStruct
+		var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
+		var tempTestDataArea TestDataAreaStruct
+		var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+		var tempTestDataValuesForColumnAndRowUuidMap map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
+		var tempTestDataPointValueSlice []*TestDataPointValueStruct
+
+		tempTestDataModelMap = *testDataModelMap
+		tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
+		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
+		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
+		tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
+		tempTestDataValuesForColumnAndRowUuidMap = *tempTestDataArea.TestDataValuesForColumnAndRowUuidMap
+
+		var allTestDataPointRowsUuid []TestDataPointRowUuidType
+
+		// Loop all TestData and extract all rows
+		for _, tempTestDataPointValue := range tempTestDataValuesForColumnAndRowUuidMap {
+			allTestDataPointRowsUuid = append(allTestDataPointRowsUuid, tempTestDataPointValue.TestDataPointRowUuid)
+		}
+
 		// Loop all Columns and extract selected checkboxes in the CheckGroups
-		for _, testDataValueSelection := range testDataValueSelections {
+		for index, testDataValueSelection := range testDataValueSelections {
 
 			// Extract the Selected CheckBoxes
 			var selectedCheckBoxes []string
@@ -292,28 +314,17 @@ func showNewOrEditGroupWindow(
 
 			}
 
-			if testDataPointRowsUuid != nil {
-				if len(searchResult) == 0 {
-					searchResult = testDataPointRowsUuid
-				} else {
-					intersectionSlice := testDataPointIntersectionOfTwoSlices(searchResult, testDataPointRowsUuid)
-					searchResult = intersectionSlice
-				}
+			// Do intersection towards all rows for TestDataColumn
+			if index == 0 {
+
+				searchResult = testDataPointIntersectionOfTwoSlices(allTestDataPointRowsUuid, testDataPointRowsUuid)
+
+			} else {
+
+				searchResult = testDataPointIntersectionOfTwoSlices(searchResult, testDataPointRowsUuid)
 			}
+
 		}
-
-		var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
-		var tempTestDataDomainModel TestDataDomainModelStruct
-		var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
-		var tempTestDataArea TestDataAreaStruct
-		var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-		var tempTestDataPointValueSlice []*TestDataPointValueStruct
-
-		tempTestDataModelMap = *testDataModelMap
-		tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
-		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
-		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
-		tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
 
 		// Convert into all 'TestDataValueName' in []string to be used in Available TestDataPoints-list
 		filteredTestDataPoints = nil
