@@ -119,8 +119,8 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 				TestDataPointRowUuid:         TestDataPointRowUuidType(rowUuid.String()),
 				TestDataColumnAndRowUuid:     TestDataColumnAndRowUuidType(columnAndRowUuid.String()),
 				TestDataValue:                TestDataValueType(tempTestDataPoint),
-				TestDataValueNameDescription: "TestDataDomainName/TestDataAreaName",
-				TestDataValueName:            TestDataValueNameType(testDataDomainName) + "/" + TestDataValueNameType(testDataAreaName),
+				TestDataValueNameDescription: "TestDataDomainName/TestDataAreaName/",
+				TestDataValueName:            TestDataValueNameType(testDataDomainName) + "/" + TestDataValueNameType(testDataAreaName) + "/",
 			}
 
 			// Add TestDataPoint to 'testDataPointsForRow'
@@ -150,8 +150,8 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 
 		// Loop the Values in the row and add 'TestDataPointName'
 		for _, testDataPoint := range testDataPointsForRow {
-			testDataPoint.TestDataValueNameDescription = TestDataValueNameDescriptionType(testDataPointNameDescription)
-			testDataPoint.TestDataValueName = TestDataValueNameType(testDataPointName)
+			testDataPoint.TestDataValueNameDescription = testDataPoint.TestDataValueNameDescription + TestDataValueNameDescriptionType(testDataPointNameDescription)
+			testDataPoint.TestDataValueName = testDataPoint.TestDataValueName + TestDataValueNameType(testDataPointName)
 		}
 
 		// Add 'testDataPointsForRow' to Map for TestDataPoints in one row
