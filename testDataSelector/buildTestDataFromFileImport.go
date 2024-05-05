@@ -119,8 +119,8 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 				TestDataPointRowUuid:         TestDataPointRowUuidType(rowUuid.String()),
 				TestDataColumnAndRowUuid:     TestDataColumnAndRowUuidType(columnAndRowUuid.String()),
 				TestDataValue:                TestDataValueType(tempTestDataPoint),
-				TestDataValueNameDescription: "",
-				TestDataValueName:            "",
+				TestDataValueNameDescription: "TestDataDomainName/TestDataAreaName",
+				TestDataValueName:            TestDataValueNameType(testDataDomainName) + "/" + TestDataValueNameType(testDataAreaName),
 			}
 
 			// Add TestDataPoint to 'testDataPointsForRow'

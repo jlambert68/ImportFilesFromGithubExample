@@ -294,8 +294,10 @@ func showNewOrEditGroupWindow(
 			allTestDataPointRowsUuid = append(allTestDataPointRowsUuid, tempTestDataPointValue.TestDataPointRowUuid)
 		}
 
+		searchResult = allTestDataPointRowsUuid
+
 		// Loop all Columns and extract selected checkboxes in the CheckGroups
-		for index, testDataValueSelection := range testDataValueSelections {
+		for _, testDataValueSelection := range testDataValueSelections {
 
 			// Extract the Selected CheckBoxes
 			var selectedCheckBoxes []string
@@ -314,14 +316,11 @@ func showNewOrEditGroupWindow(
 
 			}
 
-			// Do intersection towards all rows for TestDataColumn
-			if index == 0 {
-
-				searchResult = testDataPointIntersectionOfTwoSlices(allTestDataPointRowsUuid, testDataPointRowsUuid)
-
-			} else {
+			// When there is only one column in 'testDataValueSelections' then intersect with full TestDataSet
+			if len(testDataPointRowsUuid) != 0 {
 
 				searchResult = testDataPointIntersectionOfTwoSlices(searchResult, testDataPointRowsUuid)
+
 			}
 
 		}
