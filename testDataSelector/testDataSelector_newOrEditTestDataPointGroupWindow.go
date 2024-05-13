@@ -277,7 +277,6 @@ func showNewOrEditGroupWindow(
 		var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
 		var tempTestDataArea TestDataAreaStruct
 		var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-		var tempTestDataValuesForColumnAndRowUuidMap map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 		var tempTestDataPointValueSlice []*TestDataPointValueStruct
 
 		tempTestDataModelMap = *testDataModelMap
@@ -285,13 +284,15 @@ func showNewOrEditGroupWindow(
 		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
 		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
 		tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
-		tempTestDataValuesForColumnAndRowUuidMap = *tempTestDataArea.TestDataValuesForColumnAndRowUuidMap
 
 		var allTestDataPointRowsUuid []TestDataPointRowUuidType
+		var tempTestDataValueNameToRowUuidMap map[TestDataValueNameType][]TestDataPointRowUuidType
+
+		tempTestDataValueNameToRowUuidMap = make(map[TestDataValueNameType][]TestDataPointRowUuidType)
 
 		// Loop all TestData and extract all rows
-		for _, tempTestDataPointValue := range tempTestDataValuesForColumnAndRowUuidMap {
-			allTestDataPointRowsUuid = append(allTestDataPointRowsUuid, tempTestDataPointValue.TestDataPointRowUuid)
+		for tempTestDataPointRowUuid, _ := range tempTestDataValuesForRowMap {
+			allTestDataPointRowsUuid = append(allTestDataPointRowsUuid, tempTestDataPointRowUuid)
 		}
 
 		searchResult = allTestDataPointRowsUuid
@@ -316,22 +317,31 @@ func showNewOrEditGroupWindow(
 
 			}
 
-			// When there is only one column in 'testDataValueSelections' then intersect with full TestDataSet
+			// Intersect with full TestDataSet to minimize the rows
 			if len(testDataPointRowsUuid) != 0 {
 
 				searchResult = testDataPointIntersectionOfTwoSlices(searchResult, testDataPointRowsUuid)
 
 			}
-
 		}
 
 		// Convert into all 'TestDataValueName' in []string to be used in Available TestDataPoints-list
 		filteredTestDataPoints = nil
+		var tempTestDataValueName string
 		for _, testDataPointRowUuid := range searchResult {
 
 			tempTestDataPointValueSlice = *tempTestDataValuesForRowMap[testDataPointRowUuid]
 
-			filteredTestDataPoints = append(filteredTestDataPoints, string(tempTestDataPointValueSlice[0].TestDataValueName))
+			tempTestDataValueName = string(tempTestDataPointValueSlice[0].TestDataValueName)
+
+			tempTestDataPointRowUuidSliceInMap, _ := tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)]
+			tempTestDataPointRowUuidSliceInMap = append(tempTestDataPointRowUuidSliceInMap, testDataPointRowUuid)
+			tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)] = tempTestDataPointRowUuidSliceInMap
+		}
+
+		for tempTestDataValueNameInMap, tempTestDataPointRowUuidSliceInMap := range tempTestDataValueNameToRowUuidMap {
+
+			filteredTestDataPoints = append(filteredTestDataPoints, fmt.Sprintf("%s [%d]", string(tempTestDataValueNameInMap), len(tempTestDataPointRowUuidSliceInMap)))
 		}
 
 		// Create the list that holds all points that are available to chose from
@@ -411,6 +421,7 @@ func showNewOrEditGroupWindow(
 	allAvailablePointsList = widget.NewList(
 		func() int { return len(allPointsAvailable) },
 		func() fyne.CanvasObject {
+
 			return widget.NewLabel("")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
