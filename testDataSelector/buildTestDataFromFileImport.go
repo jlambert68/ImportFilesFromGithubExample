@@ -11,7 +11,7 @@ const (
 	testDataAreaName   TestDataAreaNameType   = "Main TestData Area"
 )
 
-func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDataDomainUuidType]*TestDataDomainModelStruct {
+func buildTestDataMap(headers []string, testData []TestDataRowType) *TestDataModelStruct {
 
 	// Define a namespace UUID; this could be any valid UUID that you choose to use as a namespace for your IDs.
 	// Here, we use the DNS namespace provided by the UUID package for demonstration purposes.
@@ -19,6 +19,9 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 
 	var testDataHeaders TestDataRowType
 	testDataHeaders = headers
+
+	// The overall structure for the TestData
+	var testDataModel TestDataModelStruct
 
 	// Initialize your map
 	var testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
@@ -28,18 +31,24 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 	var testDataPointsForColumns [][]*TestDataPointValueStruct
 
 	// Initiate the maps used
+	var tempTestDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
 	var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnMap map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnAndRowUuidMap map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	var tempTestDataColumnsMetaDataMap map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
 	var tempUniqueTestDataValuesForColumnMap map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType
+	tempTestDataDomainAndAreaNameToUuidMap = make(map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType)
 	tempTestDataValuesForRowMap = make(map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForRowNameMap = make(map[TestDataValueNameType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnAndRowUuidMap = make(map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct)
 	tempTestDataColumnsMetaDataMap = make(map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct)
 	tempUniqueTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType)
+
+	// Add the TestDataDomain and TestDataArea to map that map for Name to UUID conversion
+	tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(testDataDomainName)] = TestDataDomainOrAreaUuidType(testDataDomainUuid)
+	tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(testDataAreaName)] = TestDataDomainOrAreaUuidType(testDataAreaUuid)
 
 	// TestData for one Area within one Domain
 	var testDataArea *TestDataAreaStruct
@@ -206,5 +215,10 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *map[TestDat
 		tempTestDataColumnsMetaDataMap[tempTestDataColumnUuid] = tempTestDataColumnMetaDataStruct
 	}
 
-	return &testDataModelMap
+	testDataModel = TestDataModelStruct{
+		TestDataDomainAndAreaNameToUuidMap: &tempTestDataDomainAndAreaNameToUuidMap,
+		TestDataModelMap:                   &testDataModelMap,
+	}
+
+	return &testDataModel
 }

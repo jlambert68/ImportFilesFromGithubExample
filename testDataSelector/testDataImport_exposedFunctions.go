@@ -62,7 +62,7 @@ func GetTestDataPointValues(testDataGroupPoint string) (testDataColumnDataNameMa
 	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*TestDataPointValueStruct
 	var tempTestDataPointValueSlice []*TestDataPointValueStruct
 
-	tempTestDataModelMap = *testDataModelMapRef
+	tempTestDataModelMap = *testDataModelRef.TestDataModelMap
 	tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
 	tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
 	tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]

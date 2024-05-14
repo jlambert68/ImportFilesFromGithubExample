@@ -2,9 +2,12 @@ package testDataSelector
 
 import "fyne.io/fyne/v2/widget"
 
-// TestDataModelMapType
-// Model holding Testdata for one or more Domains
-type TestDataModelMapType map[TestDataDomainUuidType]*TestDataDomainModelStruct
+// TestDataModelStruct
+// The structure holding all TestData
+type TestDataModelStruct struct {
+	TestDataDomainAndAreaNameToUuidMap *map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
+	TestDataModelMap                   *map[TestDataDomainUuidType]*TestDataDomainModelStruct
+}
 
 // TestDataDomainModelStruct
 // DataData for one Domain
@@ -22,7 +25,7 @@ type TestDataAreaStruct struct {
 	TestDataAreaUuid                     TestDataAreaUuidType
 	TestDataAreaName                     TestDataAreaNameType
 	TestDataValuesForRowMap              *map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-	TestDataValuesForRowNameMap          *map[TestDataValueNameType]*[]*TestDataPointValueStruct
+	TestDataValuesForRowNameMap          *map[TestDataValueNameType]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
 	TestDataValuesForColumnMap           *map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	TestDataValuesForColumnAndRowUuidMap *map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	TestDataColumnsMetaDataMap           *map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
@@ -72,6 +75,14 @@ type TestDataAreaUuidType string
 // TestDataAreaNameType
 // The Name for a specific TestData-area within the Domain
 type TestDataAreaNameType string
+
+// TestDataDomainOrAreaUuidType
+// The UUID for a specific TestData-domain or TestData-area
+type TestDataDomainOrAreaUuidType string
+
+// TestDataDomainOrAreaNameType
+// The Name for a specific TestData-domain or TestData-area
+type TestDataDomainOrAreaNameType string
 
 // TestDataPointRowUuidType
 // Identifies one TestDataPoint/TestDataRow

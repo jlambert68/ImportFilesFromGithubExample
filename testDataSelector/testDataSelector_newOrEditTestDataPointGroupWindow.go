@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -21,7 +23,13 @@ func showNewOrEditGroupWindow(
 	responseChannel *chan responseChannelStruct,
 	incomingGroupName testDataPointGroupNameType,
 	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataPointGroupNameType]*testDataPointNameMapType,
-	testDataModelMap *map[TestDataDomainUuidType]*TestDataDomainModelStruct) {
+	testDataModel *TestDataModelStruct) {
+
+	var testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
+	testDataModelMap = *testDataModel.TestDataModelMap
+
+	//var testDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
+	//testDataDomainAndAreaNameToUuidMap = *testDataModel.TestDataDomainAndAreaNameToUuidMap
 
 	parent.Hide()
 
@@ -92,6 +100,8 @@ func showNewOrEditGroupWindow(
 	var testDataValueSelections []*testDataValueSelectionStruct
 	var testDataValuesSelectionContainer *fyne.Container
 
+	var tempTestDataPointRowUuidSliceInMap []TestDataPointRowUuidType
+
 	// Create label for Domains
 	domainsLabel = widget.NewLabel(testDataDomainLabelText)
 	domainsLabel.TextStyle.Bold = true
@@ -99,7 +109,7 @@ func showNewOrEditGroupWindow(
 	testAreasLabel.TextStyle.Bold = true
 
 	// Extract TestData on Domain-level
-	for _, tempTestDataDomainModel := range *testDataModelMap {
+	for _, tempTestDataDomainModel := range testDataModelMap {
 		domainOptions = append(domainOptions, string(tempTestDataDomainModel.TestDataDomainName))
 		domains = append(domains, tempTestDataDomainModel)
 	}
@@ -279,7 +289,7 @@ func showNewOrEditGroupWindow(
 		var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
 		var tempTestDataPointValueSlice []*TestDataPointValueStruct
 
-		tempTestDataModelMap = *testDataModelMap
+		tempTestDataModelMap = *testDataModel.TestDataModelMap
 		tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
 		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
 		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
@@ -334,7 +344,7 @@ func showNewOrEditGroupWindow(
 
 			tempTestDataValueName = string(tempTestDataPointValueSlice[0].TestDataValueName)
 
-			tempTestDataPointRowUuidSliceInMap, _ := tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)]
+			tempTestDataPointRowUuidSliceInMap, _ = tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)]
 			tempTestDataPointRowUuidSliceInMap = append(tempTestDataPointRowUuidSliceInMap, testDataPointRowUuid)
 			tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)] = tempTestDataPointRowUuidSliceInMap
 		}
@@ -443,6 +453,36 @@ func showNewOrEditGroupWindow(
 	// Functionality to add a point from 'allPointsAvailable' to 'allSelectedPoints'
 
 	allAvailablePointsList.OnSelected = func(id widget.ListItemID) {
+
+		re := regexp.MustCompile(`\[(\d+)\]`)
+
+		// FindStringSubmatch returns an array of matches where the first element is the full match,
+		// and the subsequent ones are the captured groups.
+		matches := re.FindStringSubmatch(allPointsAvailable[id])
+		if len(matches) > 1 { // matches[0] is the full match, matches[1] would be the first captured group
+			fmt.Println("Extracted number:", matches[1])
+		} else {
+			fmt.Println("No number found")
+		}
+
+		re = regexp.MustCompile(`^(.*?)\[\d+\]`)
+
+		// FindStringSubmatch returns an array of matches where the first element is the full match,
+		// and the subsequent ones are the captured groups.
+		matches = re.FindStringSubmatch(allPointsAvailable[id])
+		var clickedDataPointName string
+
+		if len(matches) > 1 { // matches[0] is the full match, matches[1] would be the first captured group
+			clickedDataPointName = strings.Trim(matches[1], " ")
+			fmt.Println(fmt.Sprintf("Extracted text to the left: '%s'", clickedDataPointName))
+		} else {
+			fmt.Println("No matching text found")
+		}
+
+		var tableData [][]string
+		tableData = buildTableData(clickedDataPointName, testDataModel)
+
+		showTable(newOrEditTestDataPointGroupWindow, tableData)
 
 		allSelectedPoints = append(allSelectedPoints, allPointsAvailable[id])
 		allPointsAvailable = append(allPointsAvailable[:id], allPointsAvailable[id+1:]...)
@@ -650,4 +690,118 @@ func testDataPointIntersectionOfTwoSlices(firstSlice, secondSlice []TestDataPoin
 	}
 
 	return intersectionSlice
+}
+
+func buildTableData(
+	tempTestDataPointRowName string,
+	testDataModel *TestDataModelStruct) (
+	tableData [][]string) {
+
+	re := regexp.MustCompile(`^([^/]+)/([^/]+)`)
+
+	matches := re.FindStringSubmatch(tempTestDataPointRowName)
+	if len(matches) > 2 {
+		fmt.Println("First part:", matches[1])
+		fmt.Println("Second part:", matches[2])
+	} else {
+		fmt.Println("No matching parts found")
+	}
+
+	var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
+	var tempTestDataDomainModel TestDataDomainModelStruct
+	var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
+	var tempTestDataArea TestDataAreaStruct
+	var tempTestDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
+	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*TestDataPointValueStruct
+	var tempTestDataPointRowUuidMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+	var tempTestDataPointValueSlicePtr *[]*TestDataPointValueStruct
+	var tempTestDataPointValueSlice []*TestDataPointValueStruct
+	var tempTestDataPointValueSlice2Ptr *[]*TestDataPointValueStruct
+	var tempTestDataPointValueSlice2 []*TestDataPointValueStruct
+	var tempTestDataDomainOrAreaUuid TestDataDomainOrAreaUuidType
+	var tempTestDataDomainUuid TestDataDomainUuidType
+	var tempTestDataAreaUuid TestDataAreaUuidType
+
+	tempTestDataModelMap = *testDataModel.TestDataModelMap
+
+	// Extract the UUID for Domain and Area
+	tempTestDataDomainAndAreaNameToUuidMap = *testDataModel.TestDataDomainAndAreaNameToUuidMap
+	tempTestDataDomainOrAreaUuid, _ = tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(matches[1])]
+	tempTestDataDomainUuid = TestDataDomainUuidType(tempTestDataDomainOrAreaUuid)
+	tempTestDataDomainOrAreaUuid, _ = tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(matches[2])]
+	tempTestDataAreaUuid = TestDataAreaUuidType(tempTestDataDomainOrAreaUuid)
+
+	// Extract Domain and Area maps
+	tempTestDataDomainModel = *tempTestDataModelMap[tempTestDataDomainUuid]
+	tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
+	tempTestDataArea = *tempTestDataAreaMap[tempTestDataAreaUuid]
+	tempTestDataValuesForRowNameMap = *tempTestDataArea.TestDataValuesForRowNameMap
+	tempTestDataPointRowUuidMap = *tempTestDataArea.TestDataValuesForRowMap
+
+	var tempTestDataPointRowNameToSearchFor string
+	tempTestDataPointRowNameToSearchFor = tempTestDataPointRowName[len(matches[0]+"/"):]
+
+	tempTestDataPointValueSlicePtr, _ = tempTestDataValuesForRowNameMap[TestDataValueNameType(tempTestDataPointRowNameToSearchFor)]
+	tempTestDataPointValueSlice = *tempTestDataPointValueSlicePtr
+
+	for _, tempTestDataPointValue := range tempTestDataPointValueSlice {
+
+		var rowSlice []string
+		tempTestDataPointValueSlice2Ptr, _ = tempTestDataPointRowUuidMap[tempTestDataPointValue.TestDataPointRowUuid]
+		tempTestDataPointValueSlice2 = *tempTestDataPointValueSlice2Ptr
+
+		for _, localTestDataPointValue := range tempTestDataPointValueSlice2 {
+			rowSlice = append(rowSlice, string(localTestDataPointValue.TestDataValue))
+		}
+
+		tableData = append(tableData, rowSlice)
+
+	}
+
+	return tableData
+}
+
+// showTable creates and shows a table for the selected node with data
+func showTable(w fyne.Window, data [][]string) {
+	table := widget.NewTable(
+		func() (int, int) { return len(data), len(data[0]) },
+		func() fyne.CanvasObject {
+			return widget.NewLabel("") // Create a label for each cell
+		},
+		func(cellID widget.TableCellID, obj fyne.CanvasObject) {
+			obj.(*widget.Label).SetText(data[cellID.Row][cellID.Col]) // Set text based on data
+		},
+	)
+
+	// Calculate and set column widths based on content
+	setColumnWidths(table, data)
+
+	// Set minimum size for the table to ensure it's larger
+	table.Resize(fyne.NewSize(400, 300)) // Set the minimum size to 400x300 pixels
+
+	// Use a scroll container to make the table scrollable in case it has more data
+	scrollContainer := container.NewScroll(table)
+	scrollContainer.SetMinSize(fyne.NewSize(400, 300)) // Ensure the scroll container is also adequately sized
+
+	// Show table in a pop-up and ensure the pop-up is appropriately sized
+	popup := widget.NewModalPopUp(scrollContainer, w.Canvas())
+	popup.Resize(fyne.NewSize(450, 350)) // Resize the popup to be slightly larger than the table and container
+	popup.Show()
+}
+func setColumnWidths(table *widget.Table, data [][]string) {
+	maxWidths := make([]float32, len(data[0]))
+	for col := range maxWidths {
+		for row := range data {
+			width := fyne.MeasureText(data[row][col], theme.TextSize(), fyne.TextStyle{}).Width
+			if width > maxWidths[col] {
+				maxWidths[col] = width
+			}
+		}
+		// Add some padding to the maximum width found
+		maxWidths[col] += theme.Padding() * 4
+	}
+
+	for col, width := range maxWidths {
+		table.SetColumnWidth(col, width)
+	}
 }

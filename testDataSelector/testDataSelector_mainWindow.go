@@ -8,27 +8,27 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func ImportTestData() (testDataModelMap *map[TestDataDomainUuidType]*TestDataDomainModelStruct) {
+func ImportTestData() (testDataModel *TestDataModelStruct) {
 
 	var testDataRows []TestDataRowType
 	var headers []string
 	headers, testDataRows = ImportTestDataFromFile2()
 
-	testDataModelMap = buildTestDataMap(headers, testDataRows)
+	testDataModel = buildTestDataMap(headers, testDataRows)
 
-	return testDataModelMap
+	return testDataModel
 }
 
-var testDataModelMapRef *map[TestDataDomainUuidType]*TestDataDomainModelStruct
+var testDataModelRef *TestDataModelStruct
 
 func MainTestDataSelector(
 	app fyne.App,
 	parent fyne.Window,
-	testDataModelMapPtr *map[TestDataDomainUuidType]*TestDataDomainModelStruct) {
+	testDataModelPtr *TestDataModelStruct) {
 
 	parent.Hide()
 
-	testDataModelMapRef = testDataModelMapPtr
+	testDataModelRef = testDataModelPtr
 
 	myWindow := app.NewWindow("TestData Management")
 	myWindow.Resize(fyne.NewSize(600, 500))
@@ -184,7 +184,7 @@ func MainTestDataSelector(
 			&responseChannel,
 			"",
 			&chosenTestDataPointsPerGroupMap,
-			testDataModelMapPtr)
+			testDataModelPtr)
 	})
 
 	// Crete the 'Edit'-button for editing an existing Group for TestDataPoints
@@ -201,7 +201,7 @@ func MainTestDataSelector(
 			&responseChannel,
 			testDataPointGroups[selectedIndexForGroups],
 			&chosenTestDataPointsPerGroupMap,
-			testDataModelMapPtr)
+			testDataModelPtr)
 	})
 
 	// Crete the 'Delete'-button for deleting an existing Group for TestDataPoints

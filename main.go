@@ -16,8 +16,8 @@ import (
 
 func main() {
 
-	var testDataModelMapPtr *map[testDataSelector.TestDataDomainUuidType]*testDataSelector.TestDataDomainModelStruct
-	testDataModelMapPtr = testDataSelector.ImportTestData()
+	var testDataModelPtr *testDataSelector.TestDataModelStruct
+	testDataModelPtr = testDataSelector.ImportTestData()
 
 	var err error
 	// Initiate Lua Script Engine
@@ -67,7 +67,7 @@ func main() {
 		testDataSelector.MainTestDataSelector(
 			myApp,
 			myMainWindow,
-			testDataModelMapPtr)
+			testDataModelPtr)
 	})
 
 	//inputText := "This is {{bold}} text and this is {{also bold}} and this normal again."
