@@ -33,14 +33,14 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *TestDataMod
 	// Initiate the maps used
 	var tempTestDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
 	var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*TestDataPointValueStruct
+	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnMap map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnAndRowUuidMap map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	var tempTestDataColumnsMetaDataMap map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
 	var tempUniqueTestDataValuesForColumnMap map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType
 	tempTestDataDomainAndAreaNameToUuidMap = make(map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType)
 	tempTestDataValuesForRowMap = make(map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct)
-	tempTestDataValuesForRowNameMap = make(map[TestDataValueNameType]*[]*TestDataPointValueStruct)
+	tempTestDataValuesForRowNameMap = make(map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnAndRowUuidMap = make(map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct)
 	tempTestDataColumnsMetaDataMap = make(map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct)
@@ -157,6 +157,8 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *TestDataMod
 
 		}
 
+		var tempTestDataValuesForRowUuidSlice []*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+
 		// Loop the Values in the row and add 'TestDataPointName'
 		for _, testDataPoint := range testDataPointsForRow {
 			testDataPoint.TestDataValueNameDescription = testDataPoint.TestDataValueNameDescription + TestDataValueNameDescriptionType(testDataPointNameDescription)
@@ -166,8 +168,11 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *TestDataMod
 		// Add 'testDataPointsForRow' to Map for TestDataPoints in one row
 		tempTestDataValuesForRowMap[TestDataPointRowUuidType(rowUuid.String())] = &testDataPointsForRow
 
+		// Add the map the slices of maps
+		tempTestDataValuesForRowUuidSlice = append(tempTestDataValuesForRowUuidSlice, &tempTestDataValuesForRowMap)
+
 		// Add 'testDataPointsForRowName' to Map for TestDataPoints in one row
-		tempTestDataValuesForRowNameMap[TestDataValueNameType(testDataPointName)] = &testDataPointsForRow
+		tempTestDataValuesForRowNameMap[TestDataValueNameType(testDataPointName)] = &tempTestDataValuesForRowUuidSlice
 
 	}
 

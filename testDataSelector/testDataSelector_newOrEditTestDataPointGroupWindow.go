@@ -712,12 +712,9 @@ func buildTableData(
 	var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
 	var tempTestDataArea TestDataAreaStruct
 	var tempTestDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
-	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*TestDataPointValueStruct
-	var tempTestDataPointRowUuidMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-	var tempTestDataPointValueSlicePtr *[]*TestDataPointValueStruct
-	var tempTestDataPointValueSlice []*TestDataPointValueStruct
-	var tempTestDataPointValueSlice2Ptr *[]*TestDataPointValueStruct
-	var tempTestDataPointValueSlice2 []*TestDataPointValueStruct
+	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+	var tempTestDataValuesForRowUuidMapBaseOnNameSlice []*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+
 	var tempTestDataDomainOrAreaUuid TestDataDomainOrAreaUuidType
 	var tempTestDataDomainUuid TestDataDomainUuidType
 	var tempTestDataAreaUuid TestDataAreaUuidType
@@ -736,22 +733,23 @@ func buildTableData(
 	tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
 	tempTestDataArea = *tempTestDataAreaMap[tempTestDataAreaUuid]
 	tempTestDataValuesForRowNameMap = *tempTestDataArea.TestDataValuesForRowNameMap
-	tempTestDataPointRowUuidMap = *tempTestDataArea.TestDataValuesForRowMap
 
 	var tempTestDataPointRowNameToSearchFor string
 	tempTestDataPointRowNameToSearchFor = tempTestDataPointRowName[len(matches[0]+"/"):]
 
-	tempTestDataPointValueSlicePtr, _ = tempTestDataValuesForRowNameMap[TestDataValueNameType(tempTestDataPointRowNameToSearchFor)]
-	tempTestDataPointValueSlice = *tempTestDataPointValueSlicePtr
+	tempTestDataValuesForRowUuidMapBaseOnNameSlice = *tempTestDataValuesForRowNameMap[TestDataValueNameType(tempTestDataPointRowNameToSearchFor)]
 
-	for _, tempTestDataPointValue := range tempTestDataPointValueSlice {
+	// Loop the slice to extract the map for one row of data
+	for _, tempTestDataValueMapForRow := range tempTestDataValuesForRowUuidMapBaseOnNameSlice {
 
 		var rowSlice []string
-		tempTestDataPointValueSlice2Ptr, _ = tempTestDataPointRowUuidMap[tempTestDataPointValue.TestDataPointRowUuid]
-		tempTestDataPointValueSlice2 = *tempTestDataPointValueSlice2Ptr
 
-		for _, localTestDataPointValue := range tempTestDataPointValueSlice2 {
-			rowSlice = append(rowSlice, string(localTestDataPointValue.TestDataValue))
+		// Loop the map to get all values for the row
+		for _, tempTestDataPointSlice := range *tempTestDataValueMapForRow {
+			for _, tempTestDataPoint := range *tempTestDataPointSlice {
+				rowSlice = append(rowSlice, string(tempTestDataPoint.TestDataValue))
+			}
+
 		}
 
 		tableData = append(tableData, rowSlice)
