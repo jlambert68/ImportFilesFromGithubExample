@@ -33,14 +33,14 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *TestDataMod
 	// Initiate the maps used
 	var tempTestDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
 	var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]TestDataPointRowUuidType
 	var tempTestDataValuesForColumnMap map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForColumnAndRowUuidMap map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	var tempTestDataColumnsMetaDataMap map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
 	var tempUniqueTestDataValuesForColumnMap map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType
 	tempTestDataDomainAndAreaNameToUuidMap = make(map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType)
 	tempTestDataValuesForRowMap = make(map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct)
-	tempTestDataValuesForRowNameMap = make(map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct)
+	tempTestDataValuesForRowNameMap = make(map[TestDataValueNameType]*[]TestDataPointRowUuidType)
 	tempTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*[]*TestDataPointValueStruct)
 	tempTestDataValuesForColumnAndRowUuidMap = make(map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct)
 	tempTestDataColumnsMetaDataMap = make(map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct)
@@ -171,9 +171,6 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *TestDataMod
 		// Add the map the slices of maps
 		tempTestDataValuesForRowUuidSlice = append(tempTestDataValuesForRowUuidSlice, &tempTestDataValuesForRowMap)
 
-		// Add 'testDataPointsForRowName' to Map for TestDataPoints in one row
-		tempTestDataValuesForRowNameMap[TestDataValueNameType(testDataPointName)] = &tempTestDataValuesForRowUuidSlice
-
 	}
 
 	// Loop 'testDataPointsForColumns' and add to column Map and create ColumnMetaData
@@ -220,6 +217,29 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *TestDataMod
 		tempTestDataColumnsMetaDataMap[tempTestDataColumnUuid] = tempTestDataColumnMetaDataStruct
 	}
 
+	// Loop 'TestDataValuesForRowMap' to be able to create 'TestDataValuesForRowNameMap'
+	var testDataPointRowName TestDataValueNameType
+	var tempTestDataValuesForRowSlice []*TestDataPointValueStruct
+	//var localTestDataValuesForRowMapSlice []TestDataPointRowUuidType
+	for _, tempTestDataValuesForRowSlicePtr := range tempTestDataValuesForRowMap {
+		tempTestDataValuesForRowSlice = *tempTestDataValuesForRowSlicePtr
+		//localTestDataPointRowUuid
+		testDataPointRowName = tempTestDataValuesForRowSlice[0].TestDataValueName
+		localTestDataValuesForRowMapSlicePtr, existInMap := tempTestDataValuesForRowNameMap[testDataPointRowName]
+		if existInMap == false {
+			var tempLocalTestDataValuesForRowMapSlice []TestDataPointRowUuidType
+			tempLocalTestDataValuesForRowMapSlice = append(tempLocalTestDataValuesForRowMapSlice, tempTestDataValuesForRowSlice[0].TestDataPointRowUuid)
+
+			tempTestDataValuesForRowNameMap[testDataPointRowName] = &tempLocalTestDataValuesForRowMapSlice
+			localTestDataValuesForRowMapSlicePtr = &tempLocalTestDataValuesForRowMapSlice
+		} else {
+			//localTestDataValuesForRowMapSlice = *localTestDataValuesForRowMapSlicePtr
+
+			*localTestDataValuesForRowMapSlicePtr = append(*localTestDataValuesForRowMapSlicePtr, tempTestDataValuesForRowSlice[0].TestDataPointRowUuid)
+		}
+
+	}
+blev fel
 	testDataModel = TestDataModelStruct{
 		TestDataDomainAndAreaNameToUuidMap: &tempTestDataDomainAndAreaNameToUuidMap,
 		TestDataModelMap:                   &testDataModelMap,

@@ -25,7 +25,7 @@ type TestDataAreaStruct struct {
 	TestDataAreaUuid                     TestDataAreaUuidType
 	TestDataAreaName                     TestDataAreaNameType
 	TestDataValuesForRowMap              *map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-	TestDataValuesForRowNameMap          *map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+	TestDataValuesForRowNameMap          *map[TestDataValueNameType]*[]TestDataPointRowUuidType
 	TestDataValuesForColumnMap           *map[TestDataColumnUuidType]*[]*TestDataPointValueStruct
 	TestDataValuesForColumnAndRowUuidMap *map[TestDataColumnAndRowUuidType]*TestDataPointValueStruct
 	TestDataColumnsMetaDataMap           *map[TestDataColumnUuidType]*TestDataColumnMetaDataStruct
