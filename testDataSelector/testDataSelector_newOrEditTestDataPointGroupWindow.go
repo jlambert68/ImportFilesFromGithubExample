@@ -713,6 +713,7 @@ func buildTableData(
 	var tempTestDataArea TestDataAreaStruct
 	var tempTestDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
 	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]TestDataPointRowUuidType
+	var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
 	var tempTestDataValuesForRowUuidMapBaseOnNameSlice []TestDataPointRowUuidType
 
 	var tempTestDataDomainOrAreaUuid TestDataDomainOrAreaUuidType
@@ -733,35 +734,97 @@ func buildTableData(
 	tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
 	tempTestDataArea = *tempTestDataAreaMap[tempTestDataAreaUuid]
 	tempTestDataValuesForRowNameMap = *tempTestDataArea.TestDataValuesForRowNameMap
+	tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
 
 	var tempTestDataPointRowNameToSearchFor string
-	tempTestDataPointRowNameToSearchFor = tempTestDataPointRowName[len(matches[0]+"/"):]
+	tempTestDataPointRowNameToSearchFor = tempTestDataPointRowName //[len(matches[0]+"/"):]
 
 	tempTestDataValuesForRowUuidMapBaseOnNameSlice = *tempTestDataValuesForRowNameMap[TestDataValueNameType(tempTestDataPointRowNameToSearchFor)]
 
 	fmt.Println(tempTestDataValuesForRowUuidMapBaseOnNameSlice)
 
-	/*
-		// Loop the slice to extract the map for one row of data
+	// Loop the slice to extract the RowUUids
+
+	var headerSlice []string
+	for rowIndex, tempTestDataPointRowUuid := range tempTestDataValuesForRowUuidMapBaseOnNameSlice {
+
 		var rowSlice []string
-		for _,  tempTestDataPointRowUuid := range tempTestDataValuesForRowUuidMapBaseOnNameSlice {
+		tempTestDataValuesForRowSlice := tempTestDataValuesForRowMap[tempTestDataPointRowUuid]
 
+		// Loop the slice with RowValue
+		for _, tempTestDataPointValue := range *tempTestDataValuesForRowSlice {
 
-
-					rowSlice = append(rowSlice, string(tempTestDataPointRowUuid))
-
-
+			// Create a header slice
+			if rowIndex == 0 {
+				headerSlice = append(headerSlice, string(tempTestDataPointValue.TestDataColumnUIName))
 			}
 
-			tableData = append(tableData, rowSlice)
-
+			rowSlice = append(rowSlice, string(tempTestDataPointValue.TestDataValue))
 		}
 
-	*/
+		// Add a header when first row
+		if rowIndex == 0 {
+			tableData = append(tableData, headerSlice)
+		}
+
+		// Add the data
+		tableData = append(tableData, rowSlice)
+
+	}
 
 	return tableData
 }
 
+// showTable creates and shows a table for the selected node with data
+func showTable(w fyne.Window, data [][]string) {
+	// Add a column for checkboxes
+	checkboxes := make([]bool, len(data))
+
+	// Create a new table with an extra column for checkboxes
+	table := widget.NewTable(
+		func() (int, int) { return len(data), len(data[0]) + 1 },
+		func() fyne.CanvasObject {
+			return widget.NewLabel("") // Create a label for each cell
+		},
+		func(cellID widget.TableCellID, obj fyne.CanvasObject) {
+			if cellID.Col == 0 {
+				// First column, use checkboxes
+				if check, ok := obj.(*widget.Check); ok {
+					check.SetChecked(checkboxes[cellID.Row])
+					check.OnChanged = func(checked bool) {
+						checkboxes[cellID.Row] = checked
+					}
+				} else {
+					newCheck := widget.NewCheck("", func(checked bool) {
+						checkboxes[cellID.Row] = checked
+					})
+					newCheck.SetChecked(checkboxes[cellID.Row])
+					obj = newCheck
+				}
+			} else {
+				// Data columns
+				obj.(*widget.Label).SetText(data[cellID.Row][cellID.Col-1]) // Set text based on data
+			}
+		},
+	)
+
+	// Calculate and set column widths based on content
+	setColumnWidths(table, data)
+
+	// Set minimum size for the table to ensure it's larger
+	table.Resize(fyne.NewSize(400, 300)) // Set the minimum size to 400x300 pixels
+
+	// Use a scroll container to make the table scrollable in case it has more data
+	scrollContainer := container.NewScroll(table)
+	scrollContainer.SetMinSize(fyne.NewSize(400, 300)) // Ensure the scroll container is also adequately sized
+
+	// Show table in a pop-up and ensure the pop-up is appropriately sized
+	popup := widget.NewModalPopUp(scrollContainer, w.Canvas())
+	popup.Resize(fyne.NewSize(450, 350)) // Resize the popup to be slightly larger than the table and container
+	popup.Show()
+}
+
+/*
 // showTable creates and shows a table for the selected node with data
 func showTable(w fyne.Window, data [][]string) {
 	table := widget.NewTable(
@@ -789,6 +852,9 @@ func showTable(w fyne.Window, data [][]string) {
 	popup.Resize(fyne.NewSize(450, 350)) // Resize the popup to be slightly larger than the table and container
 	popup.Show()
 }
+
+*/
+
 func setColumnWidths(table *widget.Table, data [][]string) {
 	maxWidths := make([]float32, len(data[0]))
 	for col := range maxWidths {

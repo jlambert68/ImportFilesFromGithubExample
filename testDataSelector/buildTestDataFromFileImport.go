@@ -239,7 +239,7 @@ func buildTestDataMap(headers []string, testData []TestDataRowType) *TestDataMod
 		}
 
 	}
-blev fel
+
 	testDataModel = TestDataModelStruct{
 		TestDataDomainAndAreaNameToUuidMap: &tempTestDataDomainAndAreaNameToUuidMap,
 		TestDataModelMap:                   &testDataModelMap,
