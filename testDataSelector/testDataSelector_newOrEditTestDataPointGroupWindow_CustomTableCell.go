@@ -18,6 +18,7 @@ type CustomWidget struct {
 	background *canvas.Rectangle
 	hovered    bool
 	onHover    func(bool)
+	onTapped   func()
 }
 
 // NewCustomWidget creates a new CustomWidget
@@ -108,6 +109,13 @@ func (w *CustomWidget) MouseOut() {
 
 func (w *CustomWidget) MouseMoved(*desktop.MouseEvent) {}
 
+// Tapped handles tap events
+func (w *CustomWidget) Tapped(*fyne.PointEvent) {
+	if w.onTapped != nil {
+		w.onTapped()
+	}
+}
+
 // CustomTableWidget represents the custom table with row double-click handling and hover effects
 type CustomTableWidget struct {
 	*widget.Table
@@ -152,28 +160,28 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 				table.unhoverRow(cellID.Row)
 			}
 		}
+		customWidget.onTapped = func() {
+			table.handleCellTapped(cellID)
+		}
 		table.cellObjects[cellID] = customWidget
 		customWidget.Refresh()
 	}
 	table.ExtendBaseWidget(table)
 	table.OnSelected = func(id widget.TableCellID) {
-		now := time.Now()
-		if now.Sub(table.lastTap) < 500*time.Millisecond { // 500ms for double-tap
-			table.tapCount++
-		} else {
-			table.tapCount = 1
-		}
-		table.lastTap = now
-
-		if table.tapCount == 2 {
-			table.tapCount = 0
+		if id.Row > 0 {
 			table.toggleRowIcon(id.Row)
 		}
+
 	}
 
 	setColumnWidths(table.Table, data)
 
 	return table
+}
+
+func (t *CustomTableWidget) handleCellTapped(cellID widget.TableCellID) {
+	// Handle cell click logic here
+	println("Cell tapped:", cellID.Row, cellID.Col)
 }
 
 func (t *CustomTableWidget) toggleRowIcon(row int) {
