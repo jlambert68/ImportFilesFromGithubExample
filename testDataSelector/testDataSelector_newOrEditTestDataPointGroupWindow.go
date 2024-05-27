@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"regexp"
@@ -778,50 +779,52 @@ func buildTableData(
 // showTable creates and shows a table for the selected node with data
 func showTable(w fyne.Window, data [][]string) {
 	// Add a column for checkboxes
-	checkboxes := make([]bool, len(data))
 
 	// Create a new table with an extra column for checkboxes
-	table := widget.NewTable(
-		func() (int, int) { return len(data), len(data[0]) + 1 },
-		func() fyne.CanvasObject {
-			return widget.NewLabel("") // Create a label for each cell
-		},
-		func(cellID widget.TableCellID, obj fyne.CanvasObject) {
-			if cellID.Col == 0 {
-				// First column, use checkboxes
-				if check, ok := obj.(*widget.Check); ok {
-					check.SetChecked(checkboxes[cellID.Row])
-					check.OnChanged = func(checked bool) {
-						checkboxes[cellID.Row] = checked
-					}
-				} else {
-					newCheck := widget.NewCheck("", func(checked bool) {
-						checkboxes[cellID.Row] = checked
-					})
-					newCheck.SetChecked(checkboxes[cellID.Row])
-					obj = newCheck
-				}
-			} else {
-				// Data columns
-				obj.(*widget.Label).SetText(data[cellID.Row][cellID.Col-1]) // Set text based on data
-			}
-		},
-	)
-
-	// Calculate and set column widths based on content
-	setColumnWidths(table, data)
+	table := NewCustomTableWidget(data)
 
 	// Set minimum size for the table to ensure it's larger
-	table.Resize(fyne.NewSize(400, 300)) // Set the minimum size to 400x300 pixels
+	table.Resize(fyne.NewSize(600, 500)) // Set the minimum size to 400x300 pixels
 
 	// Use a scroll container to make the table scrollable in case it has more data
 	scrollContainer := container.NewScroll(table)
-	scrollContainer.SetMinSize(fyne.NewSize(400, 300)) // Ensure the scroll container is also adequately sized
+	//scrollContainer.SetMinSize(fyne.NewSize(400, 300)) // Ensure the scroll container is also adequately sized
 
-	// Show table in a pop-up and ensure the pop-up is appropriately sized
-	popup := widget.NewModalPopUp(scrollContainer, w.Canvas())
-	popup.Resize(fyne.NewSize(450, 350)) // Resize the popup to be slightly larger than the table and container
-	popup.Show()
+	// Set a resizable container
+	//resizableContainer := container.NewMax(scrollContainer)
+
+	// Set the content of the window to the resizable container
+	//w.SetContent(resizableContainer)
+
+	// Set minimum size for the window
+	//w.Resize(fyne.NewSize(450, 350))
+
+	// Show the resizable window
+	//w.Resize(fyne.NewSize(500, 400))
+
+	modal := dialog.NewCustomConfirm("Chose TestDataPoints", "Select TestDataPoints", "Cancel",
+		scrollContainer,
+		func(response bool) {
+			if response {
+				println("User confirmed action")
+			} else {
+				println("User canceled action")
+			}
+		}, w)
+	modal.Resize(fyne.NewSize(800, 600))
+	modal.Show()
+
+	//w.Show()
+
+	/*
+		// Show table in a pop-up and ensure the pop-up is appropriately sized
+		popup := widget.NewModalPopUp(resizableContainer, w.Canvas())
+
+		popup.Resize(fyne.NewSize(450, 350)) // Resize the popup to be slightly larger than the table and container
+
+		popup.Show()
+
+	*/
 }
 
 /*
