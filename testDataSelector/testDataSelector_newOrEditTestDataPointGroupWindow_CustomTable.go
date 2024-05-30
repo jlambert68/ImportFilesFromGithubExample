@@ -6,27 +6,30 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"sync"
 	"time"
 )
 
 // CustomWidget represents a custom component that can switch between a label and an icon with a background color
 type CustomWidget struct {
 	widget.BaseWidget
-	isIcon     bool
+	//isIcon     bool
 	label      *widget.Label
 	icon       *widget.Icon
 	background *canvas.Rectangle
 	hovered    bool
 	onHover    func(bool)
 	onTapped   func()
+	cellID     widget.TableCellID
+	isSelected bool
 }
 
 // NewCustomWidget creates a new CustomWidget
-func NewCustomWidget(isIcon bool, text string) *CustomWidget {
+func NewCustomWidget(isSelected bool, text string) *CustomWidget {
 	w := &CustomWidget{
-		isIcon:     isIcon,
+		isSelected: isSelected,
 		label:      widget.NewLabel(text),
-		icon:       widget.NewIcon(theme.ContentAddIcon()), // Replace with desired icon or picture
+		icon:       widget.NewIcon(theme.CheckButtonCheckedIcon()), // Replace with desired icon or picture
 		background: canvas.NewRectangle(theme.BackgroundColor()),
 	}
 	w.ExtendBaseWidget(w)
@@ -69,7 +72,7 @@ func (r *customWidgetRenderer) Destroy() {}
 
 // updateVisibility updates the visibility of the label and icon based on the isIcon flag
 func (w *CustomWidget) updateVisibility() {
-	if w.isIcon {
+	if w.isSelected {
 		w.icon.Show()
 		w.label.Hide()
 	} else {
@@ -86,9 +89,12 @@ func (w *CustomWidget) updateVisibility() {
 
 // SetText sets the text of the label
 func (w *CustomWidget) SetText(text string) {
-	if !w.isIcon {
-		w.label.SetText(text)
-	}
+	w.label.SetText(text)
+}
+
+// SetCellID sets the position of the cell in the Table
+func (w *CustomWidget) SetCellID(cellID widget.TableCellID) {
+	w.cellID = cellID
 }
 
 func (w *CustomWidget) MouseIn(*desktop.MouseEvent) {
@@ -126,6 +132,9 @@ type CustomTableWidget struct {
 	hoveredRow  int
 }
 
+// Use a mutex to synchronize access to the map
+var tableMutex sync.Mutex
+
 func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 	table := &CustomTableWidget{
 		Table:       &widget.Table{},
@@ -141,14 +150,21 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 	}
 	table.UpdateCell = func(cellID widget.TableCellID, obj fyne.CanvasObject) {
 		customWidget := obj.(*CustomWidget)
+
+		customWidget.SetCellID(cellID)
+
 		if cellID.Col == 0 {
-			// Update the first column to show the double-click status
-			if table.rowStatus[cellID.Row] {
-				customWidget.SetText("Clicked")
-			} else {
-				customWidget.SetText("Not Clicked")
-			}
-			customWidget.isIcon = false
+			/*
+				// Update the first column to show the double-click status
+				if table.rowStatus[cellID.Row] {
+					customWidget.SetText("Clicked")
+				} else {
+					customWidget.SetText("Not Clicked")
+				}
+				customWidget.isIcon = false
+
+			*/
+			customWidget.SetText("")
 		} else {
 			// Update other columns with data
 			customWidget.SetText(data[cellID.Row][cellID.Col-1])
@@ -161,10 +177,17 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 			}
 		}
 		customWidget.onTapped = func() {
-			table.handleCellTapped(cellID)
+			table.handleCellTapped(cellID, table)
 		}
+
+		// Hinder concurrent map writes
+		tableMutex.Lock()
+
 		table.cellObjects[cellID] = customWidget
 		customWidget.Refresh()
+
+		// Release map
+		tableMutex.Unlock()
 	}
 	table.ExtendBaseWidget(table)
 	table.OnSelected = func(id widget.TableCellID) {
@@ -179,39 +202,56 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 	return table
 }
 
-func (t *CustomTableWidget) handleCellTapped(cellID widget.TableCellID) {
+func (t *CustomTableWidget) handleCellTapped(cellID widget.TableCellID, table *CustomTableWidget) {
 	// Handle cell click logic here
 	println("Cell tapped:", cellID.Row, cellID.Col)
+
+	if cellID.Row > 0 {
+		table.toggleRowIcon(cellID.Row)
+	}
 }
 
 func (t *CustomTableWidget) toggleRowIcon(row int) {
-	t.rowStatus[row] = !t.rowStatus[row]
+	//t.rowStatus[row] = !t.rowStatus[row]
 	cellID := widget.TableCellID{Row: row, Col: 0}
 	customWidget := t.cellObjects[cellID]
-	if t.rowStatus[row] {
-		customWidget.SetText("Clicked")
-	} else {
-		customWidget.SetText("Not Clicked")
-	}
-	customWidget.Refresh()
+	/*
+		if t.rowStatus[row] {
+			customWidget.SetText("Selected")
+		} else {
+			customWidget.SetText("Not Selected")
+		}
+		customWidget.Refresh()
 
-	_, cols := t.Length()
-	for col := 1; col < cols; col++ {
-		cellID := widget.TableCellID{Row: row, Col: col}
-		customWidget := t.cellObjects[cellID]
-		customWidget.isIcon = !customWidget.isIcon
+
+	*/
+	//		_, cols := t.Length()
+	//		for col := 1; col < cols; col++ {
+	cellID = widget.TableCellID{Row: row, Col: 0}
+	customWidget = t.cellObjects[cellID]
+
+	// Only process objects that is visible on screen and has is an object
+	if customWidget != nil {
+		customWidget.isSelected = !customWidget.isSelected
+		customWidget.updateVisibility()
 		customWidget.Refresh()
 	}
+
+	//		}
+
 }
 
 func (t *CustomTableWidget) hoverRow(row int) {
-	if t.hoveredRow == row || row == 0 {
+	if row == 0 { //t.hoveredRow == row || row == 0 {
 		return
 	}
-	if t.hoveredRow != -1 {
-		t.unhoverRow(t.hoveredRow)
-	}
-	t.hoveredRow = row
+	/*
+		if t.hoveredRow != -1 {
+			t.unhoverRow(t.hoveredRow)
+		}
+		t.hoveredRow = row
+
+	*/
 	_, cols := t.Length()
 	for col := 0; col < cols; col++ {
 		cellID := widget.TableCellID{Row: row, Col: col}
@@ -219,7 +259,7 @@ func (t *CustomTableWidget) hoverRow(row int) {
 		customWidget := t.cellObjects[cellID]
 
 		// Only change stuff if the column(row) is visible and has got an "object value"
-		if customWidget != nil {
+		if customWidget != nil && customWidget.cellID.Row == row {
 			customWidget.hovered = true
 			customWidget.Refresh()
 		}

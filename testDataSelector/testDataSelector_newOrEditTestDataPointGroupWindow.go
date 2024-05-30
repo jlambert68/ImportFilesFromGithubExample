@@ -46,7 +46,7 @@ func showNewOrEditGroupWindow(
 		newOrEditTestDataPointGroupWindow.SetTitle("New Group")
 	}
 
-	newOrEditTestDataPointGroupWindow.Resize(fyne.NewSize(600, 500))
+	newOrEditTestDataPointGroupWindow.Resize(fyne.NewSize(600, 1000))
 
 	// When this window closed then show parent and send response to parent window
 	newOrEditTestDataPointGroupWindow.SetOnClosed(func() {
