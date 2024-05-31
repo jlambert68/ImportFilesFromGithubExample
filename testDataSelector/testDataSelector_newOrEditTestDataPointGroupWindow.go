@@ -860,9 +860,14 @@ func showTable(w fyne.Window, data [][]string) {
 
 func setColumnWidths(table *widget.Table, data [][]string) {
 	maxWidths := make([]float32, len(data[0]))
+	var width float32
 	for col := range maxWidths {
 		for row := range data {
-			width := fyne.MeasureText(data[row][col], theme.TextSize(), fyne.TextStyle{}).Width
+			if row == 0 {
+				width = fyne.MeasureText(data[row][col], theme.TextSize(), fyne.TextStyle{Bold: true}).Width
+			} else {
+				width = fyne.MeasureText(data[row][col], theme.TextSize(), fyne.TextStyle{}).Width
+			}
 			if width > maxWidths[col] {
 				maxWidths[col] = width
 			}
@@ -871,7 +876,9 @@ func setColumnWidths(table *widget.Table, data [][]string) {
 		maxWidths[col] += theme.Padding() * 4
 	}
 
-	for col, width := range maxWidths {
-		table.SetColumnWidth(col, width)
+	for col, columnWidth := range maxWidths {
+		table.SetColumnWidth(col+1, columnWidth)
 	}
+
+	table.SetColumnWidth(0, fyne.MeasureText("xxxx", theme.TextSize(), fyne.TextStyle{}).Width)
 }
