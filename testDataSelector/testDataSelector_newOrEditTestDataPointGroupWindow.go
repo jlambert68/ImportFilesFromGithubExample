@@ -763,8 +763,19 @@ func buildTableData(
 			rowSlice = append(rowSlice, string(tempTestDataPointValue.TestDataValue))
 		}
 
+		// Append data for 'TestDataPointRowName'
+		rowSlice = append(rowSlice, tempTestDataPointRowName)
+
+		// Append unique 'TestDataPointRowUuid'
+		rowSlice = append(rowSlice, string(tempTestDataPointRowUuid))
+
 		// Add a header when first row
 		if rowIndex == 0 {
+
+			// Add headers for 'TestDataPointRowName' and 'TestDataPointRowUuid'
+			headerSlice = append(headerSlice, "TestDataPointRowName")
+			headerSlice = append(headerSlice, "TestDataPointRowUuid")
+
 			tableData = append(tableData, headerSlice)
 		}
 
@@ -807,9 +818,19 @@ func showTable(w fyne.Window, data [][]string) {
 		func(response bool) {
 			if response {
 				println("User confirmed action")
+
+				// Extract rows that were selecte
+				for row, isSelected := range table.rowIsSelectedMap {
+					if isSelected == true {
+						cellID := widget.TableCellID{row, 1}
+						fmt.Println(table.cellObjects[cellID])
+					}
+				}
+
 			} else {
 				println("User canceled action")
 			}
+
 		}, w)
 	modal.Resize(fyne.NewSize(800, 600))
 	modal.Show()
