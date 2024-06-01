@@ -7,8 +7,14 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"image/color"
 	"sync"
 )
+
+// The color of a row in the TestData-popup-table when it is selected
+var selectedRowColor = color.NRGBA{R: 0xa5, G: 0xf2, B: 0xa2, A: 0xff}
+
+var selectedAndHoveredRowColor = color.NRGBA{R: 0x60, G: 0xb8, B: 0xf7, A: 0xff}
 
 // CustomWidget represents a custom component that can switch between a label and an icon with a background color
 type CustomWidget struct {
@@ -97,9 +103,26 @@ func (w *CustomWidget) updateVisibility() {
 	}
 
 	if w.hovered {
-		w.background.FillColor = theme.PrimaryColor()
+		// Hovering the row
+		if rowIsSelected == true {
+			// Hovering and row is selected
+			w.background.FillColor = selectedAndHoveredRowColor
+
+		} else {
+			// Hovering and row is not selected
+			w.background.FillColor = theme.PrimaryColor()
+		}
+
 	} else {
-		w.background.FillColor = theme.BackgroundColor()
+		// Not hovering the row
+		if rowIsSelected == true {
+			// Not Hovering and row is selected
+			w.background.FillColor = selectedRowColor
+
+		} else {
+			// Not Hovering and row is not selected
+			w.background.FillColor = theme.BackgroundColor()
+		}
 	}
 	w.background.Refresh()
 }
