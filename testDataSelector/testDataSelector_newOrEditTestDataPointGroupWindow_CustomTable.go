@@ -1,44 +1,55 @@
 package testDataSelector
 
 import (
-	"fmt"
+	//"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"sort"
 	"sync"
 )
 
 // The color of a row in the TestData-popup-table when it is selected
 var selectedRowColor = color.NRGBA{R: 0xa5, G: 0xf2, B: 0xa2, A: 0xff}
 
+// The color of a row when it is selected and the user is hovering the row
 var selectedAndHoveredRowColor = color.NRGBA{R: 0x60, G: 0xb8, B: 0xf7, A: 0xff}
+
+// Icons used for Ascending and Descending sort indicator
+var ascendingSortIndicatorIcon = widget.NewIcon(theme.MoveUpIcon())
+var descendingSortIndicatorIcon = widget.NewIcon(theme.MoveDownIcon())
+var notFocusFortSortingIcon = widget.NewIcon(theme.MediaPauseIcon())
 
 // CustomWidget represents a custom component that can switch between a label and an icon with a background color
 type CustomWidget struct {
 	widget.BaseWidget
 	//isIcon     bool
-	label      *widget.Label
-	icon       *widget.Icon
-	background *canvas.Rectangle
-	hovered    bool
-	onHover    func(bool, int)
-	onTapped   func(widget.TableCellID)
-	cellID     widget.TableCellID
-	isSelected bool
-	tableRef   *CustomTableWidget
+	label          *widget.Label
+	icon           *widget.Icon
+	headerSortIcon *widget.Icon
+	background     *canvas.Rectangle
+	hovered        bool
+	onHover        func(bool, int)
+	onTapped       func(widget.TableCellID)
+	cellID         widget.TableCellID
+	isSelected     bool
+	tableRef       *CustomTableWidget
+	sortOrder      sortDirection
 }
 
 // NewCustomWidget creates a new CustomWidget
 func NewCustomWidget(isSelected bool, text string, tableRef *CustomTableWidget) *CustomWidget {
 	w := &CustomWidget{
-		isSelected: isSelected,
-		label:      widget.NewLabel(text),
-		icon:       widget.NewIcon(theme.CheckButtonCheckedIcon()), // Replace with desired icon or picture
-		background: canvas.NewRectangle(theme.BackgroundColor()),
-		tableRef:   tableRef,
+		isSelected:     isSelected,
+		label:          widget.NewLabel(text),
+		icon:           widget.NewIcon(theme.CheckButtonCheckedIcon()), // Replace with desired icon or picture
+		headerSortIcon: notFocusFortSortingIcon,
+		background:     canvas.NewRectangle(theme.BackgroundColor()),
+		tableRef:       tableRef,
 	}
 	w.ExtendBaseWidget(w)
 	return w
@@ -46,25 +57,49 @@ func NewCustomWidget(isSelected bool, text string, tableRef *CustomTableWidget) 
 
 // CreateRenderer implements fyne.WidgetRenderer for CustomWidget
 func (w *CustomWidget) CreateRenderer() fyne.WidgetRenderer {
-	objects := []fyne.CanvasObject{w.background, w.label, w.icon}
+	objects := []fyne.CanvasObject{w.background, w.label, w.icon, w.headerSortIcon}
 	w.updateVisibility()
-	return &customWidgetRenderer{objects: objects, widget: w}
+
+	if w.cellID.Col == 0 {
+		// First column
+		return &customWidgetRenderer{objects: objects, widget: w, layout: container.NewHBox(w.icon)}
+	} else {
+		// Data column
+		return &customWidgetRenderer{objects: objects, widget: w, layout: container.NewHBox(w.headerSortIcon)}
+	}
 }
 
 // customWidgetRenderer is the renderer for CustomWidget
 type customWidgetRenderer struct {
 	objects []fyne.CanvasObject
 	widget  *CustomWidget
+	layout  *fyne.Container
 }
 
 func (r *customWidgetRenderer) Layout(size fyne.Size) {
 	r.widget.background.Resize(size)
 	r.widget.label.Resize(size)
 	r.widget.icon.Resize(size)
+	r.layout.Resize(size)
 }
 
 func (r *customWidgetRenderer) MinSize() fyne.Size {
-	return r.objects[1].MinSize() // label's min size
+
+	// label's + sort icon width and labels height
+	var newMinSize fyne.Size
+
+	tempLabel := widget.NewLabel("Measure Height")
+	tempLabel.Refresh()
+
+	if r.widget.cellID.Col == 0 {
+		// First column
+		newMinSize = fyne.NewSize(0, tempLabel.MinSize().Height) // Doesn't matter
+	} else {
+		// Data column
+		newMinSize = fyne.NewSize(r.objects[1].Size().Width+r.objects[3].Size().Width, tempLabel.MinSize().Height)
+	}
+
+	return newMinSize
 }
 
 func (r *customWidgetRenderer) Refresh() {
@@ -164,6 +199,7 @@ func (w *CustomWidget) Tapped(*fyne.PointEvent) {
 
 // CustomTableWidget represents the custom table with row double-click handling and hover effects
 type CustomTableWidget struct {
+	tableData [][]string
 	*widget.Table
 	cellObjects      map[widget.TableCellID]*CustomWidget
 	rowIsSelectedMap map[int]bool
@@ -177,6 +213,7 @@ var tableMutex sync.Mutex
 
 func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 	table := &CustomTableWidget{
+		tableData:        data,
 		Table:            &widget.Table{},
 		cellObjects:      make(map[widget.TableCellID]*CustomWidget),
 		rowIsSelectedMap: make(map[int]bool),
@@ -184,7 +221,7 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 		//hoveredRow:  -1,
 	}
 	table.Length = func() (int, int) {
-		return len(data), len(data[0]) + 1 // Adding one more column for the status
+		return len(table.tableData), len(table.tableData[0]) + 1 // Adding one more column for the status
 	}
 	table.CreateCell = func() fyne.CanvasObject {
 		return NewCustomWidget(false, "", table)
@@ -215,7 +252,7 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 
 		} else {
 			// Update other columns with data
-			obj.(*CustomWidget).SetText(data[cellID.Row][cellID.Col-1])
+			obj.(*CustomWidget).SetText(table.tableData[cellID.Row][cellID.Col-1])
 			obj.(*CustomWidget).icon.Hide()
 			obj.(*CustomWidget).label.Show()
 
@@ -265,18 +302,62 @@ func (t *CustomTableWidget) handleCellTapped(cellID widget.TableCellID, table *C
 
 	println("Cell tapped:", cellID.Row, cellID.Col)
 
+	// Tapped on Header
 	if cellID.Row == 0 {
+
+		// Extract the TableCell
+		tableCell := t.cellObjects[cellID]
+
+		// Pick sort order
+		var sortOrder sortDirection
+		if tableCell.sortOrder == dataSortOrderNotSelected || tableCell.sortOrder == dataSortDescending {
+
+			sortOrder = dataSortAscending
+			tableCell.sortOrder = dataSortAscending
+			tableCell.headerSortIcon = ascendingSortIndicatorIcon
+
+		} else {
+			sortOrder = dataSortDescending
+			tableCell.sortOrder = dataSortDescending
+			tableCell.headerSortIcon = descendingSortIndicatorIcon
+		}
+
+		// Clear out all other sort order icons
+		for columnIndex := 1; columnIndex < len(table.tableData[0]); columnIndex++ {
+			if columnIndex != cellID.Col {
+				newCellId := widget.TableCellID{
+					Row: 0,
+					Col: columnIndex,
+				}
+				// Only set data if teh cell has been initialized
+				_, existInMap := table.cellObjects[newCellId]
+				if existInMap == true {
+					table.cellObjects[newCellId].sortOrder = dataSortOrderNotSelected
+					table.cellObjects[newCellId].headerSortIcon = notFocusFortSortingIcon
+				}
+			}
+		}
+
+		sortTable(table.tableData, cellID.Col-1, sortOrder)
+		updateRowsSelectedMap(table)
+		table.Refresh()
+
 		return
 	}
 
-	isSelected := t.rowIsSelectedMap[cellID.Row]
+	// Not the header row
+	var isSelected bool
+	isSelected = t.rowIsSelectedMap[cellID.Row]
 	isSelected = !isSelected
 	t.rowIsSelectedMap[cellID.Row] = isSelected
 
-	for k, v := range t.rowIsSelectedMap {
-		fmt.Println(k, v)
+	// Update all cells on the row with selected or not
+	for tempCellId, tableCell := range t.cellObjects {
+		// Only update cells on the celected row
+		if tempCellId.Row == cellID.Row {
+			tableCell.isSelected = isSelected
+		}
 	}
-
 	t.Refresh()
 
 	//firstCellInRow := widget.TableCellID{Row: cellID.Row, Col: 0}
@@ -327,4 +408,54 @@ func (t *CustomTableWidget) unhoverRow(row int) {
 		}
 	}
 	//t.hoveredRow = -1
+}
+
+// sortDirection defines the sorting order
+type sortDirection int
+
+const (
+	dataSortOrderNotSelected sortDirection = iota
+	dataSortAscending
+	dataSortDescending
+)
+
+// sortTable sorts a 2D string slice based on the specified column and direction,
+// keeping the first row intact.
+func sortTable(data [][]string, column int, direction sortDirection) {
+	// Only sort the rows starting from the second row
+	sort.Slice(data[1:], func(i, j int) bool {
+		if direction == dataSortOrderNotSelected {
+			direction = dataSortAscending
+		}
+
+		if direction == dataSortAscending {
+			return data[i+1][column] < data[j+1][column]
+		}
+		return data[i+1][column] > data[j+1][column]
+	})
+}
+
+// updateRowsSelectedMap updates the map holding which row that is selected
+func updateRowsSelectedMap(table *CustomTableWidget) {
+
+	var cellId widget.TableCellID
+	var isRowSelected bool
+
+	// Loop the rows
+	for rowIndex, _ := range table.tableData {
+
+		// Create a CellId to use
+		cellId = widget.TableCellID{
+			Row: rowIndex,
+			Col: 0,
+		}
+
+		// Extract from Cell if row is selected
+		isRowSelected = table.cellObjects[cellId].isSelected
+
+		// Recreate Map holding if row is selected or not
+		table.rowIsSelectedMap[rowIndex] = isRowSelected
+
+	}
+
 }
