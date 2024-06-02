@@ -24,8 +24,8 @@ var ascendingSortIndicatorIcon = widget.NewIcon(theme.MoveUpIcon())
 var descendingSortIndicatorIcon = widget.NewIcon(theme.MoveDownIcon())
 var notFocusFortSortingIcon = widget.NewIcon(theme.MediaPauseIcon())
 
-// CustomWidget represents a custom component that can switch between a label and an icon with a background color
-type CustomWidget struct {
+// customWidget represents a custom component that can switch between a label and an icon with a background color
+type customWidget struct {
 	widget.BaseWidget
 	//isIcon     bool
 	label          *widget.Label
@@ -41,9 +41,9 @@ type CustomWidget struct {
 	sortOrder      sortDirection
 }
 
-// NewCustomWidget creates a new CustomWidget
-func NewCustomWidget(isSelected bool, text string, tableRef *CustomTableWidget) *CustomWidget {
-	w := &CustomWidget{
+// NewCustomWidget creates a new customWidget
+func NewCustomWidget(isSelected bool, text string, tableRef *CustomTableWidget) *customWidget {
+	w := &customWidget{
 		isSelected:     isSelected,
 		label:          widget.NewLabel(text),
 		icon:           widget.NewIcon(theme.CheckButtonCheckedIcon()), // Replace with desired icon or picture
@@ -55,8 +55,8 @@ func NewCustomWidget(isSelected bool, text string, tableRef *CustomTableWidget) 
 	return w
 }
 
-// CreateRenderer implements fyne.WidgetRenderer for CustomWidget
-func (w *CustomWidget) CreateRenderer() fyne.WidgetRenderer {
+// CreateRenderer implements fyne.WidgetRenderer for customWidget
+func (w *customWidget) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{w.background, w.label, w.icon, w.headerSortIcon}
 	w.updateVisibility()
 
@@ -69,10 +69,10 @@ func (w *CustomWidget) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-// customWidgetRenderer is the renderer for CustomWidget
+// customWidgetRenderer is the renderer for customWidget
 type customWidgetRenderer struct {
 	objects []fyne.CanvasObject
-	widget  *CustomWidget
+	widget  *customWidget
 	layout  *fyne.Container
 }
 
@@ -114,7 +114,7 @@ func (r *customWidgetRenderer) Objects() []fyne.CanvasObject {
 func (r *customWidgetRenderer) Destroy() {}
 
 // updateVisibility updates the visibility of the label and icon based on the isIcon flag
-func (w *CustomWidget) updateVisibility() {
+func (w *customWidget) updateVisibility() {
 
 	var existInMap bool
 	var rowIsSelected bool
@@ -163,16 +163,16 @@ func (w *CustomWidget) updateVisibility() {
 }
 
 // SetText sets the text of the label
-func (w *CustomWidget) SetText(text string) {
+func (w *customWidget) SetText(text string) {
 	w.label.SetText(text)
 }
 
 // SetCellID sets the position of the cell in the Table
-func (w *CustomWidget) SetCellID(cellID widget.TableCellID) {
+func (w *customWidget) SetCellID(cellID widget.TableCellID) {
 	w.cellID = cellID
 }
 
-func (w *CustomWidget) MouseIn(*desktop.MouseEvent) {
+func (w *customWidget) MouseIn(*desktop.MouseEvent) {
 	w.hovered = true
 	if w.onHover != nil {
 		w.onHover(true, w.cellID.Row)
@@ -180,7 +180,7 @@ func (w *CustomWidget) MouseIn(*desktop.MouseEvent) {
 	w.Refresh()
 }
 
-func (w *CustomWidget) MouseOut() {
+func (w *customWidget) MouseOut() {
 	w.hovered = false
 	if w.onHover != nil {
 		w.onHover(false, w.cellID.Row)
@@ -188,10 +188,10 @@ func (w *CustomWidget) MouseOut() {
 	w.Refresh()
 }
 
-func (w *CustomWidget) MouseMoved(*desktop.MouseEvent) {}
+func (w *customWidget) MouseMoved(*desktop.MouseEvent) {}
 
 // Tapped handles tap events
-func (w *CustomWidget) Tapped(*fyne.PointEvent) {
+func (w *customWidget) Tapped(*fyne.PointEvent) {
 	if w.onTapped != nil {
 		w.onTapped(w.cellID)
 	}
@@ -201,8 +201,9 @@ func (w *CustomWidget) Tapped(*fyne.PointEvent) {
 type CustomTableWidget struct {
 	tableData [][]string
 	*widget.Table
-	cellObjects      map[widget.TableCellID]*CustomWidget
-	rowIsSelectedMap map[int]bool
+	cellObjects        map[widget.TableCellID]*customWidget
+	rowIsSelectedMap   map[int]bool
+	rowUuidIsSectedMap map[string]bool
 	//lastTap     time.Time
 	//tapCount    int
 	//hoveredRow  int
@@ -213,10 +214,11 @@ var tableMutex sync.Mutex
 
 func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 	table := &CustomTableWidget{
-		tableData:        data,
-		Table:            &widget.Table{},
-		cellObjects:      make(map[widget.TableCellID]*CustomWidget),
-		rowIsSelectedMap: make(map[int]bool),
+		tableData:          data,
+		Table:              &widget.Table{},
+		cellObjects:        make(map[widget.TableCellID]*customWidget),
+		rowIsSelectedMap:   make(map[int]bool),
+		rowUuidIsSectedMap: make(map[string]bool),
 		//rowStatus:   make([]bool, len(data)),
 		//hoveredRow:  -1,
 	}
@@ -228,7 +230,7 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 	}
 	table.UpdateCell = func(cellID widget.TableCellID, obj fyne.CanvasObject) {
 
-		obj.(*CustomWidget).SetCellID(cellID)
+		obj.(*customWidget).SetCellID(cellID)
 
 		if cellID.Col == 0 {
 			/*
@@ -241,44 +243,44 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 				customWidget.isIcon = false
 
 			*/
-			obj.(*CustomWidget).SetText("")
+			obj.(*customWidget).SetText("")
 			if table.rowIsSelectedMap[cellID.Row] == true {
-				obj.(*CustomWidget).icon.Show()
-				obj.(*CustomWidget).label.Hide()
+				obj.(*customWidget).icon.Show()
+				obj.(*customWidget).label.Hide()
 			} else {
-				obj.(*CustomWidget).icon.Hide()
-				obj.(*CustomWidget).label.Show()
+				obj.(*customWidget).icon.Hide()
+				obj.(*customWidget).label.Show()
 			}
 
 		} else {
 			// Update other columns with data
-			obj.(*CustomWidget).SetText(table.tableData[cellID.Row][cellID.Col-1])
-			obj.(*CustomWidget).icon.Hide()
-			obj.(*CustomWidget).label.Show()
+			obj.(*customWidget).SetText(table.tableData[cellID.Row][cellID.Col-1])
+			obj.(*customWidget).icon.Hide()
+			obj.(*customWidget).label.Show()
 
 			if cellID.Row == 0 {
 
-				obj.(*CustomWidget).label.TextStyle.Bold = true
+				obj.(*customWidget).label.TextStyle.Bold = true
 			} else {
-				obj.(*CustomWidget).label.TextStyle.Bold = false
+				obj.(*customWidget).label.TextStyle.Bold = false
 			}
 		}
-		obj.(*CustomWidget).onHover = func(hovered bool, row int) {
+		obj.(*customWidget).onHover = func(hovered bool, row int) {
 			if hovered {
 				table.hoverRow(row)
 			} else {
 				table.unhoverRow(row)
 			}
 		}
-		obj.(*CustomWidget).onTapped = func(cellID widget.TableCellID) {
+		obj.(*customWidget).onTapped = func(cellID widget.TableCellID) {
 			table.handleCellTapped(cellID, table)
 		}
 
 		// Hinder concurrent map writes
 		tableMutex.Lock()
 
-		table.cellObjects[cellID] = obj.(*CustomWidget)
-		obj.(*CustomWidget).Refresh()
+		table.cellObjects[cellID] = obj.(*customWidget)
+		obj.(*customWidget).Refresh()
 
 		// Release map
 		tableMutex.Unlock()
@@ -339,6 +341,7 @@ func (t *CustomTableWidget) handleCellTapped(cellID widget.TableCellID, table *C
 		}
 
 		sortTable(table.tableData, cellID.Col-1, sortOrder)
+		table.Refresh()
 		updateRowsSelectedMap(table)
 		table.Refresh()
 
@@ -350,6 +353,13 @@ func (t *CustomTableWidget) handleCellTapped(cellID widget.TableCellID, table *C
 	isSelected = t.rowIsSelectedMap[cellID.Row]
 	isSelected = !isSelected
 	t.rowIsSelectedMap[cellID.Row] = isSelected
+
+	// Get RowUUID for selected row
+	var rowUuid string
+	rowUuid = table.tableData[cellID.Row][len(table.tableData[0])-1]
+
+	// Update selected row for Row Uuid
+	t.rowUuidIsSectedMap[rowUuid] = isSelected
 
 	// Update all cells on the row with selected or not
 	for tempCellId, tableCell := range t.cellObjects {
@@ -438,22 +448,23 @@ func sortTable(data [][]string, column int, direction sortDirection) {
 // updateRowsSelectedMap updates the map holding which row that is selected
 func updateRowsSelectedMap(table *CustomTableWidget) {
 
-	var cellId widget.TableCellID
 	var isRowSelected bool
+	var rowUuid string
+	var uuidColumn int
+
+	// Get column for Row Uuid
+	uuidColumn = len(table.tableData[0]) - 1
 
 	// Loop the rows
 	for rowIndex, _ := range table.tableData {
 
-		// Create a CellId to use
-		cellId = widget.TableCellID{
-			Row: rowIndex,
-			Col: 0,
-		}
+		// Get Row Uuid
+		rowUuid = table.tableData[rowIndex][uuidColumn]
 
-		// Extract from Cell if row is selected
-		isRowSelected = table.cellObjects[cellId].isSelected
+		// Extract from row is selected
+		isRowSelected = table.rowUuidIsSectedMap[rowUuid]
 
-		// Recreate Map holding if row is selected or not
+		// Recreate values in Map holding if row is selected or not
 		table.rowIsSelectedMap[rowIndex] = isRowSelected
 
 	}
