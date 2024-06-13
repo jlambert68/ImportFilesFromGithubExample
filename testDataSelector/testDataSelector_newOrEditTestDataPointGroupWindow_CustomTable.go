@@ -1,6 +1,9 @@
 package testDataSelector
 
 import (
+	"fmt"
+	"fyne.io/fyne/v2/dialog"
+
 	//"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -302,8 +305,6 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 func (t *CustomTableWidget) handleCellTapped(cellID widget.TableCellID, table *CustomTableWidget) {
 	// Handle cell click logic here
 
-	println("Cell tapped:", cellID.Row, cellID.Col)
-
 	// Tapped on Header
 	if cellID.Row == 0 {
 
@@ -468,5 +469,67 @@ func updateRowsSelectedMap(table *CustomTableWidget) {
 		table.rowIsSelectedMap[rowIndex] = isRowSelected
 
 	}
+
+}
+
+// setColumnWidths adapt all columns in the popup window to fit its headers and data
+func setColumnWidths(table *widget.Table, data [][]string) {
+	maxWidths := make([]float32, len(data[0]))
+	var width float32
+	for col := range maxWidths {
+		for row := range data {
+			if row == 0 {
+				width = fyne.MeasureText(data[row][col], theme.TextSize(), fyne.TextStyle{Bold: true}).Width
+			} else {
+				width = fyne.MeasureText(data[row][col], theme.TextSize(), fyne.TextStyle{}).Width
+			}
+			if width > maxWidths[col] {
+				maxWidths[col] = width
+			}
+		}
+		// Add some padding to the maximum width found
+		maxWidths[col] += theme.Padding() * 4
+	}
+
+	for col, columnWidth := range maxWidths {
+		table.SetColumnWidth(col+1, columnWidth)
+	}
+
+	table.SetColumnWidth(0, fyne.MeasureText("xxxx", theme.TextSize(), fyne.TextStyle{}).Width)
+}
+
+// showTable creates and shows a table for the selected node with data
+func showTable(w fyne.Window, data [][]string) {
+
+	// Create a new table with an extra column for checkboxes
+	table := NewCustomTableWidget(data)
+
+	// Set minimum size for the table to ensure it's larger
+	table.Resize(fyne.NewSize(600, 500)) // Set the minimum size to 400x300 pixels
+
+	// Use a scroll container to make the table scrollable in case it has more data
+	scrollContainer := container.NewScroll(table)
+
+	modal := dialog.NewCustomConfirm("Chose TestDataPoints", "Select TestDataPoints", "Cancel",
+		scrollContainer,
+		func(response bool) {
+			if response {
+				println("User confirmed action")
+
+				// Extract rows that were selecte
+				for row, isSelected := range table.rowIsSelectedMap {
+					if isSelected == true {
+						cellID := widget.TableCellID{row, 1}
+						fmt.Println(table.cellObjects[cellID])
+					}
+				}
+
+			} else {
+				println("User canceled action")
+			}
+
+		}, w)
+	modal.Resize(fyne.NewSize(800, 600))
+	modal.Show()
 
 }

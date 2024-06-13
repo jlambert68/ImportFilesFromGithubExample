@@ -147,7 +147,7 @@ type testDataPointStruct struct {
 	testDatapointValue           testDatapointValueType
 }
 type testDataPointGroupNameType string
-type testDataPointNameMapType map[testDataPointUuidType]testDataPointStruct
+type testDataPointNameMapType map[testDataPointUuidType]*[]*testDataPointStruct
 
 // Error/warning texts for control of Group Name
 const (
@@ -161,4 +161,10 @@ const (
 type responseChannelStruct struct {
 	shouldBeUpdated        bool
 	testDataPointGroupName testDataPointGroupNameType
+}
+
+// Structure for the list that is used to present for the user what can be chosen form and what is chosen
+type dataPointTypeForListsStruct struct {
+	testDataPointUuid map[testDataPointUuidType]testDataPointUuidType
+	testDataPointName testDataPointNameType
 }
