@@ -4,10 +4,7 @@ import "sort"
 
 // ListTestDataGroups
 // List the current TestDataGroups that the User has
-func ListTestDataGroups() (testDataGroups []string) {
-
-	// Convert TestDataGroups into '[]string'
-	var testDataPointGroupsAsStringSlice []string
+func ListTestDataGroups() (testDataPointGroupsAsStringSlice []string) {
 
 	// Loop all 'testDataPointGroups'
 	for _, tempTestDataPointGroup := range testDataPointGroups {
@@ -23,9 +20,7 @@ func ListTestDataGroups() (testDataGroups []string) {
 
 // ListTestDataGroupPointsForAGroup
 // List the current TestDataGroupPoints for a specific TestDataGroup
-func ListTestDataGroupPointsForAGroup(testDataGroup string) (testDataGroupPoints []string) {
-
-	var testDataPointGroupsAsStringSlice []string
+func ListTestDataGroupPointsForAGroup(testDataGroup string) (testDataPointGroupsAsStringSlice []string) {
 
 	// Extract the map with the TestDataPoints
 	var tempTestDataPointNameMap testDataPointNameMapType
@@ -41,6 +36,28 @@ func ListTestDataGroupPointsForAGroup(testDataGroup string) (testDataGroupPoints
 	sort.Strings(testDataPointGroupsAsStringSlice)
 
 	return testDataPointGroupsAsStringSlice
+
+}
+
+// ListTestDataRowsForAGroupPoint
+// List the current TestDataRow for a specific TestDataGroupPoint
+func ListTestDataRowsForAGroupPoint(testDataGroupPoint string) (testDataGroupPointRowsAsStringSlice []string) {
+fixa denna
+
+	// Extract the map with the TestDataPoints
+	var tempTestDataPointNameMap testDataPointNameMapType
+	tempTestDataPointNameMap = *chosenTestDataPointsPerGroupMap[testDataPointGroupNameType(testDataGroupPoint)]
+
+	// Refill the slice with all TestDataPoints
+	for testDataPoint, _ := range tempTestDataPointNameMap {
+		testDataGroupPointRowsAsStringSlice = append(testDataGroupPointRowsAsStringSlice, string(testDataPoint))
+
+	}
+
+	// Sort the GroupPoints
+	sort.Strings(testDataGroupPointRowsAsStringSlice)
+
+	return testDataGroupPointRowsAsStringSlice
 
 }
 

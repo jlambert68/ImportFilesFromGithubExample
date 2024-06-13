@@ -132,22 +132,30 @@ var selectedIndexForGroupTestDataPoints int = -1
 var testDataPointGroupsSelect *widget.Select
 var testDataPointsForAGroupSelect *widget.Select
 
+// The type for Group name
+type testDataPointGroupNameType string
+
 // The map holding all data for Groups and TestDataPoints for a group
 var chosenTestDataPointsPerGroupMap map[testDataPointGroupNameType]*testDataPointNameMapType
 
-// Types used for data structures
+// The type for the map that holds the connection between TestDataRowUuid and alla column values
+type testDataPointNameMapType map[testDataPointUuidType]*[]*testDataPointRowStruct
+
+// Types used for data structures for a specific rowValue
 type testDataPointUuidType string
 type testDataPointNameType string
 type testDataPointNameDescriptionType string
 type testDatapointValueType string
-type testDataPointStruct struct {
+type testDataPointRowStruct struct {
+	testDataDomainUuidT          TestDataDomainUuidType
+	testDataDomainName           TestDataDomainNameType
+	testDataAreaUuid             TestDataAreaUuidType
+	testDataAreaName             TestDataAreaNameType
 	testDataPointUuid            testDataPointUuidType
 	testDataPointName            testDataPointNameType
 	testDataPointNameDescription testDataPointNameDescriptionType
 	testDatapointValue           testDatapointValueType
 }
-type testDataPointGroupNameType string
-type testDataPointNameMapType map[testDataPointUuidType]*[]*testDataPointStruct
 
 // Error/warning texts for control of Group Name
 const (

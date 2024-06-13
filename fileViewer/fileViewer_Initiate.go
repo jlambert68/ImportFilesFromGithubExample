@@ -24,13 +24,16 @@ func InitiateFileViewer(
 
 	// The Select-items for Groups ans TestDataPoints for a Group
 	var testDataPointGroupsSelect *widget.Select
-	var testDataPointsForAGroupSelect *widget.Select
 	var testDataPointGroupsSelectSelected string
+	var testDataPointsForAGroupSelect *widget.Select
 	var testDataPointsForAGroupSelectSelected string
+	var testDataRowsForTestDataPointsSelect *widget.Select
+	var testDataRowsForTestDataPointsSelectSelected string
 
-	// The slices for Groups ans TestDataPoints for a Group
-	var testDataPointGroups []string     // Define testDataPointGroups
-	var testDataPointsForAGroup []string // Define testDataPointGroups
+	// The slices for Groups, TestDataPoints for a Group and the specific TestDataRows for a TestDataPoint
+	var testDataPointGroups []string
+	var testDataPointsForAGroup []string
+	var testDataRowsForATestDataPoint []string
 
 	// Store reference to Fenix Main Window
 	fenixMainWindow = mainWindow
@@ -126,7 +129,19 @@ func InitiateFileViewer(
 		return testDataPointsForAGroup
 	}
 
-	// Create the Group dropdown
+	// Create function that converts a slice with the specific TestDataPoints into a string slice
+	testDataRowSliceToStringSliceFunction := func(testDataPoint string) []string {
+
+		if testDataPoint == "" {
+			return []string{}
+		}
+
+		testDataRowsForATestDataPoint = testDataSelector.ListTestDataRowsForAGroupPoint(testDataPoint)
+
+		return testDataRowsForATestDataPoint
+	}
+
+	// Create the Group dropdown - <Name of the group>
 	testDataPointGroupsSelect = widget.NewSelect(getTestGroupsFromTestDataEngineFunction(), func(selected string) {
 
 		testDataPointGroupsSelectSelected = selected
@@ -140,10 +155,24 @@ func InitiateFileViewer(
 
 	})
 
-	// Create the Groups TestDataPoints dropdown
+	// Create the Groups TestDataPoints dropdown - <Sub Custody/Main TestData Area/SEK/AccTest/SE/CRDT/CH/Switzerland/BBH/EUR/EUR/SEK>
 	testDataPointsForAGroupSelect = widget.NewSelect(testDataPointsToStringSliceFunction(testDataPointGroupsSelectSelected), func(selected string) {
 
 		testDataPointsForAGroupSelectSelected = selected
+
+		// Select the correct TestDataPoint in the dropdown for TestDataPoints
+		testDataRowsForTestDataPointsSelect.SetOptions(testDataRowSliceToStringSliceFunction(selected))
+		testDataRowsForTestDataPointsSelect.Refresh()
+
+		// UnSelect in DropDown- and List for Specific TestDataPoints
+		testDataPointsForAGroupSelect.ClearSelected()
+
+	})
+
+	// Create the Groups Specific TestDataPoint dropdown - <All the specific values>
+	testDataRowsForTestDataPointsSelect = widget.NewSelect(testDataRowSliceToStringSliceFunction(testDataPointsForAGroupSelectSelected), func(selected string) {
+
+		testDataRowsForTestDataPointsSelectSelected = selected
 
 		fileSelectordropdown.SetSelected(selectedFile)
 
@@ -151,7 +180,7 @@ func InitiateFileViewer(
 
 	// Create UI component for 'TestDataGroupPointSelector'
 
-	topContainer := container.NewVBox(fileSelectordropdown, urlLabel, testDataPointGroupsSelect, testDataPointsForAGroupSelect)
+	topContainer := container.NewVBox(fileSelectordropdown, urlLabel, testDataPointGroupsSelect, testDataPointsForAGroupSelect, testDataRowsForTestDataPointsSelect)
 
 	// Placeholder for rightContainer - add your form view here
 	rightContainer = container.NewBorder(nil, nil, nil, nil, richTextWithValues)

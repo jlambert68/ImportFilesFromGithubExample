@@ -77,8 +77,8 @@ func generateSelectedPointsListUIComponent(
 			for _, selectedPointUuid := range selectedPoint.testDataPointUuid {
 
 				// Create a TestDataPoint to be stored in a TestDataGroup
-				var testDataPoint testDataPointStruct
-				testDataPoint = testDataPointStruct{
+				var testDataPoint testDataPointRowStruct
+				testDataPoint = testDataPointRowStruct{
 					testDataPointUuid:            selectedPointUuid,
 					testDataPointName:            selectedPoint.testDataPointName,
 					testDataPointNameDescription: testDataPointNameDescriptionType(selectedPoint.testDataPointName),
