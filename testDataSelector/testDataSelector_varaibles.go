@@ -117,8 +117,8 @@ type TestDataValueNameDescriptionType string
 type TestDataValueNameType string
 
 // The slices for Groups ans TestDataPoints for a Group
-var testDataPointGroups []testDataPointGroupNameType // Define testDataPointGroups
-var testDataPointsForAGroup []testDataPointUuidType  // Define testDataPointGroups
+var testDataPointGroups []testDataPointGroupNameType   // Define testDataPointGroups
+var testDataPointsForAGroup []TestDataPointRowUuidType // Define testDataPointGroups
 
 // The List-items for Groups ans TestDataPoints for a Group
 var testDataPointGroupsList *widget.List
@@ -138,24 +138,20 @@ type testDataPointGroupNameType string
 // The map holding all data for Groups and TestDataPoints for a group
 var chosenTestDataPointsPerGroupMap map[testDataPointGroupNameType]*testDataPointNameMapType
 
-// The type for the map that holds the connection between TestDataRowUuid and alla column values
-type testDataPointNameMapType map[testDataPointUuidType]*[]*testDataPointRowStruct
+// The type for the map that holds the connection between TestDataÅpintName and all the RowUUids connectoed to it
+type testDataPointNameMapType map[TestDataValueNameType]*[]*dataPointTypeForGroupsStruct
 
 // Types used for data structures for a specific rowValue
-type testDataPointUuidType string
-type testDataPointNameType string
-type testDataPointNameDescriptionType string
-type testDatapointValueType string
-type testDataPointRowStruct struct {
-	testDataDomainUuidT          TestDataDomainUuidType
+/*type testDataPointRowStruct struct {
+	testDataDomainUuid           TestDataDomainUuidType
 	testDataDomainName           TestDataDomainNameType
 	testDataAreaUuid             TestDataAreaUuidType
 	testDataAreaName             TestDataAreaNameType
-	testDataPointUuid            testDataPointUuidType
-	testDataPointName            testDataPointNameType
-	testDataPointNameDescription testDataPointNameDescriptionType
-	testDatapointValue           testDatapointValueType
-}
+	testDataPointUuid            TestDataPointRowUuidType
+	testDataPointName            TestDataValueNameType
+	testDataPointNameDescription TestDataValueNameDescriptionType
+	testDatapointValue           TestDataValueType
+} */
 
 // Error/warning texts for control of Group Name
 const (
@@ -171,8 +167,12 @@ type responseChannelStruct struct {
 	testDataPointGroupName testDataPointGroupNameType
 }
 
-// Structure for the list that is used to present for the user what can be chosen form and what is chosen
-type dataPointTypeForListsStruct struct {
-	testDataPointUuid map[testDataPointUuidType]testDataPointUuidType
-	testDataPointName testDataPointNameType
+// Structure for the Group
+type dataPointTypeForGroupsStruct struct {
+	testDataDomainUuid   TestDataDomainUuidType
+	testDataDomainName   TestDataDomainNameType
+	testDataAreaUuid     TestDataAreaUuidType
+	testDataAreaName     TestDataAreaNameType
+	testDataPointName    TestDataValueNameType
+	testDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidType
 }

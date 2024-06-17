@@ -325,13 +325,13 @@ func generateTestDataSelectionsUIComponent(
 		// Create a filtered TestDataPoint
 		var filteredTestDataPoint dataPointTypeForListsStruct
 		filteredTestDataPoint = dataPointTypeForListsStruct{
-			testDataPointUuid: nil,
-			testDataPointName: testDataPointNameType(tempTestDataValueNameInMap),
+			testDataPointUuidMap: nil,
+			testDataPointName:    TestDataValueNameType(tempTestDataValueNameInMap),
 		}
 
 		// Add the 'TestDataPointUuid's' to the filtered TestDataPoint
 		for _, tempTestDataPointUuid := range tempTestDataPointRowUuidSliceFromMap {
-			filteredTestDataPoint.testDataPointUuid[testDataPointUuidType(tempTestDataPointUuid)] = testDataPointUuidType(tempTestDataPointUuid)
+			filteredTestDataPoint.testDataPointUuidMap[TestDataPointRowUuidType(tempTestDataPointUuid)] = TestDataPointRowUuidType(tempTestDataPointUuid)
 		}
 
 	}
@@ -341,7 +341,7 @@ func generateTestDataSelectionsUIComponent(
 	var rowUuidExistInSelectedPoints bool
 	var nameExistInSelectedPoints bool
 	var nameExistInAvailablePoints bool
-	var tempSelectedTestDataPointUuid testDataPointUuidType
+	var tempSelectedTestDataPointUuid TestDataPointRowUuidType
 	var availablePointsIndex int
 
 	// Make a local copy of 'allPointsAvailable' to work with
@@ -368,8 +368,8 @@ func generateTestDataSelectionsUIComponent(
 					nameExistInSelectedPoints = true
 
 					// Check if row-UUID exist in SelectedPoint
-					for _, selectedTestDataPointUuid := range selectedPoint.testDataPointUuid {
-						_, existInMap = selectedPoint.testDataPointUuid[selectedTestDataPointUuid]
+					for _, selectedTestDataPointUuid := range selectedPoint.testDataPointUuidMap {
+						_, existInMap = selectedPoint.testDataPointUuidMap[selectedTestDataPointUuid]
 
 						// Exit for-loop if the TestDataPointUuid exist
 						if existInMap == false {
@@ -395,7 +395,7 @@ func generateTestDataSelectionsUIComponent(
 						// If TestDataPointName exist in the allPointsAvailable-slice, then add it to the TestDataPoint in allPointsAvailable-slice
 						if nameExistInAvailablePoints == true {
 							existingFilteredPoint := tempAllPointsAvailable[availablePointsIndex]
-							existingFilteredPoint.testDataPointUuid[tempSelectedTestDataPointUuid] = tempSelectedTestDataPointUuid
+							existingFilteredPoint.testDataPointUuidMap[tempSelectedTestDataPointUuid] = tempSelectedTestDataPointUuid
 							tempAllPointsAvailable[availablePointsIndex] = existingFilteredPoint
 
 						} else {

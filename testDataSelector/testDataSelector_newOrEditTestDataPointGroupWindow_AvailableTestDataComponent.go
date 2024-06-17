@@ -12,7 +12,9 @@ func generateAllAvailablePointsListUIComponent(
 	allAvailablePointsList *widget.List,
 	allPointsAvailable *[]dataPointTypeForListsStruct,
 	allSelectedPoints *[]dataPointTypeForListsStruct,
-	newOrEditTestDataPointGroupWindow *fyne.Window) {
+	newOrEditTestDataPointGroupWindow *fyne.Window,
+	selectedPointsList *widget.List,
+	testDataModel *TestDataModelStruct) {
 
 	// Create and configure the list-component of all TestDataPoints
 	allAvailablePointsList = widget.NewList(
@@ -26,23 +28,31 @@ func generateAllAvailablePointsListUIComponent(
 			var localCopyAllPointsAvailable []dataPointTypeForListsStruct
 			localCopyAllPointsAvailable = *allPointsAvailable
 
-			obj.(*widget.Label).SetText(fmt.Sprintf("%s [%d]", string(localCopyAllPointsAvailable[id].testDataPointName), len(localCopyAllPointsAvailable[id].testDataPointUuid)))
+			obj.(*widget.Label).SetText(fmt.Sprintf(
+				"%s [%d]",
+				string(localCopyAllPointsAvailable[id].testDataPointName),
+				len(localCopyAllPointsAvailable[id].testDataPointUuidMap)))
 		},
 	)
 
 	allAvailablePointsList.OnSelected = func(id widget.ListItemID) {
 
+		// Generate local copy of 'allPointsAvailable'
+		var localCopyOfAllPointsAvailable []dataPointTypeForListsStruct
+		localCopyOfAllPointsAvailable = *allPointsAvailable
+
 		// Remove the number part of the visible name
 		var clickedDataPointName string
-		clickedDataPointName = filterToRemoveNumberOfSimilarTestDataPointsInName(string(allPointsAvailable[id].testDataPointName))
+		clickedDataPointName = filterToRemoveNumberOfSimilarTestDataPointsInName(string(localCopyOfAllPointsAvailable[id].testDataPointName))
 
 		var tableData [][]string
 		tableData = buildPopUpTableDataFromTestDataPointName(clickedDataPointName, testDataModel)
 
-		showTable(newOrEditTestDataPointGroupWindow, tableData)
+		showTable(*newOrEditTestDataPointGroupWindow, tableData)
 
-		allSelectedPoints = append(allSelectedPoints, allPointsAvailable[id])
-		allPointsAvailable = append(allPointsAvailable[:id], allPointsAvailable[id+1:]...)
+		//fixa denna
+		//allSelectedPoints = append(*allSelectedPoints, *allPointsAvailable[id])
+		//allPointsAvailable = append(allPointsAvailable[:id], allPointsAvailable[id+1:]...)
 
 		allAvailablePointsList.UnselectAll()
 

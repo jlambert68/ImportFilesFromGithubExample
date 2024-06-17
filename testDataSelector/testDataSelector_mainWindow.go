@@ -171,8 +171,8 @@ func MainTestDataSelector(
 	responseChannel = make(chan responseChannelStruct)
 
 	// The structure holding Group and TestDataPoints together
-	//var newOrEditedChosenTestDataPointsPerGroupMap map[testDataPointGroupNameType][]testDataPointUuidType
-	//newOrEditedChosenTestDataPointsPerGroupMap = make(map[testDataPointGroupNameType][]testDataPointUuidType)
+	//var newOrEditedChosenTestDataPointsPerGroupMap map[testDataPointGroupNameType][]TestDataPointRowUuidType
+	//newOrEditedChosenTestDataPointsPerGroupMap = make(map[testDataPointGroupNameType][]TestDataPointRowUuidType)
 
 	// Crete the 'New'-button for creating a new Group for TestDataPoints
 	newButton := widget.NewButton("New", func() {

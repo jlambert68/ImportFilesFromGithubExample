@@ -42,7 +42,8 @@ func ListTestDataGroupPointsForAGroup(testDataGroup string) (testDataPointGroups
 // ListTestDataRowsForAGroupPoint
 // List the current TestDataRow for a specific TestDataGroupPoint
 func ListTestDataRowsForAGroupPoint(testDataGroupPoint string) (testDataGroupPointRowsAsStringSlice []string) {
-fixa denna
+
+	//fixa denna
 
 	// Extract the map with the TestDataPoints
 	var tempTestDataPointNameMap testDataPointNameMapType

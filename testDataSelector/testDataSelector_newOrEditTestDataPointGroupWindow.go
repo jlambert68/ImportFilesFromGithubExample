@@ -89,7 +89,9 @@ func showNewOrEditGroupWindow(
 		allAvailablePointsList,
 		&allPointsAvailable,
 		&allSelectedPoints,
-		&newOrEditTestDataPointGroupWindow)
+		&newOrEditTestDataPointGroupWindow,
+		selectedPointsList,
+		testDataModel)
 
 	// Create and configure the list-component of selected TestDataPoints
 	generateSelectedPointsListUIComponent(
@@ -99,7 +101,8 @@ func showNewOrEditGroupWindow(
 		&newOrEditTestDataPointGroupWindow,
 		lowerRightSideContainer,
 		incomingGroupName,
-		isNew)
+		isNew,
+		newOrEditedChosenTestDataPointsThisGroupMapPtr)
 
 	var tempTestDataPointsLabel *widget.Label
 	tempTestDataPointsLabel = widget.NewLabel("TestDataPoints based on filter")
@@ -242,6 +245,7 @@ func buildPopUpTableDataFromTestDataPointName(
 	return tableData
 }
 
+/*
 // Build the Table Data, based on TestDataPointUuid, to be used when the popup table is shown to the user to pick from
 func buildPopUpTableDataFromTestDataPointUuid(
 	tempTestDataPointRowUuids []string,
@@ -336,3 +340,5 @@ func buildPopUpTableDataFromTestDataPointUuid(
 
 	return tableData
 }
+
+*/
