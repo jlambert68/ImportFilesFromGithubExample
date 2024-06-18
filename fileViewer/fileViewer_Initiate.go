@@ -28,7 +28,7 @@ func InitiateFileViewer(
 	var testDataPointsForAGroupSelect *widget.Select
 	var testDataPointsForAGroupSelectSelected string
 	var testDataRowsForTestDataPointsSelect *widget.Select
-	var testDataRowsForTestDataPointsSelectSelected string
+	//var testDataRowsForTestDataPointsSelectSelected string
 
 	// The slices for Groups, TestDataPoints for a Group and the specific TestDataRows for a TestDataPoint
 	var testDataPointGroups []string
@@ -172,7 +172,7 @@ func InitiateFileViewer(
 	// Create the Groups Specific TestDataPoint dropdown - <All the specific values>
 	testDataRowsForTestDataPointsSelect = widget.NewSelect(testDataRowSliceToStringSliceFunction(testDataPointsForAGroupSelectSelected), func(selected string) {
 
-		testDataRowsForTestDataPointsSelectSelected = selected
+		//testDataRowsForTestDataPointsSelectSelected = selected
 
 		fileSelectordropdown.SetSelected(selectedFile)
 

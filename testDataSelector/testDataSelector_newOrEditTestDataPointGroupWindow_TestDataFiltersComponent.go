@@ -15,10 +15,10 @@ func generateTestDataSelectionsUIComponent(
 	testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct,
 	testDataModel *TestDataModelStruct,
 	tempTestDataValuesForRowMapPtr *map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct,
-	allPointsAvailable *[]dataPointTypeForListsStruct,
-	allSelectedPoints *[]dataPointTypeForListsStruct,
+	allPointsAvailable *[]dataPointTypeForGroupsStruct,
+	allSelectedPoints *[]dataPointTypeForGroupsStruct,
 	allAvailablePointsList *widget.List,
-	searchAndClearButtonsContainer *fyne.Container) {
+	searchAndClearButtonsContainer *fyne.Container) (*fyne.Container, *fyne.Container) {
 
 	var existInMap bool
 
@@ -242,6 +242,7 @@ func generateTestDataSelectionsUIComponent(
 		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
 		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
 		*tempTestDataValuesForRowMapPtr = *tempTestDataArea.TestDataValuesForRowMap
+		var tempTestDataPointValueSlice []*TestDataPointValueStruct
 
 		//var tempTestDataPointValueSlice *[]*TestDataPointValueStruct
 
@@ -282,6 +283,73 @@ func generateTestDataSelectionsUIComponent(
 			}
 		}
 
+		// Convert into all 'TestDataValueName' in []string to be used in Available TestDataPoints-list
+		var filteredTestDataPoints []string
+		filteredTestDataPoints = nil
+		var tempTestDataValueName string
+		for _, testDataPointRowUuid := range searchResult {
+
+			tempTestDataPointValueSlice = *tempTestDataValuesForRowMapPtr[testDataPointRowUuid]
+
+			tempTestDataValueName = string(tempTestDataPointValueSlice[0].TestDataValueName)
+
+			tempTestDataPointRowUuidSliceInMap, _ = tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)]
+			tempTestDataPointRowUuidSliceInMap = append(tempTestDataPointRowUuidSliceInMap, testDataPointRowUuid)
+			tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)] = tempTestDataPointRowUuidSliceInMap
+		}
+
+		for tempTestDataValueNameInMap, tempTestDataPointRowUuidSliceInMap := range tempTestDataValueNameToRowUuidMap {
+
+			filteredTestDataPoints = append(filteredTestDataPoints, fmt.Sprintf("%s [%d]", string(tempTestDataValueNameInMap), len(tempTestDataPointRowUuidSliceInMap)))
+		}
+
+		// Create the list that holds all points that are available to chose from
+		// Create the list that holds all points that are chosen
+		allPointsAvailable = nil
+		var existInSelectedPoints bool
+		for _, point := range filteredTestDataPoints {
+
+			var pointToBeAdded dataPointTypeForGroupsStruct
+
+			// Add it to the list of available points, if it doesn't exist in the Selected-List
+			if len(*allSelectedPoints) == 0 {
+				*allPointsAvailable = append(*allPointsAvailable, pointToBeAdded)
+			} else {
+				for _, selectedPoint := range *allSelectedPoints {
+
+					if selectedPoint == point {
+						existInSelectedPoints = true
+						break
+					}
+					if existInSelectedPoints == false {
+						allPointsAvailable = append(allPointsAvailable, point)
+					} else {
+						existInSelectedPoints = false
+					}
+				}
+			}
+		}
+
+		// Custom sort: we sort by splitting each string into parts and comparing the parts
+		sort.Slice(allPointsAvailable, func(i, j int) bool {
+			// Split both strings by '/'
+			partsI := strings.Split(allPointsAvailable[i], "/")
+			partsJ := strings.Split(allPointsAvailable[j], "/")
+
+			// Compare each part; the first non-equal part determines the order
+			for k := 0; k < len(partsI) && k < len(partsJ); k++ {
+				if partsI[k] != partsJ[k] {
+					return partsI[k] < partsJ[k]
+				}
+			}
+
+			// If all compared parts are equal, but one slice is shorter, it comes first
+			return len(partsI) < len(partsJ)
+		})
+
+		// Refresh the List-widget
+		allAvailablePointsList.Refresh()
+
 	})
 
 	// Create Clear checkboxes-button
@@ -303,7 +371,7 @@ func generateTestDataSelectionsUIComponent(
 
 	// Convert into all 'TestDataValueName' in []TestDataPointRowUuidType to be used in Available TestDataPoints-list
 	// Slices used to keep track of filtered DataPoints
-	var filteredTestDataPoints []dataPointTypeForListsStruct
+	var filteredTestDataPoints []dataPointTypeForGroupsStruct
 	var tempTestDataPointRowUuidSliceInMap []TestDataPointRowUuidType
 	filteredTestDataPoints = nil
 	var tempTestDataValueName string
@@ -323,15 +391,19 @@ func generateTestDataSelectionsUIComponent(
 	for tempTestDataValueNameInMap, tempTestDataPointRowUuidSliceFromMap := range tempTestDataValueNameToRowUuidMap {
 
 		// Create a filtered TestDataPoint
-		var filteredTestDataPoint dataPointTypeForListsStruct
-		filteredTestDataPoint = dataPointTypeForListsStruct{
+		var filteredTestDataPoint dataPointTypeForGroupsStruct
+		filteredTestDataPoint = dataPointTypeForGroupsStruct{
+			testDataDomainUuid:   "",
+			testDataDomainName:   "",
+			testDataAreaUuid:     "",
+			testDataAreaName:     "",
+			testDataPointName:    tempTestDataValueNameInMap,
 			testDataPointUuidMap: nil,
-			testDataPointName:    TestDataValueNameType(tempTestDataValueNameInMap),
 		}
 
 		// Add the 'TestDataPointUuid's' to the filtered TestDataPoint
 		for _, tempTestDataPointUuid := range tempTestDataPointRowUuidSliceFromMap {
-			filteredTestDataPoint.testDataPointUuidMap[TestDataPointRowUuidType(tempTestDataPointUuid)] = TestDataPointRowUuidType(tempTestDataPointUuid)
+			filteredTestDataPoint.testDataPointUuidMap[tempTestDataPointUuid] = tempTestDataPointUuid
 		}
 
 	}
@@ -416,7 +488,7 @@ func generateTestDataSelectionsUIComponent(
 	}
 
 	// Custom sort: we sort by splitting each string into parts and comparing the parts
-	sort.Slice(allPointsAvailable, func(i, j int) bool {
+	sort.Slice(tempAllPointsAvailable, func(i, j int) bool {
 		// Split both strings by '/'
 		partsI := strings.Split(string(tempAllPointsAvailable[i].testDataPointName), "/")
 		partsJ := strings.Split(string(tempAllPointsAvailable[j].testDataPointName), "/")
@@ -437,5 +509,7 @@ func generateTestDataSelectionsUIComponent(
 
 	// Refresh the List-widget
 	allAvailablePointsList.Refresh()
+
+	return testDataSelectionsContainer, searchAndClearButtonsContainer
 
 }

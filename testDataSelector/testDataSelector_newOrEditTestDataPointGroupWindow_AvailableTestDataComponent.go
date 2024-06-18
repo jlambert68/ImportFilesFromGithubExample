@@ -10,11 +10,11 @@ import (
 
 func generateAllAvailablePointsListUIComponent(
 	allAvailablePointsList *widget.List,
-	allPointsAvailable *[]dataPointTypeForListsStruct,
-	allSelectedPoints *[]dataPointTypeForListsStruct,
+	allPointsAvailable *[]dataPointTypeForGroupsStruct,
+	allSelectedPoints *[]dataPointTypeForGroupsStruct,
 	newOrEditTestDataPointGroupWindow *fyne.Window,
 	selectedPointsList *widget.List,
-	testDataModel *TestDataModelStruct) {
+	testDataModel *TestDataModelStruct) *widget.List {
 
 	// Create and configure the list-component of all TestDataPoints
 	allAvailablePointsList = widget.NewList(
@@ -25,7 +25,7 @@ func generateAllAvailablePointsListUIComponent(
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
 
-			var localCopyAllPointsAvailable []dataPointTypeForListsStruct
+			var localCopyAllPointsAvailable []dataPointTypeForGroupsStruct
 			localCopyAllPointsAvailable = *allPointsAvailable
 
 			obj.(*widget.Label).SetText(fmt.Sprintf(
@@ -38,7 +38,7 @@ func generateAllAvailablePointsListUIComponent(
 	allAvailablePointsList.OnSelected = func(id widget.ListItemID) {
 
 		// Generate local copy of 'allPointsAvailable'
-		var localCopyOfAllPointsAvailable []dataPointTypeForListsStruct
+		var localCopyOfAllPointsAvailable []dataPointTypeForGroupsStruct
 		localCopyOfAllPointsAvailable = *allPointsAvailable
 
 		// Remove the number part of the visible name
@@ -60,6 +60,9 @@ func generateAllAvailablePointsListUIComponent(
 		selectedPointsList.Refresh()
 
 	}
+
+	return allAvailablePointsList
+
 }
 
 // Removes the part of the name that specifies the number similar TestDataPoints, i.e.

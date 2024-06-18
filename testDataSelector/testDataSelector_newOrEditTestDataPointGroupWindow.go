@@ -47,8 +47,8 @@ func showNewOrEditGroupWindow(
 	})
 
 	// Slices used to keep track of filtered, available and selected DataPoints
-	var allPointsAvailable []dataPointTypeForListsStruct
-	var allSelectedPoints []dataPointTypeForListsStruct
+	var allPointsAvailable []dataPointTypeForGroupsStruct
+	var allSelectedPoints []dataPointTypeForGroupsStruct
 
 	// The List-widget holding all available TestDataPoints from Search
 	var allAvailablePointsList *widget.List
@@ -73,8 +73,17 @@ func showNewOrEditGroupWindow(
 
 	var lowerRightSideContainer *fyne.Container
 
+	// Create and configure the list-component of all TestDataPoints
+	allAvailablePointsList = generateAllAvailablePointsListUIComponent(
+		allAvailablePointsList,
+		&allPointsAvailable,
+		&allSelectedPoints,
+		&newOrEditTestDataPointGroupWindow,
+		selectedPointsList,
+		testDataModel)
+
 	// *** Create the selection boxes for selecting TestDataValues values
-	generateTestDataSelectionsUIComponent(
+	testDataSelectionsContainer, searchAndClearButtonsContainer = generateTestDataSelectionsUIComponent(
 		testDataSelectionsContainer,
 		testDataModelMap,
 		testDataModel,
@@ -84,17 +93,8 @@ func showNewOrEditGroupWindow(
 		allAvailablePointsList,
 		searchAndClearButtonsContainer)
 
-	// Create and configure the list-component of all TestDataPoints
-	generateAllAvailablePointsListUIComponent(
-		allAvailablePointsList,
-		&allPointsAvailable,
-		&allSelectedPoints,
-		&newOrEditTestDataPointGroupWindow,
-		selectedPointsList,
-		testDataModel)
-
 	// Create and configure the list-component of selected TestDataPoints
-	generateSelectedPointsListUIComponent(
+	selectedPointsList, lowerRightSideContainer = generateSelectedPointsListUIComponent(
 		selectedPointsList,
 		&allPointsAvailable,
 		&allSelectedPoints,

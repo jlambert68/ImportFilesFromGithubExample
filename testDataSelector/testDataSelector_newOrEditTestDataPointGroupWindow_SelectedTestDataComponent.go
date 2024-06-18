@@ -16,7 +16,7 @@ func generateSelectedPointsListUIComponent(
 	lowerRightSideContainer *fyne.Container,
 	incomingGroupName testDataPointGroupNameType,
 	isNew bool,
-	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataPointGroupNameType]*testDataPointNameMapType) {
+	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataPointGroupNameType]*testDataPointNameMapType) (*widget.List, *fyne.Container) {
 
 	var newOrEditTestDataPointGroupWindow fyne.Window
 	newOrEditTestDataPointGroupWindow = *newOrEditTestDataPointGroupWindowPtr
@@ -89,48 +89,23 @@ func generateSelectedPointsListUIComponent(
 		// Logic to add new newTestDataPointNameMap
 		var newTestDataPointNameMap testDataPointNameMapType
 		newTestDataPointNameMap = make(testDataPointNameMapType)
-		var testDataPointRowSlice []*testDataPointRowStruct
-		//var tempSelectedPointUuid TestDataPointRowUuidType
-
-		// Loop all points and add them the 'newTestDataPointNameMap'
-		for _, selectedPoint := range *allSelectedPoints {
-
-			for _, selectedPointUuid := range selectedPoint.testDataPointUuidMap {
-
-				// Create a TestDataPoint to be stored in a TestDataGroup
-				var testDataPoint testDataPointRowStruct
-				testDataPoint = testDataPointRowStruct{
-					testDataDomainUuid:           selectedPoint.testDataDomainUuid,
-					testDataDomainName:           selectedPoint.testDataDomainName,
-					testDataAreaUuid:             selectedPoint.testDataAreaUuid,
-					testDataAreaName:             selectedPoint.testDataAreaName,
-					testDataPointUuid:            selectedPointUuid,
-					testDataPointName:            selectedPoint.testDataPointName,
-					testDataPointNameDescription: "< Not set, yet >",
-					testDatapointValue:           "< Not set, yet >",
-				}
-
-				testDataPointRowSlice = append(testDataPointRowSlice, &testDataPoint)
-
-			}
-
-			newTestDataPointNameMap[testDataPointRowSlice[0].testDataPointName] = &testDataPointRowSlice
-
-		}
 
 		// When GroupName is changed and the Group is in 'Edit'-mode the remove the old Group
 		if isNew == false && nameEntry.Text != string(incomingGroupName) {
-			delete(newOrEditedChosenTestDataPointsThisGroupMap, testDataPointGroupNameType(incomingGroupName))
+			delete(newOrEditedChosenTestDataPointsThisGroupMap, incomingGroupName)
+		}
+
+		for _, selectedPoint := range *allSelectedPoints {
+
+			var dataPointsForGroup []*dataPointTypeForGroupsStruct
+			dataPointsForGroup = append(dataPointsForGroup, &selectedPoint)
+			newTestDataPointNameMap[selectedPoint.testDataPointName] = &dataPointsForGroup
+
 		}
 
 		// Add the TestDataPoints to the GroupName used
 		newOrEditedChosenTestDataPointsThisGroupMap[testDataPointGroupNameType(nameEntry.Text)] = &newTestDataPointNameMap
 		newOrEditedChosenTestDataPointsThisGroupMapPtr = &newOrEditedChosenTestDataPointsThisGroupMap
-
-		//shouldUpdateMainWindow = responseChannelStruct{
-		//	shouldBeUpdated:        true,
-		//	testDataPointGroupName: testDataPointGroupNameType(nameEntry.Text),
-		//}
 
 		newOrEditTestDataPointGroupWindow.Close()
 	})
@@ -174,6 +149,8 @@ func generateSelectedPointsListUIComponent(
 	tempTestGroupLabel.TextStyle.Bold = true
 
 	lowerRightSideContainer = container.NewBorder(container.NewVBox(tempTestGroupLabel, entryContainer, buttonsContainer), nil, nil, nil, selectedPointsList)
+
+	return selectedPointsList, lowerRightSideContainer
 
 }
 
