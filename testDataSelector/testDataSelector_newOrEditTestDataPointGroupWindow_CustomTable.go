@@ -552,6 +552,9 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 	testDataPointName TestDataValueNameType,
 	testDataPointRowUuid TestDataPointRowUuidType) {
 
+	var foundInSelectedPointsList bool
+	var tempDataPoint dataPointTypeForGroupsStruct
+
 	// Loop Available TestDataPoints
 	for _, availableDataPoint := range allPointsAvailable {
 
@@ -564,14 +567,23 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 			//Add it to the Selected Datapoint-map
 			availableDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
 
+			// Make a copy of the DataPoint to be used when the DataPoint doesn't exist in Selected-pointslist
+			tempDataPoint = availableDataPoint
+
+			// Exit for loop
+			break
+
 		}
 	}
 
 	// Loop Selected TestDataPoints
+	foundInSelectedPointsList = false
 	for _, selectedDataPoint := range allSelectedPoints {
 
 		// If correct DataPoint found the process on RowUuid-level
 		if selectedDataPoint.testDataPointName == testDataPointName {
+
+			foundInSelectedPointsList = true
 
 			// Remove it from Available DataPoint-map
 			delete(selectedDataPoint.availableTestDataPointUuidMap, testDataPointRowUuid)
@@ -579,7 +591,22 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 			//Add it to the Selected Datapoint-map
 			selectedDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
 
+			// Exit for loop
+			break
+
 		}
+
+	}
+
+	// If the DataPoint wasn't found in SelecectedList, then it is new for the list
+	if foundInSelectedPointsList == false {
+
+		// Add a copy of the DataPoint from the Available-points-list
+		allSelectedPoints = append(allSelectedPoints, tempDataPoint)
+
+		// Sort the allSelectedPoints-list
+		allSelectedPoints = sortDataPointsList(allSelectedPoints)
+
 	}
 
 	// Refresh the Available- and Selected DataPoint-lists
@@ -604,11 +631,14 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 			//Add it to the Available Datapoint-map
 			availableDataPoint.availableTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
 
+			// Exit for loop
+			break
+
 		}
 	}
 
 	// Loop Selected TestDataPoints
-	for _, selectedDataPoint := range allSelectedPoints {
+	for selectedDataPointIndex, selectedDataPoint := range allSelectedPoints {
 
 		// If correct DataPoint found the process on RowUuid-level
 		if selectedDataPoint.testDataPointName == testDataPointName {
@@ -618,6 +648,16 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 
 			//Add it to the Available Datapoint-map
 			selectedDataPoint.availableTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+
+			// When there are no more RowUuids in map then Delete the DataPoint from the Slice
+			if len(selectedDataPoint.selectedTestDataPointUuidMap) == 0 {
+
+				// Remove the element at the specified index
+				allSelectedPoints = append(allSelectedPoints[:selectedDataPointIndex], allSelectedPoints[selectedDataPointIndex+1:]...)
+			}
+
+			// Exit for loop
+			break
 
 		}
 	}

@@ -57,9 +57,9 @@ func generateSelectedPointsListUIComponent(
 			obj.(*widget.Label).SetText(fmt.Sprintf(
 				"%s [%d(%d)]",
 				string(allSelectedPoints[id].testDataPointName),
-				len(allPointsAvailable[id].selectedTestDataPointUuidMap),
-				len(allPointsAvailable[id].availableTestDataPointUuidMap)+
-					len(allPointsAvailable[id].selectedTestDataPointUuidMap)))
+				len(allSelectedPoints[id].selectedTestDataPointUuidMap),
+				len(allSelectedPoints[id].availableTestDataPointUuidMap)+
+					len(allSelectedPoints[id].selectedTestDataPointUuidMap)))
 		},
 	)
 

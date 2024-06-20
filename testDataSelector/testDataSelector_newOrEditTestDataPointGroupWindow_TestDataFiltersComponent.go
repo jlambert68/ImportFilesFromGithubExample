@@ -373,22 +373,8 @@ func generateTestDataSelectionsUIComponent(
 			allPointsAvailableToBeSorted = append(allPointsAvailableToBeSorted, point)
 		}
 
-		// Custom sort: we sort by splitting each string into parts and comparing the parts
-		sort.Slice(allPointsAvailableToBeSorted, func(i, j int) bool {
-			// Split both strings by '/'
-			partsI := strings.Split(string(allPointsAvailableToBeSorted[i].testDataPointName), "/")
-			partsJ := strings.Split(string(allPointsAvailableToBeSorted[j].testDataPointName), "/")
-
-			// Compare each part; the first non-equal part determines the order
-			for k := 0; k < len(partsI) && k < len(partsJ); k++ {
-				if partsI[k] != partsJ[k] {
-					return partsI[k] < partsJ[k]
-				}
-			}
-
-			// If all compared parts are equal, but one slice is shorter, it comes first
-			return len(partsI) < len(partsJ)
-		})
+		// Sort the slice with DataPoints
+		allPointsAvailableToBeSorted = sortDataPointsList(allPointsAvailableToBeSorted)
 
 		// copy back from sorted slice
 		allPointsAvailable = allPointsAvailableToBeSorted
@@ -556,5 +542,29 @@ func generateTestDataSelectionsUIComponent(
 
 		return testDataSelectionsContainer, searchAndClearButtonsContainer
 	*/
+
+}
+
+// Sort a slice with DataPoints
+func sortDataPointsList(dataPointListToBeSorted []dataPointTypeForGroupsStruct) []dataPointTypeForGroupsStruct {
+
+	// Custom sort: we sort by splitting each string into parts and comparing the parts
+	sort.Slice(dataPointListToBeSorted, func(i, j int) bool {
+		// Split both strings by '/'
+		partsI := strings.Split(string(dataPointListToBeSorted[i].testDataPointName), "/")
+		partsJ := strings.Split(string(dataPointListToBeSorted[j].testDataPointName), "/")
+
+		// Compare each part; the first non-equal part determines the order
+		for k := 0; k < len(partsI) && k < len(partsJ); k++ {
+			if partsI[k] != partsJ[k] {
+				return partsI[k] < partsJ[k]
+			}
+		}
+
+		// If all compared parts are equal, but one slice is shorter, it comes first
+		return len(partsI) < len(partsJ)
+	})
+
+	return dataPointListToBeSorted
 
 }
