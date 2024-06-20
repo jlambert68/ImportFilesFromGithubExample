@@ -163,7 +163,10 @@ const (
 	groupNameIsNotUnique               string = "Group name already exists!"
 	groupNameIsEmpty                   string = "Group name can't be empty"
 	groupNameCanNotStartOrEndWithSpace string = "Group name can not start or end with a space"
+	selectedListIsEmpty                string = "There is nothing to save"
 )
+
+var setStateForSaveButtonAndGroupNameTextEntryExternalCall func()
 
 // Message sent back when a Group is Created or is Edited
 type responseChannelStruct struct {

@@ -134,6 +134,11 @@ func generateSelectedPointsListUIComponent(
 
 	lowerRightSideContainer = container.NewBorder(container.NewVBox(tempTestGroupLabel, entryContainer, buttonsContainer), nil, nil, nil, selectedPointsList)
 
+	// Create function call to 'setStateForSaveButtonAndGroupNameTextEntry' from outside
+	setStateForSaveButtonAndGroupNameTextEntryExternalCall = func() {
+		setStateForSaveButtonAndGroupNameTextEntry(nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName)
+	}
+
 }
 
 // Set the State for Save Button and the GroupName Entry
@@ -143,6 +148,14 @@ func setStateForSaveButtonAndGroupNameTextEntry(
 	saveButton *widget.Button,
 	isNew bool,
 	incomingGroupName testDataPointGroupNameType) {
+
+	// Handle when the Selected List is empty
+	if len(allSelectedPoints) == 0 {
+		nameStatusLabel.SetText(selectedListIsEmpty)
+		saveButton.Disable()
+
+		return
+	}
 
 	// Handle when first or last character in Group Name is a 'space'
 	if len(entryValue) > 0 && (entryValue[:1] == " " || entryValue[len(entryValue)-1:] == " ") {

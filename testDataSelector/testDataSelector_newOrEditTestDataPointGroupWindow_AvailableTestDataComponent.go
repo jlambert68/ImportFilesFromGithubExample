@@ -39,7 +39,10 @@ func generateAllAvailablePointsListUIComponent(
 		var tableData [][]string
 		tableData = buildPopUpTableDataFromTestDataPointName(clickedDataPointName, testDataModel)
 
-		showTable(*newOrEditTestDataPointGroupWindow, tableData)
+		showTable(
+			*newOrEditTestDataPointGroupWindow,
+			tableData,
+			allPointsAvailable[id].selectedTestDataPointUuidMap)
 
 		allAvailablePointsList.UnselectAll()
 

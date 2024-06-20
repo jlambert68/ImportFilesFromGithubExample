@@ -1,7 +1,6 @@
 package testDataSelector
 
 import (
-	"fmt"
 	"fyne.io/fyne/v2/dialog"
 
 	//"fmt"
@@ -215,7 +214,10 @@ type CustomTableWidget struct {
 // Use a mutex to synchronize access to the map
 var tableMutex sync.Mutex
 
-func NewCustomTableWidget(data [][]string) *CustomTableWidget {
+func NewCustomTableWidget(
+	data [][]string,
+	selectedTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidType) *CustomTableWidget {
+
 	table := &CustomTableWidget{
 		tableData:          data,
 		Table:              &widget.Table{},
@@ -297,7 +299,32 @@ func NewCustomTableWidget(data [][]string) *CustomTableWidget {
 
 	}*/
 
+	// Set correct column widths
 	setColumnWidths(table.Table, data)
+
+	// Pre-select rows that exists in SelectDataPoint-list
+	var testDataPointRowUuid TestDataPointRowUuidType
+	var existInMap bool
+	var cellID widget.TableCellID
+
+	for rowIndex, dataRow := range data {
+
+		// Extract the 'TestDataPointRowUuid' from the row and check if it exists in Selected-amp
+		testDataPointRowUuid = TestDataPointRowUuidType(dataRow[len(dataRow)-1])
+		_, existInMap = selectedTestDataPointUuidMap[testDataPointRowUuid]
+		if existInMap == true {
+
+			// Create the CellId to be clicked on
+			cellID = widget.TableCellID{
+				Row: rowIndex,
+				Col: 0,
+			}
+
+			// Trigger Click on Table-cell
+			table.handleCellTapped(cellID, table)
+		}
+
+	}
 
 	return table
 }
@@ -499,10 +526,13 @@ func setColumnWidths(table *widget.Table, data [][]string) {
 }
 
 // showTable creates and shows a table for the selected node with data
-func showTable(w fyne.Window, data [][]string) {
+func showTable(
+	w fyne.Window,
+	data [][]string,
+	selectedTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidType) {
 
 	// Create a new table with an extra column for checkboxes
-	table := NewCustomTableWidget(data)
+	table := NewCustomTableWidget(data, selectedTestDataPointUuidMap)
 
 	// Set minimum size for the table to ensure it's larger
 	table.Resize(fyne.NewSize(600, 500)) // Set the minimum size to 400x300 pixels
@@ -519,16 +549,14 @@ func showTable(w fyne.Window, data [][]string) {
 				var testDataPointName TestDataValueNameType
 				var testDataPointRowUuid TestDataPointRowUuidType
 
-				// Extract rows that were selecte
+				// Extract rows that were selected
 				for row, isSelected := range table.rowIsSelectedMap {
 
 					testDataPointName = TestDataValueNameType(table.tableData[row][len(table.tableData[1])-2])
 					testDataPointRowUuid = TestDataPointRowUuidType(table.tableData[row][len(table.tableData[1])-1])
 
 					if isSelected == true {
-						cellID := widget.TableCellID{row, 1}
 
-						fmt.Println(table.cellObjects[cellID])
 						addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(testDataPointName, testDataPointRowUuid)
 
 					} else {
@@ -613,6 +641,9 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 	allAvailablePointsList.Refresh()
 	selectedPointsList.Refresh()
 
+	// Check disable SaveButton of SelectedList is emtpy
+	setStateForSaveButtonAndGroupNameTextEntryExternalCall()
+
 }
 
 func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
@@ -665,5 +696,8 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 	// Refresh the Available- and Selected DataPoint-lists
 	allAvailablePointsList.Refresh()
 	selectedPointsList.Refresh()
+
+	// Check disable SaveButton of SelectedList is emtpy
+	setStateForSaveButtonAndGroupNameTextEntryExternalCall()
 
 }
