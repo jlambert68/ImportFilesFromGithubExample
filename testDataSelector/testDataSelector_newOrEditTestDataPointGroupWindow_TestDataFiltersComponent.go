@@ -327,7 +327,7 @@ func generateTestDataSelectionsUIComponent(
 						testDataPointName:             tempTestDataValueName,
 						searchResultDataPointUuidMap:  nil,
 						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
-						selectedTestDataPointUuidMap:  nil,
+						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
 					}
 				}
 
@@ -353,7 +353,7 @@ func generateTestDataSelectionsUIComponent(
 						testDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
 						testDataPointName:             tempTestDataValueName,
 						searchResultDataPointUuidMap:  nil,
-						availableTestDataPointUuidMap: nil,
+						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
 						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
 					}
 				}

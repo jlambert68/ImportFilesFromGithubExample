@@ -55,9 +55,7 @@ func buildPopUpTableDataFromTestDataPointName(
 
 	tempTestDataValuesForRowUuidMapBaseOnNameSlice = *tempTestDataValuesForRowNameMap[TestDataValueNameType(tempTestDataPointRowNameToSearchFor)]
 
-	fmt.Println(tempTestDataValuesForRowUuidMapBaseOnNameSlice)
-
-	// Loop the slice to extract the RowUUids
+	// Loop the slice to extract the RowUuids
 
 	var headerSlice []string
 	for rowIndex, tempTestDataPointRowUuid := range tempTestDataValuesForRowUuidMapBaseOnNameSlice {

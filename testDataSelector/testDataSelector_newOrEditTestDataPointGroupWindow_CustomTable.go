@@ -516,11 +516,24 @@ func showTable(w fyne.Window, data [][]string) {
 			if response {
 				println("User confirmed action")
 
+				var testDataPointName TestDataValueNameType
+				var testDataPointRowUuid TestDataPointRowUuidType
+
 				// Extract rows that were selecte
 				for row, isSelected := range table.rowIsSelectedMap {
+
+					testDataPointName = TestDataValueNameType(table.tableData[row][len(table.tableData[1])-2])
+					testDataPointRowUuid = TestDataPointRowUuidType(table.tableData[row][len(table.tableData[1])-1])
+
 					if isSelected == true {
 						cellID := widget.TableCellID{row, 1}
+
 						fmt.Println(table.cellObjects[cellID])
+						addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(testDataPointName, testDataPointRowUuid)
+
+					} else {
+						// Not Selected, check if existed in Selected
+						addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(testDataPointName, testDataPointRowUuid)
 					}
 				}
 
@@ -531,5 +544,86 @@ func showTable(w fyne.Window, data [][]string) {
 		}, w)
 	modal.Resize(fyne.NewSize(800, 600))
 	modal.Show()
+
+}
+
+// Add the TestDataPoint to the Selected-list and removes it from the Avaialables-lsit
+func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
+	testDataPointName TestDataValueNameType,
+	testDataPointRowUuid TestDataPointRowUuidType) {
+
+	// Loop Available TestDataPoints
+	for _, availableDataPoint := range allPointsAvailable {
+
+		// If correct DataPoint found the process on RowUuid-level
+		if availableDataPoint.testDataPointName == testDataPointName {
+
+			// Remove it from Available DataPoint-map
+			delete(availableDataPoint.availableTestDataPointUuidMap, testDataPointRowUuid)
+
+			//Add it to the Selected Datapoint-map
+			availableDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+
+		}
+	}
+
+	// Loop Selected TestDataPoints
+	for _, selectedDataPoint := range allSelectedPoints {
+
+		// If correct DataPoint found the process on RowUuid-level
+		if selectedDataPoint.testDataPointName == testDataPointName {
+
+			// Remove it from Available DataPoint-map
+			delete(selectedDataPoint.availableTestDataPointUuidMap, testDataPointRowUuid)
+
+			//Add it to the Selected Datapoint-map
+			selectedDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+
+		}
+	}
+
+	// Refresh the Available- and Selected DataPoint-lists
+	allAvailablePointsList.Refresh()
+	selectedPointsList.Refresh()
+
+}
+
+func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
+	testDataPointName TestDataValueNameType,
+	testDataPointRowUuid TestDataPointRowUuidType) {
+
+	// Loop Available TestDataPoints
+	for _, availableDataPoint := range allPointsAvailable {
+
+		// If correct DataPoint found the process on RowUuid-level
+		if availableDataPoint.testDataPointName == testDataPointName {
+
+			// Remove it from Selected DataPoint-map
+			delete(availableDataPoint.selectedTestDataPointUuidMap, testDataPointRowUuid)
+
+			//Add it to the Available Datapoint-map
+			availableDataPoint.availableTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+
+		}
+	}
+
+	// Loop Selected TestDataPoints
+	for _, selectedDataPoint := range allSelectedPoints {
+
+		// If correct DataPoint found the process on RowUuid-level
+		if selectedDataPoint.testDataPointName == testDataPointName {
+
+			// Remove it from Selected DataPoint-map
+			delete(selectedDataPoint.selectedTestDataPointUuidMap, testDataPointRowUuid)
+
+			//Add it to the Available Datapoint-map
+			selectedDataPoint.availableTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+
+		}
+	}
+
+	// Refresh the Available- and Selected DataPoint-lists
+	allAvailablePointsList.Refresh()
+	selectedPointsList.Refresh()
 
 }
