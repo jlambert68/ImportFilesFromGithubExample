@@ -213,3 +213,6 @@ var listsSplitContainer *container.Split
 var upperSplitContainer *fyne.Container
 
 var lowerRightSideContainer *fyne.Container
+
+// A pointer to the TestDataModel
+var testDataModelPtr *TestDataModelStruct

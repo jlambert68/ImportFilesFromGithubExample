@@ -1,6 +1,8 @@
 package testDataSelector
 
-import "sort"
+import (
+	"sort"
+)
 
 // ListTestDataGroups
 // List the current TestDataGroups that the User has
@@ -73,40 +75,44 @@ func ListTestDataRowsForAGroupPoint(testDataGroup string, testDataGroupPoint str
 // GetTestDataPointValues
 // Generate a map with 'TestDataColumnDataName' as key and 'TestDataValue' as value
 func GetTestDataPointValues(
-	testDataGroupPoint string,
-	testDataGroupPointRowUuid string) (
+	testDataPointName string,
+	testDataPointRowUuid string) (
 	testDataColumnDataNameMap map[string]string) { // map[TestDataColumnDataNameType]TestDataValueType
 
 	// Initiate response-map
 	testDataColumnDataNameMap = make(map[string]string)
 
-	if testDataGroupPoint == "" || testDataGroupPointRowUuid == "" {
+	if testDataPointName == "" || testDataPointRowUuid == "" {
 		return testDataColumnDataNameMap
 	}
 
-	var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
-	var tempTestDataDomainModel TestDataDomainModelStruct
-	var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
-	var tempTestDataArea TestDataAreaStruct
-	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-	var tempTestDataPointValueSlice []*TestDataPointValueStruct
+	// Create the data table for all matching 'testDataPointRowUuid'
+	var tableData [][]string
+	tableData = buildPopUpTableDataFromTestDataPointName(testDataPointName, testDataModelPtr)
 
-	tempTestDataModelMap = *testDataModelRef.TestDataModelMap
-	tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
-	tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
-	tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
-	tempTestDataValuesForRowNameMap = *tempTestDataArea.TestDataValuesForRowNameMap
+	var headerSlice []string
 
-	// Initiate response-map
-	testDataColumnDataNameMap = make(map[string]string)
+	// Loop alla rows
+	for rowIndex, rowData := range tableData {
 
-	// Extract correct TestDataPointRow
-	tempTestDataPointValueSlice = *tempTestDataValuesForRowNameMap[TestDataValueNameType(testDataGroupPoint)]
+		// Loop alla values for row
+		for columnIndex, columnValue := range rowData {
 
-	// Loop Values in slice and create response-map
-	for _, tempTestDataPoint := range tempTestDataPointValueSlice {
+			// Create a header slice
+			if rowIndex == 0 {
+				// Header row
+				headerSlice = append(headerSlice, columnValue)
 
-		testDataColumnDataNameMap[string(tempTestDataPoint.TestDataColumnDataName)] = string(tempTestDataPoint.TestDataValue)
+			} else {
+				// Only process if this is the correct row
+				if rowData[len(rowData)-1] == testDataPointRowUuid {
+
+					testDataColumnDataNameMap[headerSlice[columnIndex]] = columnValue
+
+				}
+			}
+
+		}
 
 	}
 
