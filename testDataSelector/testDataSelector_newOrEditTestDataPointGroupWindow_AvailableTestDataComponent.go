@@ -9,50 +9,37 @@ import (
 )
 
 func generateAllAvailablePointsListUIComponent(
-	allAvailablePointsList *widget.List,
-	allPointsAvailable *[]dataPointTypeForGroupsStruct,
-	allSelectedPoints *[]dataPointTypeForGroupsStruct,
 	newOrEditTestDataPointGroupWindow *fyne.Window,
-	selectedPointsList *widget.List,
-	testDataModel *TestDataModelStruct) *widget.List {
+	testDataModel *TestDataModelStruct) {
 
 	// Create and configure the list-component of all TestDataPoints
 	allAvailablePointsList = widget.NewList(
-		func() int { return len(*allPointsAvailable) },
+		func() int { return len(allPointsAvailable) },
 		func() fyne.CanvasObject {
 
 			return widget.NewLabel("")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
 
-			var localCopyAllPointsAvailable []dataPointTypeForGroupsStruct
-			localCopyAllPointsAvailable = *allPointsAvailable
-
 			obj.(*widget.Label).SetText(fmt.Sprintf(
-				"%s [%d]",
-				string(localCopyAllPointsAvailable[id].testDataPointName),
-				len(localCopyAllPointsAvailable[id].testDataPointUuidMap)))
+				"%s [%d(%d)]",
+				string(allPointsAvailable[id].testDataPointName),
+				len(allPointsAvailable[id].availableTestDataPointUuidMap),
+				len(allPointsAvailable[id].availableTestDataPointUuidMap)+
+					len(allPointsAvailable[id].selectedTestDataPointUuidMap)))
 		},
 	)
 
 	allAvailablePointsList.OnSelected = func(id widget.ListItemID) {
 
-		// Generate local copy of 'allPointsAvailable'
-		var localCopyOfAllPointsAvailable []dataPointTypeForGroupsStruct
-		localCopyOfAllPointsAvailable = *allPointsAvailable
-
 		// Remove the number part of the visible name
 		var clickedDataPointName string
-		clickedDataPointName = filterToRemoveNumberOfSimilarTestDataPointsInName(string(localCopyOfAllPointsAvailable[id].testDataPointName))
+		clickedDataPointName = string(allPointsAvailable[id].testDataPointName) //filterToRemoveNumberOfSimilarTestDataPointsInName(string(allPointsAvailable[id].testDataPointName))
 
 		var tableData [][]string
 		tableData = buildPopUpTableDataFromTestDataPointName(clickedDataPointName, testDataModel)
 
 		showTable(*newOrEditTestDataPointGroupWindow, tableData)
-
-		//fixa denna
-		//allSelectedPoints = append(*allSelectedPoints, *allPointsAvailable[id])
-		//allPointsAvailable = append(allPointsAvailable[:id], allPointsAvailable[id+1:]...)
 
 		allAvailablePointsList.UnselectAll()
 
@@ -60,8 +47,6 @@ func generateAllAvailablePointsListUIComponent(
 		selectedPointsList.Refresh()
 
 	}
-
-	return allAvailablePointsList
 
 }
 

@@ -1,6 +1,10 @@
 package testDataSelector
 
-import "fyne.io/fyne/v2/widget"
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+)
 
 // TestDataModelStruct
 // The structure holding all TestData
@@ -169,10 +173,37 @@ type responseChannelStruct struct {
 
 // Structure for the Group
 type dataPointTypeForGroupsStruct struct {
-	testDataDomainUuid   TestDataDomainUuidType
-	testDataDomainName   TestDataDomainNameType
-	testDataAreaUuid     TestDataAreaUuidType
-	testDataAreaName     TestDataAreaNameType
-	testDataPointName    TestDataValueNameType
-	testDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidType
+	testDataDomainUuid            TestDataDomainUuidType
+	testDataDomainName            TestDataDomainNameType
+	testDataAreaUuid              TestDataAreaUuidType
+	testDataAreaName              TestDataAreaNameType
+	testDataPointName             TestDataValueNameType
+	searchResultDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidType
+	availableTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidType
+	selectedTestDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidType
 }
+
+// Slices used to keep track of filtered, available and selected DataPoints
+var allPointsAvailable []dataPointTypeForGroupsStruct
+var allSelectedPoints []dataPointTypeForGroupsStruct
+
+// The List-widget holding all available TestDataPoints from Search
+var allAvailablePointsList *widget.List
+
+// The List-widget holding all selected TestDataPoints from Search
+var selectedPointsList *widget.List
+
+// *** Create the selection boxes for selecting TestDataValues values
+var testDataSelectionsContainer *fyne.Container
+
+// Create the container for Search- and Clear- buttons
+var searchAndClearButtonsContainer *fyne.Container
+
+// Layout configuration for the new/edit window
+// Create the UpperAndLowerSplitContainer
+var upperAndLowerSplitContainer *container.Split
+var listsSplitContainer *container.Split
+
+var upperSplitContainer *fyne.Container
+
+var lowerRightSideContainer *fyne.Container

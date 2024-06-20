@@ -11,14 +11,8 @@ import (
 
 // *** Create the selection boxes for selecting TestDataValues values
 func generateTestDataSelectionsUIComponent(
-	testDataSelectionsContainer *fyne.Container,
-	testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct,
 	testDataModel *TestDataModelStruct,
-	tempTestDataValuesForRowMapPtr *map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct,
-	allPointsAvailable *[]dataPointTypeForGroupsStruct,
-	allSelectedPoints *[]dataPointTypeForGroupsStruct,
-	allAvailablePointsList *widget.List,
-	searchAndClearButtonsContainer *fyne.Container) (*fyne.Container, *fyne.Container) {
+	testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct) {
 
 	var existInMap bool
 
@@ -226,9 +220,6 @@ func generateTestDataSelectionsUIComponent(
 	// Create the main TestData-selection-container
 	testDataSelectionsContainer = container.NewHBox(testDomainContainer, testAreasContainer, testDataValuesSelectionContainer)
 
-	var tempTestDataValueNameToRowUuidMap map[TestDataValueNameType][]TestDataPointRowUuidType
-	tempTestDataValueNameToRowUuidMap = make(map[TestDataValueNameType][]TestDataPointRowUuidType)
-
 	// Create Search TestData-button
 	searchTestDataButton = widget.NewButton("Search for TestDataPoints", func() {
 
@@ -236,12 +227,14 @@ func generateTestDataSelectionsUIComponent(
 		var tempTestDataDomainModel TestDataDomainModelStruct
 		var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
 		var tempTestDataArea TestDataAreaStruct
+		var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
 
 		tempTestDataModelMap = *testDataModel.TestDataModelMap
 		tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
 		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
 		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
-		*tempTestDataValuesForRowMapPtr = *tempTestDataArea.TestDataValuesForRowMap
+		tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
+
 		var tempTestDataPointValueSlice []*TestDataPointValueStruct
 
 		//var tempTestDataPointValueSlice *[]*TestDataPointValueStruct
@@ -249,7 +242,7 @@ func generateTestDataSelectionsUIComponent(
 		var allTestDataPointRowsUuid []TestDataPointRowUuidType
 
 		// Loop all TestData and extract all rows
-		for tempTestDataPointRowUuid, _ := range *tempTestDataValuesForRowMapPtr {
+		for tempTestDataPointRowUuid, _ := range tempTestDataValuesForRowMap {
 			allTestDataPointRowsUuid = append(allTestDataPointRowsUuid, tempTestDataPointRowUuid)
 		}
 
@@ -283,58 +276,108 @@ func generateTestDataSelectionsUIComponent(
 			}
 		}
 
-		// Convert into all 'TestDataValueName' in []string to be used in Available TestDataPoints-list
-		var filteredTestDataPoints []string
-		filteredTestDataPoints = nil
-		var tempTestDataValueName string
+		// Convert all DataPoints in SearchResult to be used in Available TestDataPoints-list based on already selected datapoints
+		var tempTestDataValueName TestDataValueNameType
+		var tempTestDataPointRowUuid TestDataPointRowUuidType
+		var existInSelectedPoints bool
+		var tempMapForSearchResultDataPoints map[TestDataValueNameType]dataPointTypeForGroupsStruct
+		tempMapForSearchResultDataPoints = make(map[TestDataValueNameType]dataPointTypeForGroupsStruct)
+		allPointsAvailable = nil
+
 		for _, testDataPointRowUuid := range searchResult {
 
-			tempTestDataPointValueSlice = *tempTestDataValuesForRowMapPtr[testDataPointRowUuid]
+			tempTestDataPointValueSlice = *tempTestDataValuesForRowMap[testDataPointRowUuid]
 
-			tempTestDataValueName = string(tempTestDataPointValueSlice[0].TestDataValueName)
+			// Get the TestDataValueName
+			tempTestDataValueName = tempTestDataPointValueSlice[0].TestDataValueName
 
-			tempTestDataPointRowUuidSliceInMap, _ = tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)]
-			tempTestDataPointRowUuidSliceInMap = append(tempTestDataPointRowUuidSliceInMap, testDataPointRowUuid)
-			tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)] = tempTestDataPointRowUuidSliceInMap
-		}
+			// Get the TestDataPointRowUuid
+			tempTestDataPointRowUuid = tempTestDataPointValueSlice[0].TestDataPointRowUuid
 
-		for tempTestDataValueNameInMap, tempTestDataPointRowUuidSliceInMap := range tempTestDataValueNameToRowUuidMap {
+			// Check if RowUuid already exists in SelectedDataPoints-list
+			existInSelectedPoints = false
+			if len(allSelectedPoints) != 0 {
+				for _, selectedPoint := range allSelectedPoints {
 
-			filteredTestDataPoints = append(filteredTestDataPoints, fmt.Sprintf("%s [%d]", string(tempTestDataValueNameInMap), len(tempTestDataPointRowUuidSliceInMap)))
-		}
+					_, existInSelectedPoints = selectedPoint.availableTestDataPointUuidMap[tempTestDataPointRowUuid]
 
-		// Create the list that holds all points that are available to chose from
-		// Create the list that holds all points that are chosen
-		allPointsAvailable = nil
-		var existInSelectedPoints bool
-		for _, point := range filteredTestDataPoints {
-
-			var pointToBeAdded dataPointTypeForGroupsStruct
-
-			// Add it to the list of available points, if it doesn't exist in the Selected-List
-			if len(*allSelectedPoints) == 0 {
-				*allPointsAvailable = append(*allPointsAvailable, pointToBeAdded)
-			} else {
-				for _, selectedPoint := range *allSelectedPoints {
-
-					if selectedPoint == point {
-						existInSelectedPoints = true
+					// If the row already exist then exit for-loop
+					if existInSelectedPoints == true {
 						break
-					}
-					if existInSelectedPoints == false {
-						allPointsAvailable = append(allPointsAvailable, point)
-					} else {
-						existInSelectedPoints = false
 					}
 				}
 			}
+
+			// Add the 'TestDataPointRowUuid' to inner map in 'searchResultDataPoint' if it doesn't already exist in  SelectedDataPoints-list
+			if existInSelectedPoints == false {
+				// Doesn't exist in Selected Points
+
+				// Create the DataPoint from the SerachResult
+				var searchResultDataPoint dataPointTypeForGroupsStruct
+
+				// Try to find the DataPoint in the Map based on 'tempTestDataValueName'
+				searchResultDataPoint, existInMap = tempMapForSearchResultDataPoints[tempTestDataValueName]
+				if existInMap == false {
+					// It doesn't exist so create the 'searchResultDataPoint'
+					searchResultDataPoint = dataPointTypeForGroupsStruct{
+						testDataDomainUuid:            tempTestDataPointValueSlice[0].TestDataDomainUuid,
+						testDataDomainName:            tempTestDataPointValueSlice[0].TestDataDomainName,
+						testDataAreaUuid:              tempTestDataPointValueSlice[0].TestDataAreaUuid,
+						testDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
+						testDataPointName:             tempTestDataValueName,
+						searchResultDataPointUuidMap:  nil,
+						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
+						selectedTestDataPointUuidMap:  nil,
+					}
+				}
+
+				searchResultDataPoint.availableTestDataPointUuidMap[tempTestDataPointRowUuid] = tempTestDataPointValueSlice[0].TestDataPointRowUuid
+
+				// Add the 'searchResultDataPoint' back to the temporary map for SearchResultDataPoints
+				tempMapForSearchResultDataPoints[tempTestDataValueName] = searchResultDataPoint
+
+			} else {
+				// Exist in Selected Points
+
+				// Create the DataPoint from the SerachResult
+				var searchResultDataPoint dataPointTypeForGroupsStruct
+
+				// Try to find the DataPoint in the Map based on 'tempTestDataValueName'
+				searchResultDataPoint, existInMap = tempMapForSearchResultDataPoints[tempTestDataValueName]
+				if existInMap == false {
+					// It doesn't exist so create the 'searchResultDataPoint'
+					searchResultDataPoint = dataPointTypeForGroupsStruct{
+						testDataDomainUuid:            tempTestDataPointValueSlice[0].TestDataDomainUuid,
+						testDataDomainName:            tempTestDataPointValueSlice[0].TestDataDomainName,
+						testDataAreaUuid:              tempTestDataPointValueSlice[0].TestDataAreaUuid,
+						testDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
+						testDataPointName:             tempTestDataValueName,
+						searchResultDataPointUuidMap:  nil,
+						availableTestDataPointUuidMap: nil,
+						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
+					}
+				}
+
+				searchResultDataPoint.selectedTestDataPointUuidMap[tempTestDataPointRowUuid] = tempTestDataPointValueSlice[0].TestDataPointRowUuid
+
+				// Add the 'searchResultDataPoint' back to the temporary map for SearchResultDataPoints
+				tempMapForSearchResultDataPoints[tempTestDataValueName] = searchResultDataPoint
+			}
+		}
+
+		// Create temporary slice to sort
+		var allPointsAvailableToBeSorted []dataPointTypeForGroupsStruct
+		// Create the list that holds all points that are available to chose from
+		for _, point := range tempMapForSearchResultDataPoints {
+
+			allPointsAvailableToBeSorted = append(allPointsAvailableToBeSorted, point)
 		}
 
 		// Custom sort: we sort by splitting each string into parts and comparing the parts
-		sort.Slice(allPointsAvailable, func(i, j int) bool {
+		sort.Slice(allPointsAvailableToBeSorted, func(i, j int) bool {
 			// Split both strings by '/'
-			partsI := strings.Split(allPointsAvailable[i], "/")
-			partsJ := strings.Split(allPointsAvailable[j], "/")
+			partsI := strings.Split(string(allPointsAvailableToBeSorted[i].testDataPointName), "/")
+			partsJ := strings.Split(string(allPointsAvailableToBeSorted[j].testDataPointName), "/")
 
 			// Compare each part; the first non-equal part determines the order
 			for k := 0; k < len(partsI) && k < len(partsJ); k++ {
@@ -346,6 +389,9 @@ func generateTestDataSelectionsUIComponent(
 			// If all compared parts are equal, but one slice is shorter, it comes first
 			return len(partsI) < len(partsJ)
 		})
+
+		// copy back from sorted slice
+		allPointsAvailable = allPointsAvailableToBeSorted
 
 		// Refresh the List-widget
 		allAvailablePointsList.Refresh()
@@ -369,147 +415,146 @@ func generateTestDataSelectionsUIComponent(
 	// Create the container for the Search- and Clear-buttons
 	searchAndClearButtonsContainer = container.NewHBox(searchTestDataButton, clearTestDataFilterCheckBoxesButton)
 
-	// Convert into all 'TestDataValueName' in []TestDataPointRowUuidType to be used in Available TestDataPoints-list
-	// Slices used to keep track of filtered DataPoints
-	var filteredTestDataPoints []dataPointTypeForGroupsStruct
-	var tempTestDataPointRowUuidSliceInMap []TestDataPointRowUuidType
-	filteredTestDataPoints = nil
-	var tempTestDataValueName string
-	tempTestDataValuesForRowMap := *tempTestDataValuesForRowMapPtr
-	for _, testDataPointRowUuid := range searchResult {
+	/*
+		// Convert into all 'TestDataValueName' in []TestDataPointRowUuidType to be used in Available TestDataPoints-list
+		// Slices used to keep track of filtered DataPoints
+		var filteredTestDataPoints []dataPointTypeForGroupsStruct
+		var tempTestDataPointRowUuidSliceInMap []TestDataPointRowUuidType
+		filteredTestDataPoints = nil
+		var tempTestDataValueName string
+		tempTestDataValuesForRowMap := *tempTestDataValuesForRowMapPtr
+		for _, testDataPointRowUuid := range searchResult {
 
-		tempTestDataPointValueSlicePtr, _ := tempTestDataValuesForRowMap[testDataPointRowUuid]
-		tempTestDataPointValueSlice := *tempTestDataPointValueSlicePtr
+			tempTestDataPointValueSlicePtr, _ := tempTestDataValuesForRowMap[testDataPointRowUuid]
+			tempTestDataPointValueSlice := *tempTestDataPointValueSlicePtr
 
-		tempTestDataValueName = string(tempTestDataPointValueSlice[0].TestDataValueName)
+			tempTestDataValueName = string(tempTestDataPointValueSlice[0].TestDataValueName)
 
-		tempTestDataPointRowUuidSliceInMap, _ = tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)]
-		tempTestDataPointRowUuidSliceInMap = append(tempTestDataPointRowUuidSliceInMap, testDataPointRowUuid)
-		tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)] = tempTestDataPointRowUuidSliceInMap
-	}
-
-	for tempTestDataValueNameInMap, tempTestDataPointRowUuidSliceFromMap := range tempTestDataValueNameToRowUuidMap {
-
-		// Create a filtered TestDataPoint
-		var filteredTestDataPoint dataPointTypeForGroupsStruct
-		filteredTestDataPoint = dataPointTypeForGroupsStruct{
-			testDataDomainUuid:   "",
-			testDataDomainName:   "",
-			testDataAreaUuid:     "",
-			testDataAreaName:     "",
-			testDataPointName:    tempTestDataValueNameInMap,
-			testDataPointUuidMap: nil,
+			tempTestDataPointRowUuidSliceInMap, _ = tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)]
+			tempTestDataPointRowUuidSliceInMap = append(tempTestDataPointRowUuidSliceInMap, testDataPointRowUuid)
+			tempTestDataValueNameToRowUuidMap[TestDataValueNameType(tempTestDataValueName)] = tempTestDataPointRowUuidSliceInMap
 		}
 
-		// Add the 'TestDataPointUuid's' to the filtered TestDataPoint
-		for _, tempTestDataPointUuid := range tempTestDataPointRowUuidSliceFromMap {
-			filteredTestDataPoint.testDataPointUuidMap[tempTestDataPointUuid] = tempTestDataPointUuid
+		for tempTestDataValueNameInMap, tempTestDataPointRowUuidSliceFromMap := range tempTestDataValueNameToRowUuidMap {
+
+			// Create a filtered TestDataPoint
+			var filteredTestDataPoint dataPointTypeForGroupsStruct
+			filteredTestDataPoint = dataPointTypeForGroupsStruct{
+				testDataDomainUuid:            "",
+				testDataDomainName:            "",
+				testDataAreaUuid:              "",
+				testDataAreaName:              "",
+				testDataPointName:             tempTestDataValueNameInMap,
+				availableTestDataPointUuidMap: nil,
+			}
+
+			// Add the 'TestDataPointUuid's' to the filtered TestDataPoint
+			for _, tempTestDataPointUuid := range tempTestDataPointRowUuidSliceFromMap {
+				filteredTestDataPoint.availableTestDataPointUuidMap[tempTestDataPointUuid] = tempTestDataPointUuid
+			}
+
 		}
 
-	}
+		// Create the list that holds all points that are available to chose from
+		allPointsAvailable = nil
+		var rowUuidExistInSelectedPoints bool
+		var nameExistInSelectedPoints bool
+		var nameExistInAvailablePoints bool
+		var tempSelectedTestDataPointUuid TestDataPointRowUuidType
+		var availablePointsIndex int
 
-	// Create the list that holds all points that are available to chose from
-	*allPointsAvailable = nil
-	var rowUuidExistInSelectedPoints bool
-	var nameExistInSelectedPoints bool
-	var nameExistInAvailablePoints bool
-	var tempSelectedTestDataPointUuid TestDataPointRowUuidType
-	var availablePointsIndex int
+		for _, filteredPoint := range filteredTestDataPoints {
 
-	// Make a local copy of 'allPointsAvailable' to work with
-	tempAllPointsAvailable := *allPointsAvailable
+			// Add it to the list of available points, if it doesn't exist in the Selected-List
+			if len(allSelectedPoints) == 0 {
+				allSelectedPoints = append(allSelectedPoints, filteredPoint)
+			} else {
 
-	for _, filteredPoint := range filteredTestDataPoints {
+				// Clear flags for of TestDataPointName and TestDataPointRowUuid exist in SelectedPoints
+				nameExistInSelectedPoints = false
+				rowUuidExistInSelectedPoints = false
 
-		// Add it to the list of available points, if it doesn't exist in the Selected-List
-		if len(*allSelectedPoints) == 0 {
-			tempAllPointsAvailable = append(tempAllPointsAvailable, filteredPoint)
-		} else {
+				// Clear the flag if the TestDataPointName exist in AllPointsAvailable-slice
+				nameExistInAvailablePoints = false
 
-			// Clear flags for of TestDataPointName and TestDataPointRowUuid exist in SelectedPoints
-			nameExistInSelectedPoints = false
-			rowUuidExistInSelectedPoints = false
+				for _, selectedPoint := range allSelectedPoints {
 
-			// Clear the flag if the TestDataPointName exist in AllPointsAvailable-slice
-			nameExistInAvailablePoints = false
+					if selectedPoint.testDataPointName == filteredPoint.testDataPointName {
 
-			for _, selectedPoint := range *allSelectedPoints {
+						nameExistInSelectedPoints = true
 
-				if selectedPoint.testDataPointName == filteredPoint.testDataPointName {
+						// Check if row-UUID exist in SelectedPoint
+						for _, selectedTestDataPointUuid := range selectedPoint.selectedTestDataPointUuidMap {
+							_, existInMap = selectedPoint.selectedTestDataPointUuidMap[selectedTestDataPointUuid]
 
-					nameExistInSelectedPoints = true
-
-					// Check if row-UUID exist in SelectedPoint
-					for _, selectedTestDataPointUuid := range selectedPoint.testDataPointUuidMap {
-						_, existInMap = selectedPoint.testDataPointUuidMap[selectedTestDataPointUuid]
-
-						// Exit for-loop if the TestDataPointUuid exist
-						if existInMap == false {
-							tempSelectedTestDataPointUuid = selectedTestDataPointUuid
-							rowUuidExistInSelectedPoints = true
-							break
-						}
-					}
-
-					// If the TestDataPointUuid doesn't exist in SelectedPoints then add to the Available TestDataPoints
-					if rowUuidExistInSelectedPoints == false {
-
-						// Check if the TestDataPointName exist in the AllPointsAvailable slice
-						for tempAvailablePointsIndex, availablePoint := range tempAllPointsAvailable {
-
-							if availablePoint.testDataPointName == filteredPoint.testDataPointName {
-								nameExistInAvailablePoints = true
-								availablePointsIndex = tempAvailablePointsIndex
+							// Exit for-loop if the TestDataPointUuid exist
+							if existInMap == false {
+								tempSelectedTestDataPointUuid = selectedTestDataPointUuid
+								rowUuidExistInSelectedPoints = true
 								break
 							}
 						}
 
-						// If TestDataPointName exist in the allPointsAvailable-slice, then add it to the TestDataPoint in allPointsAvailable-slice
-						if nameExistInAvailablePoints == true {
-							existingFilteredPoint := tempAllPointsAvailable[availablePointsIndex]
-							existingFilteredPoint.testDataPointUuidMap[tempSelectedTestDataPointUuid] = tempSelectedTestDataPointUuid
-							tempAllPointsAvailable[availablePointsIndex] = existingFilteredPoint
+						// If the TestDataPointUuid doesn't exist in SelectedPoints then add to the Available TestDataPoints
+						if rowUuidExistInSelectedPoints == false {
 
-						} else {
-							// The TestDataPointName didn't exist so add the full TestDataPoint
-							tempAllPointsAvailable = append(tempAllPointsAvailable, filteredPoint)
+							// Check if the TestDataPointName exist in the AllPointsAvailable slice
+							for tempAvailablePointsIndex, availablePoint := range allPointsAvailable {
+
+								if availablePoint.testDataPointName == filteredPoint.testDataPointName {
+									nameExistInAvailablePoints = true
+									availablePointsIndex = tempAvailablePointsIndex
+									break
+								}
+							}
+
+							// If TestDataPointName exist in the allPointsAvailable-slice, then add it to the TestDataPoint in allPointsAvailable-slice
+							if nameExistInAvailablePoints == true {
+								existingFilteredPoint := allPointsAvailable[availablePointsIndex]
+								existingFilteredPoint.availableTestDataPointUuidMap[tempSelectedTestDataPointUuid] = tempSelectedTestDataPointUuid
+								allPointsAvailable[availablePointsIndex] = existingFilteredPoint
+
+							} else {
+								// The TestDataPointName didn't exist so add the full TestDataPoint
+								allPointsAvailable = append(allPointsAvailable, filteredPoint)
+
+							}
 
 						}
 
-					}
-
-					// Exit the for-loop if the TestDataPointName exist SelectedPoints
-					if nameExistInSelectedPoints == true {
-						break
+						// Exit the for-loop if the TestDataPointName exist SelectedPoints
+						if nameExistInSelectedPoints == true {
+							break
+						}
 					}
 				}
 			}
 		}
-	}
 
-	// Custom sort: we sort by splitting each string into parts and comparing the parts
-	sort.Slice(tempAllPointsAvailable, func(i, j int) bool {
-		// Split both strings by '/'
-		partsI := strings.Split(string(tempAllPointsAvailable[i].testDataPointName), "/")
-		partsJ := strings.Split(string(tempAllPointsAvailable[j].testDataPointName), "/")
+		// Custom sort: we sort by splitting each string into parts and comparing the parts
+		sort.Slice(tempAllPointsAvailable, func(i, j int) bool {
+			// Split both strings by '/'
+			partsI := strings.Split(string(tempAllPointsAvailable[i].testDataPointName), "/")
+			partsJ := strings.Split(string(tempAllPointsAvailable[j].testDataPointName), "/")
 
-		// Compare each part; the first non-equal part determines the order
-		for k := 0; k < len(partsI) && k < len(partsJ); k++ {
-			if partsI[k] != partsJ[k] {
-				return partsI[k] < partsJ[k]
+			// Compare each part; the first non-equal part determines the order
+			for k := 0; k < len(partsI) && k < len(partsJ); k++ {
+				if partsI[k] != partsJ[k] {
+					return partsI[k] < partsJ[k]
+				}
 			}
-		}
 
-		// If all compared parts are equal, but one slice is shorter, it comes first
-		return len(partsI) < len(partsJ)
-	})
+			// If all compared parts are equal, but one slice is shorter, it comes first
+			return len(partsI) < len(partsJ)
+		})
 
-	// Write back to original from local copy of 'allPointsAvailable'
-	allPointsAvailable = &tempAllPointsAvailable
+		// Write back to original from local copy of 'allPointsAvailable'
+		allPointsAvailable = &tempAllPointsAvailable
 
-	// Refresh the List-widget
-	allAvailablePointsList.Refresh()
+		// Refresh the List-widget
+		allAvailablePointsList.Refresh()
 
-	return testDataSelectionsContainer, searchAndClearButtonsContainer
+		return testDataSelectionsContainer, searchAndClearButtonsContainer
+	*/
 
 }

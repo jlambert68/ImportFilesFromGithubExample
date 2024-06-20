@@ -9,14 +9,10 @@ import (
 
 // Create and configure the list-component of selected TestDataPoints
 func generateSelectedPointsListUIComponent(
-	selectedPointsList *widget.List,
-	allPointsAvailable *[]dataPointTypeForGroupsStruct,
-	allSelectedPoints *[]dataPointTypeForGroupsStruct,
 	newOrEditTestDataPointGroupWindowPtr *fyne.Window,
-	lowerRightSideContainer *fyne.Container,
 	incomingGroupName testDataPointGroupNameType,
 	isNew bool,
-	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataPointGroupNameType]*testDataPointNameMapType) (*widget.List, *fyne.Container) {
+	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataPointGroupNameType]*testDataPointNameMapType) {
 
 	var newOrEditTestDataPointGroupWindow fyne.Window
 	newOrEditTestDataPointGroupWindow = *newOrEditTestDataPointGroupWindowPtr
@@ -43,7 +39,7 @@ func generateSelectedPointsListUIComponent(
 			// Loop the TestDataPointNames
 			for _, tempDataPointForGroup := range dataPointsForGroup {
 
-				*allSelectedPoints = append(*allSelectedPoints, *tempDataPointForGroup)
+				allSelectedPoints = append(allSelectedPoints, *tempDataPointForGroup)
 
 			}
 
@@ -52,32 +48,20 @@ func generateSelectedPointsListUIComponent(
 
 	// Create and configure the list-component of selected TestDataPoints
 	selectedPointsList = widget.NewList(
-		func() int { return len(*allSelectedPoints) },
+		func() int { return len(allSelectedPoints) },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
 
-			var localCopyAllSelectedPoints []dataPointTypeForGroupsStruct
-			localCopyAllSelectedPoints = *allSelectedPoints
-
-			obj.(*widget.Label).SetText(fmt.Sprintf("%s [%d]", string(localCopyAllSelectedPoints[id].testDataPointName), len(localCopyAllSelectedPoints[id].testDataPointUuidMap)))
+			obj.(*widget.Label).SetText(fmt.Sprintf(
+				"%s [%d(%d)]",
+				string(allSelectedPoints[id].testDataPointName),
+				len(allPointsAvailable[id].selectedTestDataPointUuidMap),
+				len(allPointsAvailable[id].availableTestDataPointUuidMap)+
+					len(allPointsAvailable[id].selectedTestDataPointUuidMap)))
 		},
 	)
-
-	/*
-		// Functionality to remove a pointTypeSlicePtr from 'selectedPointTypes'
-		selectedPointsList.OnSelected = func(id widget.ListItemID) {
-			//allPointsAvailable = append(allPointsAvailable, allSelectedPoints[id])
-			allSelectedPoints = append(allSelectedPoints[:id], allSelectedPoints[id+1:]...)
-
-			selectedPointsList.UnselectAll()
-
-			allAvailablePointsList.Refresh()
-			selectedPointsList.Refresh()
-		}
-
-	*/
 
 	// the Entry for the name of the TestDataPointsGroup
 	nameEntry := widget.NewEntry()
@@ -95,7 +79,7 @@ func generateSelectedPointsListUIComponent(
 			delete(newOrEditedChosenTestDataPointsThisGroupMap, incomingGroupName)
 		}
 
-		for _, selectedPoint := range *allSelectedPoints {
+		for _, selectedPoint := range allSelectedPoints {
 
 			var dataPointsForGroup []*dataPointTypeForGroupsStruct
 			dataPointsForGroup = append(dataPointsForGroup, &selectedPoint)
@@ -149,8 +133,6 @@ func generateSelectedPointsListUIComponent(
 	tempTestGroupLabel.TextStyle.Bold = true
 
 	lowerRightSideContainer = container.NewBorder(container.NewVBox(tempTestGroupLabel, entryContainer, buttonsContainer), nil, nil, nil, selectedPointsList)
-
-	return selectedPointsList, lowerRightSideContainer
 
 }
 
