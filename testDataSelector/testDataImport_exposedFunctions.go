@@ -41,17 +41,25 @@ func ListTestDataGroupPointsForAGroup(testDataGroup string) (testDataPointGroups
 
 // ListTestDataRowsForAGroupPoint
 // List the current TestDataRow for a specific TestDataGroupPoint
-func ListTestDataRowsForAGroupPoint(testDataGroupPoint string) (testDataGroupPointRowsAsStringSlice []string) {
+func ListTestDataRowsForAGroupPoint(testDataGroup string, testDataGroupPoint string) (testDataGroupPointRowsAsStringSlice []string) {
 
 	//fixa denna
 
 	// Extract the map with the TestDataPoints
 	var tempTestDataPointNameMap testDataPointNameMapType
-	tempTestDataPointNameMap = *chosenTestDataPointsPerGroupMap[testDataPointGroupNameType(testDataGroupPoint)]
+	var dataPointRowsSlicePtr *[]*dataPointTypeForGroupsStruct
+	var dataPointRowsSlice []*dataPointTypeForGroupsStruct
+
+	// Extract DataPoints from for Group
+	tempTestDataPointNameMap = *chosenTestDataPointsPerGroupMap[testDataPointGroupNameType(testDataGroup)]
+
+	// Extract Rows for DataPoint
+	dataPointRowsSlicePtr = tempTestDataPointNameMap[TestDataValueNameType(testDataGroupPoint)]
+	dataPointRowsSlice = *dataPointRowsSlicePtr
 
 	// Refill the slice with all TestDataPoints
-	for testDataPoint, _ := range tempTestDataPointNameMap {
-		testDataGroupPointRowsAsStringSlice = append(testDataGroupPointRowsAsStringSlice, string(testDataPoint))
+	for _, testDataPointRowUuidPtr := range dataPointRowsSlice[0].selectedTestDataPointUuidMap {
+		testDataGroupPointRowsAsStringSlice = append(testDataGroupPointRowsAsStringSlice, string(testDataPointRowUuidPtr))
 
 	}
 
@@ -64,45 +72,44 @@ func ListTestDataRowsForAGroupPoint(testDataGroupPoint string) (testDataGroupPoi
 
 // GetTestDataPointValues
 // Generate a map with 'TestDataColumnDataName' as key and 'TestDataValue' as value
-func GetTestDataPointValues(testDataGroupPoint string) (testDataColumnDataNameMap map[string]string) { // map[TestDataColumnDataNameType]TestDataValueType
+func GetTestDataPointValues(
+	testDataGroupPoint string,
+	testDataGroupPointRowUuid string) (
+	testDataColumnDataNameMap map[string]string) { // map[TestDataColumnDataNameType]TestDataValueType
+
+	// Initiate response-map
+	testDataColumnDataNameMap = make(map[string]string)
+
+	if testDataGroupPoint == "" || testDataGroupPointRowUuid == "" {
+		return testDataColumnDataNameMap
+	}
+
+	var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
+	var tempTestDataDomainModel TestDataDomainModelStruct
+	var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
+	var tempTestDataArea TestDataAreaStruct
+	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+	var tempTestDataPointValueSlice []*TestDataPointValueStruct
+
+	tempTestDataModelMap = *testDataModelRef.TestDataModelMap
+	tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
+	tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
+	tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
+	tempTestDataValuesForRowNameMap = *tempTestDataArea.TestDataValuesForRowNameMap
+
+	// Initiate response-map
+	testDataColumnDataNameMap = make(map[string]string)
+
+	// Extract correct TestDataPointRow
+	tempTestDataPointValueSlice = *tempTestDataValuesForRowNameMap[TestDataValueNameType(testDataGroupPoint)]
+
+	// Loop Values in slice and create response-map
+	for _, tempTestDataPoint := range tempTestDataPointValueSlice {
+
+		testDataColumnDataNameMap[string(tempTestDataPoint.TestDataColumnDataName)] = string(tempTestDataPoint.TestDataValue)
+
+	}
 
 	return testDataColumnDataNameMap
 
-	/*
-		// Initiate response-map
-		testDataColumnDataNameMap = make(map[string]string)
-
-		if testDataGroupPoint == "" {
-			return testDataColumnDataNameMap
-		}
-
-		var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
-		var tempTestDataDomainModel TestDataDomainModelStruct
-		var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
-		var tempTestDataArea TestDataAreaStruct
-		var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]*map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-		var tempTestDataPointValueSlice []*TestDataPointValueStruct
-
-		tempTestDataModelMap = *testDataModelRef.TestDataModelMap
-		tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
-		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
-		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
-		tempTestDataValuesForRowNameMap = *tempTestDataArea.TestDataValuesForRowNameMap
-
-		// Initiate response-map
-		testDataColumnDataNameMap = make(map[string]string)
-
-		// Extract correct TestDataPointRow
-		tempTestDataPointValueSlice = *tempTestDataValuesForRowNameMap[TestDataValueNameType(testDataGroupPoint)]
-
-		// Loop Values in slice and create response-map
-		for _, tempTestDataPoint := range tempTestDataPointValueSlice {
-
-			testDataColumnDataNameMap[string(tempTestDataPoint.TestDataColumnDataName)] = string(tempTestDataPoint.TestDataValue)
-
-		}
-
-		return testDataColumnDataNameMap
-
-	*/
 }

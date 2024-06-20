@@ -28,7 +28,11 @@ func showNewOrEditGroupWindow(
 
 	parent.Hide()
 
-	var shouldUpdateMainWindow responseChannelStruct
+	// Set Default value
+	shouldUpdateMainWindow = responseChannelStruct{
+		shouldBeUpdated:        false,
+		testDataPointGroupName: "",
+	}
 
 	// Set name for the Window
 	newOrEditTestDataPointGroupWindow := app.NewWindow("Edit Group")

@@ -121,8 +121,8 @@ type TestDataValueNameDescriptionType string
 type TestDataValueNameType string
 
 // The slices for Groups ans TestDataPoints for a Group
-var testDataPointGroups []testDataPointGroupNameType   // Define testDataPointGroups
-var testDataPointsForAGroup []TestDataPointRowUuidType // Define testDataPointGroups
+var testDataPointGroups []testDataPointGroupNameType // Define testDataPointGroups
+var testDataPointsForAGroup []TestDataValueNameType  // Define testDataPointGroups
 
 // The List-items for Groups ans TestDataPoints for a Group
 var testDataPointGroupsList *widget.List
@@ -167,6 +167,9 @@ const (
 )
 
 var setStateForSaveButtonAndGroupNameTextEntryExternalCall func()
+
+// Variable to be used when closing window to inform calling window if the data was updated or not
+var shouldUpdateMainWindow responseChannelStruct
 
 // Message sent back when a Group is Created or is Edited
 type responseChannelStruct struct {

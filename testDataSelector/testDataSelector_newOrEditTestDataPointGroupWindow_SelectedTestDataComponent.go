@@ -91,6 +91,12 @@ func generateSelectedPointsListUIComponent(
 		newOrEditedChosenTestDataPointsThisGroupMap[testDataPointGroupNameType(nameEntry.Text)] = &newTestDataPointNameMap
 		newOrEditedChosenTestDataPointsThisGroupMapPtr = &newOrEditedChosenTestDataPointsThisGroupMap
 
+		// Inform calling window that an update is done
+		shouldUpdateMainWindow = responseChannelStruct{
+			shouldBeUpdated:        true,
+			testDataPointGroupName: testDataPointGroupNameType(nameEntry.Text),
+		}
+
 		newOrEditTestDataPointGroupWindow.Close()
 	})
 

@@ -26,9 +26,9 @@ func InitiateFileViewer(
 	var testDataPointGroupsSelect *widget.Select
 	var testDataPointGroupsSelectSelected string
 	var testDataPointsForAGroupSelect *widget.Select
-	var testDataPointsForAGroupSelectSelected string
+	var testDataPointForAGroupSelectSelected string
 	var testDataRowsForTestDataPointsSelect *widget.Select
-	//var testDataRowsForTestDataPointsSelectSelected string
+	var testDataRowsForTestDataPointsSelectSelected string
 
 	// The slices for Groups, TestDataPoints for a Group and the specific TestDataRows for a TestDataPoint
 	var testDataPointGroups []string
@@ -46,14 +46,14 @@ func InitiateFileViewer(
 	var leftContainer *fyne.Container
 	var rightContainer *fyne.Container
 
-	// Extract filenames for the fileSelectordropdown
+	// Extract filenames for the fileSelectorDropdown
 	var fileNames []string
 	for _, file := range *importedFilesPtr {
 		fileNames = append(fileNames, file.Name)
 	}
 
-	// Create UI component for 'fileSelectordropdown'
-	fileSelectordropdown := widget.NewSelect(fileNames, nil)
+	// Create UI component for 'fileSelectorDropdown'
+	fileSelectorDropdown := widget.NewSelect(fileNames, nil)
 	urlLabel := widget.NewLabel("")
 	var richText *widget.RichText
 	richText = &widget.RichText{
@@ -72,15 +72,17 @@ func InitiateFileViewer(
 		Truncation: 0,
 	}
 
-	var testDataPointValues map[string]string
+	var testDataPointValues map[string]string // map[TestDataColumnDataNameType]TestDataValueType
 
-	// Set the fileSelectordropdown change handler
+	// Set the fileSelectorDropdown change handler
 	var selectedFile string
-	fileSelectordropdown.OnChanged = func(selected string) {
+	fileSelectorDropdown.OnChanged = func(selected string) {
 
 		selectedFile = selected
 
-		testDataPointValues = testDataSelector.GetTestDataPointValues(testDataPointsForAGroupSelectSelected)
+		testDataPointValues = testDataSelector.GetTestDataPointValues(
+			testDataPointForAGroupSelectSelected,
+			testDataRowsForTestDataPointsSelectSelected)
 
 		for _, file := range *importedFilesPtr {
 			if file.Name == selected {
@@ -130,13 +132,13 @@ func InitiateFileViewer(
 	}
 
 	// Create function that converts a slice with the specific TestDataPoints into a string slice
-	testDataRowSliceToStringSliceFunction := func(testDataPoint string) []string {
+	testDataRowSliceToStringSliceFunction := func(testDataGroup string, testDataGroupPoint string) []string {
 
-		if testDataPoint == "" {
+		if testDataGroup == "" || testDataGroupPoint == "" {
 			return []string{}
 		}
 
-		testDataRowsForATestDataPoint = testDataSelector.ListTestDataRowsForAGroupPoint(testDataPoint)
+		testDataRowsForATestDataPoint = testDataSelector.ListTestDataRowsForAGroupPoint(testDataGroup, testDataGroupPoint)
 
 		return testDataRowsForATestDataPoint
 	}
@@ -158,29 +160,29 @@ func InitiateFileViewer(
 	// Create the Groups TestDataPoints dropdown - <Sub Custody/Main TestData Area/SEK/AccTest/SE/CRDT/CH/Switzerland/BBH/EUR/EUR/SEK>
 	testDataPointsForAGroupSelect = widget.NewSelect(testDataPointsToStringSliceFunction(testDataPointGroupsSelectSelected), func(selected string) {
 
-		testDataPointsForAGroupSelectSelected = selected
+		testDataPointForAGroupSelectSelected = selected
 
 		// Select the correct TestDataPoint in the dropdown for TestDataPoints
-		testDataRowsForTestDataPointsSelect.SetOptions(testDataRowSliceToStringSliceFunction(selected))
+		testDataRowsForTestDataPointsSelect.SetOptions(testDataRowSliceToStringSliceFunction(testDataPointGroupsSelect.Selected, selected))
 		testDataRowsForTestDataPointsSelect.Refresh()
 
 		// UnSelect in DropDown- and List for Specific TestDataPoints
-		testDataPointsForAGroupSelect.ClearSelected()
+		testDataRowsForTestDataPointsSelect.ClearSelected()
 
 	})
 
 	// Create the Groups Specific TestDataPoint dropdown - <All the specific values>
-	testDataRowsForTestDataPointsSelect = widget.NewSelect(testDataRowSliceToStringSliceFunction(testDataPointsForAGroupSelectSelected), func(selected string) {
+	testDataRowsForTestDataPointsSelect = widget.NewSelect(testDataRowSliceToStringSliceFunction(testDataPointGroupsSelectSelected, testDataPointForAGroupSelectSelected), func(selected string) {
 
-		//testDataRowsForTestDataPointsSelectSelected = selected
+		testDataRowsForTestDataPointsSelectSelected = selected
 
-		fileSelectordropdown.SetSelected(selectedFile)
+		fileSelectorDropdown.SetSelected(selectedFile)
 
 	})
 
 	// Create UI component for 'TestDataGroupPointSelector'
 
-	topContainer := container.NewVBox(fileSelectordropdown, urlLabel, testDataPointGroupsSelect, testDataPointsForAGroupSelect, testDataRowsForTestDataPointsSelect)
+	topContainer := container.NewVBox(fileSelectorDropdown, urlLabel, testDataPointGroupsSelect, testDataPointsForAGroupSelect, testDataRowsForTestDataPointsSelect)
 
 	// Placeholder for rightContainer - add your form view here
 	rightContainer = container.NewBorder(nil, nil, nil, nil, richTextWithValues)
