@@ -216,7 +216,7 @@ var tableMutex sync.Mutex
 
 func NewCustomTableWidget(
 	data [][]string,
-	selectedTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidType) *CustomTableWidget {
+	selectedTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidStruct) *CustomTableWidget {
 
 	table := &CustomTableWidget{
 		tableData:          data,
@@ -529,7 +529,7 @@ func setColumnWidths(table *widget.Table, data [][]string) {
 func showTable(
 	w fyne.Window,
 	data [][]string,
-	selectedTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidType) {
+	selectedTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidStruct) {
 
 	// Create a new table with an extra column for checkboxes
 	table := NewCustomTableWidget(data, selectedTestDataPointUuidMap)
@@ -548,6 +548,7 @@ func showTable(
 
 				var testDataPointName TestDataValueNameType
 				var testDataPointRowUuid TestDataPointRowUuidType
+				var testDataPointRowUuidObject TestDataPointRowUuidStruct
 
 				// Extract rows that were selected
 				for row, isSelected := range table.rowIsSelectedMap {
@@ -555,13 +556,16 @@ func showTable(
 					testDataPointName = TestDataValueNameType(table.tableData[row][len(table.tableData[1])-2])
 					testDataPointRowUuid = TestDataPointRowUuidType(table.tableData[row][len(table.tableData[1])-1])
 
+					// Generate the DataRowSummary
+					testDataPointRowUuidObject = generateTestDataPointRowUuidObject(testDataPointRowUuid, table.tableData[row])
+
 					if isSelected == true {
 
-						addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(testDataPointName, testDataPointRowUuid)
+						addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(testDataPointName, testDataPointRowUuidObject)
 
 					} else {
 						// Not Selected, check if existed in Selected
-						addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(testDataPointName, testDataPointRowUuid)
+						addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(testDataPointName, testDataPointRowUuidObject)
 					}
 				}
 
@@ -575,10 +579,17 @@ func showTable(
 
 }
 
+func generateTestDataPointRowUuidObject(testDataPointRowUuid TestDataPointRowUuidType, dataRow []string) (TestDataPointRowUuidObject TestDataPointRowUuidStruct) {
+
+	vv
+
+	return TestDataPointRowUuidObject
+}
+
 // Add the TestDataPoint to the Selected-list and removes it from the Avaialables-lsit
 func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 	testDataPointName TestDataValueNameType,
-	testDataPointRowUuid TestDataPointRowUuidType) {
+	testDataPointRowUuidObject TestDataPointRowUuidStruct) {
 
 	var foundInSelectedPointsList bool
 	var tempDataPoint dataPointTypeForGroupsStruct
@@ -590,10 +601,10 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 		if availableDataPoint.testDataPointName == testDataPointName {
 
 			// Remove it from Available DataPoint-map
-			delete(availableDataPoint.availableTestDataPointUuidMap, testDataPointRowUuid)
+			delete(availableDataPoint.availableTestDataPointUuidMap, testDataPointRowUuidObject.testDataPointRowUuid)
 
 			//Add it to the Selected Datapoint-map
-			availableDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+			availableDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuidObject.testDataPointRowUuid] = testDataPointRowUuidObject
 
 			// Make a copy of the DataPoint to be used when the DataPoint doesn't exist in Selected-pointslist
 			tempDataPoint = availableDataPoint
@@ -614,10 +625,10 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 			foundInSelectedPointsList = true
 
 			// Remove it from Available DataPoint-map
-			delete(selectedDataPoint.availableTestDataPointUuidMap, testDataPointRowUuid)
+			delete(selectedDataPoint.availableTestDataPointUuidMap, testDataPointRowUuidObject.testDataPointRowUuid)
 
 			//Add it to the Selected Datapoint-map
-			selectedDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+			selectedDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuidObject.testDataPointRowUuid] = testDataPointRowUuidObject
 
 			// Exit for loop
 			break
@@ -648,7 +659,7 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 
 func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 	testDataPointName TestDataValueNameType,
-	testDataPointRowUuid TestDataPointRowUuidType) {
+	testDataPointRowUuidObject TestDataPointRowUuidStruct) {
 
 	// Loop Available TestDataPoints
 	for _, availableDataPoint := range allPointsAvailable {
@@ -657,10 +668,10 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 		if availableDataPoint.testDataPointName == testDataPointName {
 
 			// Remove it from Selected DataPoint-map
-			delete(availableDataPoint.selectedTestDataPointUuidMap, testDataPointRowUuid)
+			delete(availableDataPoint.selectedTestDataPointUuidMap, testDataPointRowUuidObject.testDataPointRowUuid)
 
 			//Add it to the Available Datapoint-map
-			availableDataPoint.availableTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+			availableDataPoint.availableTestDataPointUuidMap[testDataPointRowUuidObject.testDataPointRowUuid] = testDataPointRowUuidObject
 
 			// Exit for loop
 			break
@@ -675,10 +686,10 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 		if selectedDataPoint.testDataPointName == testDataPointName {
 
 			// Remove it from Selected DataPoint-map
-			delete(selectedDataPoint.selectedTestDataPointUuidMap, testDataPointRowUuid)
+			delete(selectedDataPoint.selectedTestDataPointUuidMap, testDataPointRowUuidObject.testDataPointRowUuid)
 
 			//Add it to the Available Datapoint-map
-			selectedDataPoint.availableTestDataPointUuidMap[testDataPointRowUuid] = testDataPointRowUuid
+			selectedDataPoint.availableTestDataPointUuidMap[testDataPointRowUuidObject.testDataPointRowUuid] = testDataPointRowUuidObject
 
 			// When there are no more RowUuids in map then Delete the DataPoint from the Slice
 			if len(selectedDataPoint.selectedTestDataPointUuidMap) == 0 {

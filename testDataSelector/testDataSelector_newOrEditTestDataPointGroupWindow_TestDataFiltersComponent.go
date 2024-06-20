@@ -326,12 +326,19 @@ func generateTestDataSelectionsUIComponent(
 						testDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
 						testDataPointName:             tempTestDataValueName,
 						searchResultDataPointUuidMap:  nil,
-						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
-						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
+						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidStruct),
+						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidStruct),
 					}
 				}
 
-				searchResultDataPoint.availableTestDataPointUuidMap[tempTestDataPointRowUuid] = tempTestDataPointValueSlice[0].TestDataPointRowUuid
+				// Create the 'testDataPointRowUuidObject' to be added to the Map
+				var testDataPointRowUuidObject TestDataPointRowUuidStruct
+				testDataPointRowUuidObject = TestDataPointRowUuidStruct{
+					testDataPointRowUuid:          tempTestDataPointValueSlice[0].TestDataPointRowUuid,
+					testDataPointRowValuesSummary: "",
+				}
+
+				searchResultDataPoint.availableTestDataPointUuidMap[tempTestDataPointRowUuid] = testDataPointRowUuidObject
 
 				// Add the 'searchResultDataPoint' back to the temporary map for SearchResultDataPoints
 				tempMapForSearchResultDataPoints[tempTestDataValueName] = searchResultDataPoint
@@ -353,12 +360,19 @@ func generateTestDataSelectionsUIComponent(
 						testDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
 						testDataPointName:             tempTestDataValueName,
 						searchResultDataPointUuidMap:  nil,
-						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
-						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidType),
+						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidStruct),
+						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidStruct),
 					}
 				}
 
-				searchResultDataPoint.selectedTestDataPointUuidMap[tempTestDataPointRowUuid] = tempTestDataPointValueSlice[0].TestDataPointRowUuid
+				// Create the 'testDataPointRowUuidObject' to be added to the Map
+				var testDataPointRowUuidObject TestDataPointRowUuidStruct
+				testDataPointRowUuidObject = TestDataPointRowUuidStruct{
+					testDataPointRowUuid:          tempTestDataPointValueSlice[0].TestDataPointRowUuid,
+					testDataPointRowValuesSummary: "",
+				}
+
+				searchResultDataPoint.selectedTestDataPointUuidMap[tempTestDataPointRowUuid] = testDataPointRowUuidObject
 
 				// Add the 'searchResultDataPoint' back to the temporary map for SearchResultDataPoints
 				tempMapForSearchResultDataPoints[tempTestDataValueName] = searchResultDataPoint

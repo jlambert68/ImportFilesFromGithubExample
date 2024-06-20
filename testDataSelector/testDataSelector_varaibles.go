@@ -120,6 +120,10 @@ type TestDataValueNameDescriptionType string
 // The name for a TestDataPoint. Used to show/describe the TestDataPoint in the UI
 type TestDataValueNameType string
 
+// TestDataPointRowValuesSummaryType
+// All values for a TestDataRow is concatenated into single value as a summary
+type TestDataPointRowValuesSummaryType string
+
 // The slices for Groups ans TestDataPoints for a Group
 var testDataPointGroups []testDataPointGroupNameType // Define testDataPointGroups
 var testDataPointsForAGroup []TestDataValueNameType  // Define testDataPointGroups
@@ -177,6 +181,11 @@ type responseChannelStruct struct {
 	testDataPointGroupName testDataPointGroupNameType
 }
 
+type TestDataPointRowUuidStruct struct {
+	testDataPointRowUuid          TestDataPointRowUuidType
+	testDataPointRowValuesSummary TestDataPointRowValuesSummaryType
+}
+
 // Structure for the Group
 type dataPointTypeForGroupsStruct struct {
 	testDataDomainUuid            TestDataDomainUuidType
@@ -184,9 +193,9 @@ type dataPointTypeForGroupsStruct struct {
 	testDataAreaUuid              TestDataAreaUuidType
 	testDataAreaName              TestDataAreaNameType
 	testDataPointName             TestDataValueNameType
-	searchResultDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidType
-	availableTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidType
-	selectedTestDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidType
+	searchResultDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
+	availableTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
+	selectedTestDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
 }
 
 // Slices used to keep track of filtered, available and selected DataPoints

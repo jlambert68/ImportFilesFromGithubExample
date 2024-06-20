@@ -60,8 +60,8 @@ func ListTestDataRowsForAGroupPoint(testDataGroup string, testDataGroupPoint str
 	dataPointRowsSlice = *dataPointRowsSlicePtr
 
 	// Refill the slice with all TestDataPoints
-	for _, testDataPointRowUuidPtr := range dataPointRowsSlice[0].selectedTestDataPointUuidMap {
-		testDataGroupPointRowsAsStringSlice = append(testDataGroupPointRowsAsStringSlice, string(testDataPointRowUuidPtr))
+	for _, testDataPointRowUuiObject := range dataPointRowsSlice[0].selectedTestDataPointUuidMap {
+		testDataGroupPointRowsAsStringSlice = append(testDataGroupPointRowsAsStringSlice, string(testDataPointRowUuiObject.testDataPointRowUuid))
 
 	}
 
