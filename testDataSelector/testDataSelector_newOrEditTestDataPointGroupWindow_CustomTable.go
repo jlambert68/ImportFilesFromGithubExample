@@ -581,7 +581,21 @@ func showTable(
 
 func generateTestDataPointRowUuidObject(testDataPointRowUuid TestDataPointRowUuidType, dataRow []string) (TestDataPointRowUuidObject TestDataPointRowUuidStruct) {
 
-	vv
+	// Loop the data for the row
+	for _, testDataValue := range dataRow {
+
+		if len(TestDataPointRowUuidObject.testDataPointRowValuesSummary) == 0 {
+
+			TestDataPointRowUuidObject.testDataPointRowValuesSummary = TestDataPointRowValuesSummaryType(testDataValue)
+			TestDataPointRowUuidObject.testDataPointRowUuid = testDataPointRowUuid
+
+		} else {
+
+			TestDataPointRowUuidObject.testDataPointRowValuesSummary = TestDataPointRowUuidObject.testDataPointRowValuesSummary +
+				"/" + TestDataPointRowValuesSummaryType(testDataValue)
+
+		}
+	}
 
 	return TestDataPointRowUuidObject
 }

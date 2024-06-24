@@ -43,7 +43,8 @@ func ListTestDataGroupPointsForAGroup(testDataGroup string) (testDataPointGroups
 
 // ListTestDataRowsForAGroupPoint
 // List the current TestDataRow for a specific TestDataGroupPoint
-func ListTestDataRowsForAGroupPoint(testDataGroup string, testDataGroupPoint string) (testDataGroupPointRowsAsStringSlice []string) {
+func ListTestDataRowsForAGroupPoint(testDataGroup string, testDataGroupPoint string) (
+	testDataGroupPointRowsSummaryValueAsStringSlice []string) {
 
 	//fixa denna
 
@@ -61,29 +62,50 @@ func ListTestDataRowsForAGroupPoint(testDataGroup string, testDataGroupPoint str
 
 	// Refill the slice with all TestDataPoints
 	for _, testDataPointRowUuiObject := range dataPointRowsSlice[0].selectedTestDataPointUuidMap {
-		testDataGroupPointRowsAsStringSlice = append(testDataGroupPointRowsAsStringSlice, string(testDataPointRowUuiObject.testDataPointRowUuid))
+		testDataGroupPointRowsSummaryValueAsStringSlice = append(testDataGroupPointRowsSummaryValueAsStringSlice,
+			string(testDataPointRowUuiObject.testDataPointRowValuesSummary))
 
 	}
 
 	// Sort the GroupPoints
-	sort.Strings(testDataGroupPointRowsAsStringSlice)
+	sort.Strings(testDataGroupPointRowsSummaryValueAsStringSlice)
 
-	return testDataGroupPointRowsAsStringSlice
+	return testDataGroupPointRowsSummaryValueAsStringSlice
 
 }
 
 // GetTestDataPointValues
 // Generate a map with 'TestDataColumnDataName' as key and 'TestDataValue' as value
 func GetTestDataPointValues(
+	testDataGroup string,
 	testDataPointName string,
-	testDataPointRowUuid string) (
+	testDataPointRowSummaryValue string) (
 	testDataColumnDataNameMap map[string]string) { // map[TestDataColumnDataNameType]TestDataValueType
 
 	// Initiate response-map
 	testDataColumnDataNameMap = make(map[string]string)
 
-	if testDataPointName == "" || testDataPointRowUuid == "" {
+	if testDataPointName == "" || testDataPointRowSummaryValue == "" {
 		return testDataColumnDataNameMap
+	}
+
+	// Get 'TestDataPointRowUuid' base on 'TestDataPointRowSummaryValue'
+	var testDataPointRowUuid string
+
+	// Extract DataPoints from for Group
+	tempTestDataPointNameMap := *chosenTestDataPointsPerGroupMap[testDataPointGroupNameType(testDataGroup)]
+
+	// Extract Rows for DataPoint
+	dataPointRowsSlicePtr := tempTestDataPointNameMap[TestDataValueNameType(testDataPointName)]
+	dataPointRowsSlice := *dataPointRowsSlicePtr
+
+	// Refill the slice with all TestDataPoints
+	for _, testDataPointRowUuiObject := range dataPointRowsSlice[0].selectedTestDataPointUuidMap {
+
+		if string(testDataPointRowUuiObject.testDataPointRowValuesSummary) == testDataPointRowSummaryValue {
+			testDataPointRowUuid = string(testDataPointRowUuiObject.testDataPointRowUuid)
+			break
+		}
 	}
 
 	// Create the data table for all matching 'testDataPointRowUuid'
