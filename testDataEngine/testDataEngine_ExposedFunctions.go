@@ -1,4 +1,4 @@
-package testDataSelector
+package testDataEngine
 
 import (
 	"sort"
@@ -110,7 +110,7 @@ func GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
 
 	// Create the data table for all matching 'testDataPointRowUuid'
 	var tableData [][]string
-	tableData = buildPopUpTableDataFromTestDataPointName(testDataPointName, testDataModelPtr)
+	tableData = BuildPopUpTableDataFromTestDataPointName(testDataPointName, &testDataModel)
 
 	var headerSlice []string
 
@@ -140,4 +140,10 @@ func GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
 
 	return testDataColumnDataNameMap
 
+}
+
+// GetTestDataModelPtr
+// Returns a pointer to the full TestDataModel
+func GetTestDataModelPtr() *TestDataModelStruct {
+	return &testDataModel
 }

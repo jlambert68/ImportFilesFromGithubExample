@@ -80,7 +80,7 @@ func InitiateFileViewer(
 
 		selectedFile = selected
 
-		testDataPointValues = testDataSelector.GetTestDataPointValues(
+		testDataPointValues = testDataSelector.GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
 			testDataPointGroupsSelectSelected,
 			testDataPointForAGroupSelectSelected,
 			testDataRowForTestDataPointsSelectSelected)

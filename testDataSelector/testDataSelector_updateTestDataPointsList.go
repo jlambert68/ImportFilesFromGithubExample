@@ -1,6 +1,6 @@
 package testDataSelector
 
-// Updates the list show the TestDataPoints for a specific Group in main window
+// Updates the list that show the TestDataPoints for a specific Group in main window
 func updateTestDataPointsForAGroupList(testDataPointGroupName testDataPointGroupNameType) {
 
 	// Clear the slice that holds all TestDataPoints
