@@ -6,6 +6,7 @@ require (
 	fyne.io/fyne/v2 v2.4.4
 	github.com/d5/tengo/v2 v2.17.0
 	github.com/google/uuid v1.1.2
+	github.com/jlambert68/FenixScriptEngine v0.0.0-20240702074005-00dea4b41437
 	github.com/yuin/gopher-lua v1.1.1
 )
 

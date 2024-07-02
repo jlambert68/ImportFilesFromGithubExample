@@ -2,13 +2,13 @@ package fileViewer
 
 import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
-	"ImportFilesFromGithub/luaScriptEngine"
 	"ImportFilesFromGithub/testDataSelector"
 	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jlambert68/FenixScriptEngine/luaEngine"
 	"regexp"
 	"strconv"
 	"strings"
@@ -412,7 +412,7 @@ func parseAndFormatText(inputText string, testDataPointValuesPtr *map[string]str
 				functionValueSlice, err := match(currentText)
 				if err == nil {
 					//newTextFromScriptEngine = tengoScriptExecuter.ExecuteScripte(functionValueSlice)
-					newTextFromScriptEngine = luaScriptEngine.ExecuteLuaScriptBasedOnPlaceholder(functionValueSlice, testCaseExecutionUuid)
+					newTextFromScriptEngine = luaEngine.ExecuteLuaScriptBasedOnPlaceholder(functionValueSlice, testCaseExecutionUuid)
 
 				} else {
 					newTextFromScriptEngine = err.Error()

@@ -3,13 +3,13 @@ package main
 import (
 	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
-	"ImportFilesFromGithub/luaScriptEngine"
 	"ImportFilesFromGithub/testDataSelector"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jlambert68/FenixScriptEngine/luaEngine"
 	"log"
 	"strings"
 )
@@ -21,11 +21,11 @@ func main() {
 
 	var err error
 	// Initiate Lua Script Engine
-	err = luaScriptEngine.InitiateLuaScriptEngine([][]byte{})
+	err = luaEngine.InitiateLuaScriptEngine([][]byte{})
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	defer luaScriptEngine.CloseDownLuaScriptEngine()
+	defer luaEngine.CloseDownLuaScriptEngine()
 
 	repoOwner := "jlambert68"    // Replace with the repository owner's username
 	repoName := "FenixTesterGui" // Replace with the repository name
