@@ -234,7 +234,7 @@ func AddTestDataToTestDataModel(
 	}
 
 	// Check how to add values to full 'testDataModel'
-	if *TestDataModel.TestDataModelMap == nil {
+	if TestDataModel.TestDataModelMap == nil {
 
 		// This is the first time the TestDataModel is populated
 		TestDataModel = TestDataModelStruct{

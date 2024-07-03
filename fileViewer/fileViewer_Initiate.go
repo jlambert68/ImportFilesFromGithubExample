@@ -2,7 +2,7 @@ package fileViewer
 
 import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
-	"ImportFilesFromGithub/testDataSelector"
+	"ImportFilesFromGithub/testDataEngine"
 	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
@@ -80,7 +80,7 @@ func InitiateFileViewer(
 
 		selectedFile = selected
 
-		testDataPointValues = testDataSelector.GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
+		testDataPointValues = testDataEngine.GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
 			testDataPointGroupsSelectSelected,
 			testDataPointForAGroupSelectSelected,
 			testDataRowForTestDataPointsSelectSelected)
@@ -115,7 +115,7 @@ func InitiateFileViewer(
 	// Create function that converts a GroupSlice into a string slice
 	getTestGroupsFromTestDataEngineFunction := func() []string {
 
-		testDataPointGroups = testDataSelector.ListTestDataGroups()
+		testDataPointGroups = testDataEngine.ListTestDataGroups()
 
 		return testDataPointGroups
 	}
@@ -127,7 +127,7 @@ func InitiateFileViewer(
 			return []string{}
 		}
 
-		testDataPointsForAGroup = testDataSelector.ListTestDataGroupPointsForAGroup(testDataGroup)
+		testDataPointsForAGroup = testDataEngine.ListTestDataGroupPointsForAGroup(testDataGroup)
 
 		return testDataPointsForAGroup
 	}
@@ -139,7 +139,7 @@ func InitiateFileViewer(
 			return []string{}
 		}
 
-		testDataRowsForATestDataPoint = testDataSelector.ListTestDataRowsForAGroupPoint(testDataGroup, testDataGroupPoint)
+		testDataRowsForATestDataPoint = testDataEngine.ListTestDataRowsForAGroupPoint(testDataGroup, testDataGroupPoint)
 
 		return testDataRowsForATestDataPoint
 	}
