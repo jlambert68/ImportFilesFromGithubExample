@@ -1,6 +1,7 @@
-package testDataSelector
+package newOrEditTestDataPointGroupUI
 
 import (
+	"ImportFilesFromGithub/testDataEngine"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -11,34 +12,36 @@ import (
 
 // *** Create the selection boxes for selecting TestDataValues values
 func generateTestDataSelectionsUIComponent(
-	testDataModel *TestDataModelStruct,
-	testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct) {
+	testDataModel *testDataEngine.TestDataModelStruct,
+	testDataModelMap map[testDataEngine.TestDataDomainUuidType]*testDataEngine.TestDataDomainModelStruct,
+	testDataDomainUuid testDataEngine.TestDataDomainUuidType,
+	testDataAreaUuid testDataEngine.TestDataAreaUuidType) {
 
 	var existInMap bool
 
-	var searchResult []TestDataPointRowUuidType
+	var searchResult []testDataEngine.TestDataPointRowUuidType
 
 	// Variable to handel DropDown for Domains
 	var domainOptions []string
-	var domains []*TestDataDomainModelStruct
+	var domains []*testDataEngine.TestDataDomainModelStruct
 	var domainsLabel *widget.Label
 	var domainsSelect *widget.Select
 	var testDomainContainer *fyne.Container
 
 	// Variable to handel DropDown for TestDataAreas for a chosen Domain
 	var testAreaOptions []string
-	var testAreas []*TestDataAreaStruct
+	var testAreas []*testDataEngine.TestDataAreaStruct
 	var testAreasLabel *widget.Label
 	var testAreaSelect *widget.Select
 	var testAreasContainer *fyne.Container
-	var testAreaMap *map[TestDataAreaUuidType]*TestDataAreaStruct
+	var testAreaMap *map[testDataEngine.TestDataAreaUuidType]*testDataEngine.TestDataAreaStruct
 
 	type testDataValueSelectionStruct struct {
 		testDataSelectionLabel       *widget.Label
 		testDataCheckGroup           *widget.CheckGroup
-		TestDataColumnUuid           TestDataColumnUuidType
-		TestDataColumnDataName       TestDataColumnDataNameType
-		TestDataPointValueRowUuidMap *map[TestDataValueType]*[]TestDataPointRowUuidType
+		TestDataColumnUuid           testDataEngine.TestDataColumnUuidType
+		TestDataColumnDataName       testDataEngine.TestDataColumnDataNameType
+		TestDataPointValueRowUuidMap *map[testDataEngine.TestDataValueType]*[]testDataEngine.TestDataPointRowUuidType
 	}
 	var testDataValueSelections []*testDataValueSelectionStruct
 	var testDataValuesSelectionContainer *fyne.Container
@@ -88,7 +91,7 @@ func generateTestDataSelectionsUIComponent(
 				testDataValuesSelectionContainer = container.NewHBox()
 
 				// Create a slice with 'testDataColumnsMetaData' that can be sorted
-				var testDataColumnsMetaDataToBeSorted []*TestDataColumnMetaDataStruct
+				var testDataColumnsMetaDataToBeSorted []*testDataEngine.TestDataColumnMetaDataStruct
 				for _, testDataColumnsMetaData := range *testDataArea.TestDataColumnsMetaDataMap {
 					testDataColumnsMetaDataToBeSorted = append(testDataColumnsMetaDataToBeSorted, testDataColumnsMetaData)
 				}
@@ -112,8 +115,8 @@ func generateTestDataSelectionsUIComponent(
 						newColumnFilterLabel = widget.NewLabel(string(testDataColumnsMetaData.TestDataColumnUIName))
 						newColumnFilterLabel.TextStyle.Bold = true
 
-						var tempTestDataPointValueRowUuidMap map[TestDataValueType]*[]TestDataPointRowUuidType
-						tempTestDataPointValueRowUuidMap = make(map[TestDataValueType]*[]TestDataPointRowUuidType)
+						var tempTestDataPointValueRowUuidMap map[testDataEngine.TestDataValueType]*[]testDataEngine.TestDataPointRowUuidType
+						tempTestDataPointValueRowUuidMap = make(map[testDataEngine.TestDataValueType]*[]testDataEngine.TestDataPointRowUuidType)
 
 						var testDataValueSelection *testDataValueSelectionStruct
 						testDataValueSelection = &testDataValueSelectionStruct{
@@ -125,7 +128,7 @@ func generateTestDataSelectionsUIComponent(
 						}
 
 						// Extract the Map with the values
-						var uniqueTestDataValuesForColumnMapPtr *map[TestDataValueType][]TestDataPointRowUuidType
+						var uniqueTestDataValuesForColumnMapPtr *map[testDataEngine.TestDataValueType][]testDataEngine.TestDataPointRowUuidType
 						UniqueTestDataValuesForColumnMap := *testDataArea.UniqueTestDataValuesForColumnMap
 
 						uniqueTestDataValuesForColumnMapPtr = UniqueTestDataValuesForColumnMap[testDataColumnsMetaData.TestDataColumnUuid]
@@ -137,12 +140,12 @@ func generateTestDataSelectionsUIComponent(
 							checkGroupOptions = append(checkGroupOptions, string(uniqueTestDataValue))
 
 							// Add 'TestDataPointRowUuid' to correct slice for each unique value in the column
-							var testDataPointRowUuidSlicePtr *[]TestDataPointRowUuidType
-							var testDataPointRowUuidSlice []TestDataPointRowUuidType
+							var testDataPointRowUuidSlicePtr *[]testDataEngine.TestDataPointRowUuidType
+							var testDataPointRowUuidSlice []testDataEngine.TestDataPointRowUuidType
 							testDataPointRowUuidSlicePtr, existInMap = tempTestDataPointValueRowUuidMap[uniqueTestDataValue]
 
 							if existInMap == false {
-								var tempTestDataPointRowUuidSlice []TestDataPointRowUuidType
+								var tempTestDataPointRowUuidSlice []testDataEngine.TestDataPointRowUuidType
 								testDataPointRowUuidSlice = tempTestDataPointRowUuidSlice
 							} else {
 								testDataPointRowUuidSlice = *testDataPointRowUuidSlicePtr
@@ -223,11 +226,11 @@ func generateTestDataSelectionsUIComponent(
 	// Create Search TestData-button
 	searchTestDataButton = widget.NewButton("Search for TestDataPoints", func() {
 
-		var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
-		var tempTestDataDomainModel TestDataDomainModelStruct
-		var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
-		var tempTestDataArea TestDataAreaStruct
-		var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
+		var tempTestDataModelMap map[testDataEngine.TestDataDomainUuidType]*testDataEngine.TestDataDomainModelStruct
+		var tempTestDataDomainModel testDataEngine.TestDataDomainModelStruct
+		var tempTestDataAreaMap map[testDataEngine.TestDataAreaUuidType]*testDataEngine.TestDataAreaStruct
+		var tempTestDataArea testDataEngine.TestDataAreaStruct
+		var tempTestDataValuesForRowMap map[testDataEngine.TestDataPointRowUuidType]*[]*testDataEngine.TestDataPointValueStruct
 
 		tempTestDataModelMap = *testDataModel.TestDataModelMap
 		tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
@@ -235,11 +238,11 @@ func generateTestDataSelectionsUIComponent(
 		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
 		tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
 
-		var tempTestDataPointValueSlice []*TestDataPointValueStruct
+		var tempTestDataPointValueSlice []*testDataEngine.TestDataPointValueStruct
 
 		//var tempTestDataPointValueSlice *[]*TestDataPointValueStruct
 
-		var allTestDataPointRowsUuid []TestDataPointRowUuidType
+		var allTestDataPointRowsUuid []testDataEngine.TestDataPointRowUuidType
 
 		// Loop all TestData and extract all rows
 		for tempTestDataPointRowUuid, _ := range tempTestDataValuesForRowMap {
@@ -256,13 +259,13 @@ func generateTestDataSelectionsUIComponent(
 			selectedCheckBoxes = testDataValueSelection.testDataCheckGroup.Selected
 
 			// Extract 'TestDataPointRowUuid' for the Selected CheckBox-value-rows
-			var testDataPointRowUuidMap map[TestDataValueType]*[]TestDataPointRowUuidType
+			var testDataPointRowUuidMap map[testDataEngine.TestDataValueType]*[]testDataEngine.TestDataPointRowUuidType
 			testDataPointRowUuidMap = *testDataValueSelection.TestDataPointValueRowUuidMap
 
-			var testDataPointRowsUuid []TestDataPointRowUuidType
+			var testDataPointRowsUuid []testDataEngine.TestDataPointRowUuidType
 
 			for _, selectedCheckBox := range selectedCheckBoxes {
-				tempTestDataPointRowsUuid, _ := testDataPointRowUuidMap[TestDataValueType(selectedCheckBox)]
+				tempTestDataPointRowsUuid, _ := testDataPointRowUuidMap[testDataEngine.TestDataValueType(selectedCheckBox)]
 
 				testDataPointRowsUuid = append(testDataPointRowsUuid, *tempTestDataPointRowsUuid...)
 
@@ -277,12 +280,12 @@ func generateTestDataSelectionsUIComponent(
 		}
 
 		// Convert all DataPoints in SearchResult to be used in Available TestDataPoints-list based on already selected datapoints
-		var tempTestDataValueName TestDataValueNameType
-		var tempTestDataPointRowUuid TestDataPointRowUuidType
+		var tempTestDataValueName testDataEngine.TestDataValueNameType
+		var tempTestDataPointRowUuid testDataEngine.TestDataPointRowUuidType
 		var existInSelectedPoints bool
-		var tempMapForSearchResultDataPoints map[TestDataValueNameType]dataPointTypeForGroupsStruct
-		tempMapForSearchResultDataPoints = make(map[TestDataValueNameType]dataPointTypeForGroupsStruct)
-		allPointsAvailable = nil
+		var tempMapForSearchResultDataPoints map[testDataEngine.TestDataValueNameType]testDataEngine.DataPointTypeForGroupsStruct
+		tempMapForSearchResultDataPoints = make(map[testDataEngine.TestDataValueNameType]testDataEngine.DataPointTypeForGroupsStruct)
+		testDataEngine.AllPointsAvailable = nil
 
 		for _, testDataPointRowUuid := range searchResult {
 
@@ -296,10 +299,10 @@ func generateTestDataSelectionsUIComponent(
 
 			// Check if RowUuid already exists in SelectedDataPoints-list
 			existInSelectedPoints = false
-			if len(allSelectedPoints) != 0 {
-				for _, selectedPoint := range allSelectedPoints {
+			if len(testDataEngine.AllSelectedPoints) != 0 {
+				for _, selectedPoint := range testDataEngine.AllSelectedPoints {
 
-					_, existInSelectedPoints = selectedPoint.availableTestDataPointUuidMap[tempTestDataPointRowUuid]
+					_, existInSelectedPoints = selectedPoint.AvailableTestDataPointUuidMap[tempTestDataPointRowUuid]
 
 					// If the row already exist then exit for-loop
 					if existInSelectedPoints == true {
@@ -313,32 +316,32 @@ func generateTestDataSelectionsUIComponent(
 				// Doesn't exist in Selected Points
 
 				// Create the DataPoint from the SerachResult
-				var searchResultDataPoint dataPointTypeForGroupsStruct
+				var searchResultDataPoint testDataEngine.DataPointTypeForGroupsStruct
 
 				// Try to find the DataPoint in the Map based on 'tempTestDataValueName'
 				searchResultDataPoint, existInMap = tempMapForSearchResultDataPoints[tempTestDataValueName]
 				if existInMap == false {
 					// It doesn't exist so create the 'searchResultDataPoint'
-					searchResultDataPoint = dataPointTypeForGroupsStruct{
-						testDataDomainUuid:            tempTestDataPointValueSlice[0].TestDataDomainUuid,
-						testDataDomainName:            tempTestDataPointValueSlice[0].TestDataDomainName,
-						testDataAreaUuid:              tempTestDataPointValueSlice[0].TestDataAreaUuid,
-						testDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
-						testDataPointName:             tempTestDataValueName,
-						searchResultDataPointUuidMap:  nil,
-						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidStruct),
-						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidStruct),
+					searchResultDataPoint = testDataEngine.DataPointTypeForGroupsStruct{
+						TestDataDomainUuid:            tempTestDataPointValueSlice[0].TestDataDomainUuid,
+						TestDataDomainName:            tempTestDataPointValueSlice[0].TestDataDomainName,
+						TestDataAreaUuid:              tempTestDataPointValueSlice[0].TestDataAreaUuid,
+						TestDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
+						TestDataPointName:             tempTestDataValueName,
+						SearchResultDataPointUuidMap:  nil,
+						AvailableTestDataPointUuidMap: make(map[testDataEngine.TestDataPointRowUuidType]testDataEngine.TestDataPointRowUuidStruct),
+						SelectedTestDataPointUuidMap:  make(map[testDataEngine.TestDataPointRowUuidType]testDataEngine.TestDataPointRowUuidStruct),
 					}
 				}
 
 				// Create the 'testDataPointRowUuidObject' to be added to the Map
-				var testDataPointRowUuidObject TestDataPointRowUuidStruct
-				testDataPointRowUuidObject = TestDataPointRowUuidStruct{
-					testDataPointRowUuid:          tempTestDataPointValueSlice[0].TestDataPointRowUuid,
-					testDataPointRowValuesSummary: "",
+				var testDataPointRowUuidObject testDataEngine.TestDataPointRowUuidStruct
+				testDataPointRowUuidObject = testDataEngine.TestDataPointRowUuidStruct{
+					TestDataPointRowUuid:          tempTestDataPointValueSlice[0].TestDataPointRowUuid,
+					TestDataPointRowValuesSummary: "",
 				}
 
-				searchResultDataPoint.availableTestDataPointUuidMap[tempTestDataPointRowUuid] = testDataPointRowUuidObject
+				searchResultDataPoint.AvailableTestDataPointUuidMap[tempTestDataPointRowUuid] = testDataPointRowUuidObject
 
 				// Add the 'searchResultDataPoint' back to the temporary map for SearchResultDataPoints
 				tempMapForSearchResultDataPoints[tempTestDataValueName] = searchResultDataPoint
@@ -347,32 +350,32 @@ func generateTestDataSelectionsUIComponent(
 				// Exist in Selected Points
 
 				// Create the DataPoint from the SerachResult
-				var searchResultDataPoint dataPointTypeForGroupsStruct
+				var searchResultDataPoint testDataEngine.DataPointTypeForGroupsStruct
 
 				// Try to find the DataPoint in the Map based on 'tempTestDataValueName'
 				searchResultDataPoint, existInMap = tempMapForSearchResultDataPoints[tempTestDataValueName]
 				if existInMap == false {
 					// It doesn't exist so create the 'searchResultDataPoint'
-					searchResultDataPoint = dataPointTypeForGroupsStruct{
-						testDataDomainUuid:            tempTestDataPointValueSlice[0].TestDataDomainUuid,
-						testDataDomainName:            tempTestDataPointValueSlice[0].TestDataDomainName,
-						testDataAreaUuid:              tempTestDataPointValueSlice[0].TestDataAreaUuid,
-						testDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
-						testDataPointName:             tempTestDataValueName,
-						searchResultDataPointUuidMap:  nil,
-						availableTestDataPointUuidMap: make(map[TestDataPointRowUuidType]TestDataPointRowUuidStruct),
-						selectedTestDataPointUuidMap:  make(map[TestDataPointRowUuidType]TestDataPointRowUuidStruct),
+					searchResultDataPoint = testDataEngine.DataPointTypeForGroupsStruct{
+						TestDataDomainUuid:            tempTestDataPointValueSlice[0].TestDataDomainUuid,
+						TestDataDomainName:            tempTestDataPointValueSlice[0].TestDataDomainName,
+						TestDataAreaUuid:              tempTestDataPointValueSlice[0].TestDataAreaUuid,
+						TestDataAreaName:              tempTestDataPointValueSlice[0].TestDataAreaName,
+						TestDataPointName:             tempTestDataValueName,
+						SearchResultDataPointUuidMap:  nil,
+						AvailableTestDataPointUuidMap: make(map[testDataEngine.TestDataPointRowUuidType]testDataEngine.TestDataPointRowUuidStruct),
+						SelectedTestDataPointUuidMap:  make(map[testDataEngine.TestDataPointRowUuidType]testDataEngine.TestDataPointRowUuidStruct),
 					}
 				}
 
 				// Create the 'testDataPointRowUuidObject' to be added to the Map
-				var testDataPointRowUuidObject TestDataPointRowUuidStruct
-				testDataPointRowUuidObject = TestDataPointRowUuidStruct{
-					testDataPointRowUuid:          tempTestDataPointValueSlice[0].TestDataPointRowUuid,
-					testDataPointRowValuesSummary: "",
+				var testDataPointRowUuidObject testDataEngine.TestDataPointRowUuidStruct
+				testDataPointRowUuidObject = testDataEngine.TestDataPointRowUuidStruct{
+					TestDataPointRowUuid:          tempTestDataPointValueSlice[0].TestDataPointRowUuid,
+					TestDataPointRowValuesSummary: "",
 				}
 
-				searchResultDataPoint.selectedTestDataPointUuidMap[tempTestDataPointRowUuid] = testDataPointRowUuidObject
+				searchResultDataPoint.SelectedTestDataPointUuidMap[tempTestDataPointRowUuid] = testDataPointRowUuidObject
 
 				// Add the 'searchResultDataPoint' back to the temporary map for SearchResultDataPoints
 				tempMapForSearchResultDataPoints[tempTestDataValueName] = searchResultDataPoint
@@ -380,7 +383,7 @@ func generateTestDataSelectionsUIComponent(
 		}
 
 		// Create temporary slice to sort
-		var allPointsAvailableToBeSorted []dataPointTypeForGroupsStruct
+		var allPointsAvailableToBeSorted []testDataEngine.DataPointTypeForGroupsStruct
 		// Create the list that holds all points that are available to chose from
 		for _, point := range tempMapForSearchResultDataPoints {
 
@@ -391,7 +394,7 @@ func generateTestDataSelectionsUIComponent(
 		allPointsAvailableToBeSorted = sortDataPointsList(allPointsAvailableToBeSorted)
 
 		// copy back from sorted slice
-		allPointsAvailable = allPointsAvailableToBeSorted
+		testDataEngine.AllPointsAvailable = allPointsAvailableToBeSorted
 
 		// Refresh the List-widget
 		allAvailablePointsList.Refresh()
@@ -560,13 +563,13 @@ func generateTestDataSelectionsUIComponent(
 }
 
 // Sort a slice with DataPoints
-func sortDataPointsList(dataPointListToBeSorted []dataPointTypeForGroupsStruct) []dataPointTypeForGroupsStruct {
+func sortDataPointsList(dataPointListToBeSorted []testDataEngine.DataPointTypeForGroupsStruct) []testDataEngine.DataPointTypeForGroupsStruct {
 
 	// Custom sort: we sort by splitting each string into parts and comparing the parts
 	sort.Slice(dataPointListToBeSorted, func(i, j int) bool {
 		// Split both strings by '/'
-		partsI := strings.Split(string(dataPointListToBeSorted[i].testDataPointName), "/")
-		partsJ := strings.Split(string(dataPointListToBeSorted[j].testDataPointName), "/")
+		partsI := strings.Split(string(dataPointListToBeSorted[i].TestDataPointName), "/")
+		partsJ := strings.Split(string(dataPointListToBeSorted[j].TestDataPointName), "/")
 
 		// Compare each part; the first non-equal part determines the order
 		for k := 0; k < len(partsI) && k < len(partsJ); k++ {

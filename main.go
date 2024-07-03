@@ -16,8 +16,7 @@ import (
 
 func main() {
 
-	var testDataModelPtr *testDataSelector.TestDataModelStruct
-	testDataModelPtr = testDataSelector.ImportTestData()
+	testDataSelector.ImportTestData()
 
 	var err error
 	// Initiate Lua Script Engine
@@ -66,8 +65,7 @@ func main() {
 		myMainWindow.Hide()
 		testDataSelector.MainTestDataSelector(
 			myApp,
-			myMainWindow,
-			testDataModelPtr)
+			myMainWindow)
 	})
 
 	//inputText := "This is {{bold}} text and this is {{also bold}} and this normal again."

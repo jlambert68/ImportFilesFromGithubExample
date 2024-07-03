@@ -234,10 +234,10 @@ func AddTestDataToTestDataModel(
 	}
 
 	// Check how to add values to full 'testDataModel'
-	if *testDataModel.TestDataModelMap == nil {
+	if *TestDataModel.TestDataModelMap == nil {
 
 		// This is the first time the TestDataModel is populated
-		testDataModel = TestDataModelStruct{
+		TestDataModel = TestDataModelStruct{
 			TestDataDomainAndAreaNameToUuidMap: &tempTestDataDomainAndAreaNameToUuidMap,
 			TestDataModelMap:                   &localTestDataDomainModelMap,
 		}
@@ -246,17 +246,17 @@ func AddTestDataToTestDataModel(
 
 		// Add values from 'tempTestDataDomainAndAreaNameToUuidMap' into full 'testDataModel'
 		var currentTestDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
-		currentTestDataDomainAndAreaNameToUuidMap = *testDataModel.TestDataDomainAndAreaNameToUuidMap
+		currentTestDataDomainAndAreaNameToUuidMap = *TestDataModel.TestDataDomainAndAreaNameToUuidMap
 
 		// Only need to loop and add to map wíthout checking if it exists
 		for domainOrAreaName, domainOrAreaUuid := range tempTestDataDomainAndAreaNameToUuidMap {
 			currentTestDataDomainAndAreaNameToUuidMap[domainOrAreaName] = domainOrAreaUuid
 		}
-		testDataModel.TestDataDomainAndAreaNameToUuidMap = &currentTestDataDomainAndAreaNameToUuidMap
+		TestDataModel.TestDataDomainAndAreaNameToUuidMap = &currentTestDataDomainAndAreaNameToUuidMap
 
 		// Add values from 'localTestDataDomainModelMap'  into full 'testDataModel'
 		var currentTestDataDomainModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
-		currentTestDataDomainModelMap = *testDataModel.TestDataModelMap
+		currentTestDataDomainModelMap = *TestDataModel.TestDataModelMap
 
 		for localTestDataDomainUuid, localTestDataDomainModel := range localTestDataDomainModelMap {
 
@@ -288,7 +288,7 @@ func AddTestDataToTestDataModel(
 
 		}
 
-		testDataModel.TestDataModelMap = &currentTestDataDomainModelMap
+		TestDataModel.TestDataModelMap = &currentTestDataDomainModelMap
 
 	}
 

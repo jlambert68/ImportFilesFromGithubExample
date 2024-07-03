@@ -1,6 +1,7 @@
-package testDataSelector
+package newOrEditTestDataPointGroupUI
 
 import (
+	"ImportFilesFromGithub/testDataEngine"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
@@ -10,11 +11,11 @@ import (
 
 func generateAllAvailablePointsListUIComponent(
 	newOrEditTestDataPointGroupWindow *fyne.Window,
-	testDataModel *TestDataModelStruct) {
+	testDataModel *testDataEngine.TestDataModelStruct) {
 
 	// Create and configure the list-component of all TestDataPoints
 	allAvailablePointsList = widget.NewList(
-		func() int { return len(allPointsAvailable) },
+		func() int { return len(testDataEngine.AllPointsAvailable) },
 		func() fyne.CanvasObject {
 
 			return widget.NewLabel("")
@@ -23,10 +24,10 @@ func generateAllAvailablePointsListUIComponent(
 
 			obj.(*widget.Label).SetText(fmt.Sprintf(
 				"%s [%d(%d)]",
-				string(allPointsAvailable[id].testDataPointName),
-				len(allPointsAvailable[id].availableTestDataPointUuidMap),
-				len(allPointsAvailable[id].availableTestDataPointUuidMap)+
-					len(allPointsAvailable[id].selectedTestDataPointUuidMap)))
+				string(testDataEngine.AllPointsAvailable[id].TestDataPointName),
+				len(testDataEngine.AllPointsAvailable[id].AvailableTestDataPointUuidMap),
+				len(testDataEngine.AllPointsAvailable[id].AvailableTestDataPointUuidMap)+
+					len(testDataEngine.AllPointsAvailable[id].SelectedTestDataPointUuidMap)))
 		},
 	)
 
@@ -34,7 +35,7 @@ func generateAllAvailablePointsListUIComponent(
 
 		// Remove the number part of the visible name
 		var clickedDataPointName string
-		clickedDataPointName = string(allPointsAvailable[id].testDataPointName) //filterToRemoveNumberOfSimilarTestDataPointsInName(string(allPointsAvailable[id].testDataPointName))
+		clickedDataPointName = string(testDataEngine.AllPointsAvailable[id].TestDataPointName) //filterToRemoveNumberOfSimilarTestDataPointsInName(string(allPointsAvailable[id].testDataPointName))
 
 		var tableData [][]string
 		tableData = buildPopUpTableDataFromTestDataPointName(clickedDataPointName, testDataModel)
@@ -42,7 +43,7 @@ func generateAllAvailablePointsListUIComponent(
 		showTable(
 			*newOrEditTestDataPointGroupWindow,
 			tableData,
-			allPointsAvailable[id].selectedTestDataPointUuidMap)
+			testDataEngine.AllPointsAvailable[id].SelectedTestDataPointUuidMap)
 
 		allAvailablePointsList.UnselectAll()
 

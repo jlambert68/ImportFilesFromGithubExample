@@ -1,6 +1,7 @@
-package testDataSelector
+package newOrEditTestDataPointGroupUI
 
 import (
+	"ImportFilesFromGithub/testDataEngine"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -11,20 +12,18 @@ const (
 	testDataTestAreaLabelText string = "Available TestAreas for domain "
 )
 
-func showNewOrEditGroupWindow(
+func ShowNewOrEditGroupWindow(
 	app fyne.App,
 	parent fyne.Window,
 	isNew bool,
-	responseChannel *chan responseChannelStruct,
-	incomingGroupName testDataPointGroupNameType,
-	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataPointGroupNameType]*testDataPointNameMapType,
-	testDataModel *TestDataModelStruct) {
+	responseChannel *chan testDataEngine.ResponseChannelStruct,
+	incomingGroupName testDataEngine.TestDataPointGroupNameType,
+	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataEngine.TestDataPointGroupNameType]*testDataEngine.TestDataPointNameMapType,
+	testDataDomainUuid testDataEngine.TestDataDomainUuidType,
+	testDataAreaUuid testDataEngine.TestDataAreaUuidType) {
 
-	// Store reference to TestDataModel
-	testDataModelPtr = testDataModel
-
-	var testDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
-	testDataModelMap = *testDataModel.TestDataModelMap
+	var testDataModelMap map[testDataEngine.TestDataDomainUuidType]*testDataEngine.TestDataDomainModelStruct
+	testDataModelMap = *testDataEngine.TestDataModel.TestDataModelMap
 
 	//var testDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
 	//testDataDomainAndAreaNameToUuidMap = *testDataModel.TestDataDomainAndAreaNameToUuidMap
@@ -32,9 +31,9 @@ func showNewOrEditGroupWindow(
 	parent.Hide()
 
 	// Set Default value
-	shouldUpdateMainWindow = responseChannelStruct{
-		shouldBeUpdated:        false,
-		testDataPointGroupName: "",
+	testDataEngine.ShouldUpdateMainWindow = testDataEngine.ResponseChannelStruct{
+		ShouldBeUpdated:        false,
+		TestDataPointGroupName: "",
 	}
 
 	// Set name for the Window
@@ -48,14 +47,14 @@ func showNewOrEditGroupWindow(
 	// When this window closed then show parent and send response to parent window
 	newOrEditTestDataPointGroupWindow.SetOnClosed(func() {
 		parent.Show()
-		*responseChannel <- shouldUpdateMainWindow
+		*responseChannel <- testDataEngine.ShouldUpdateMainWindow
 	})
 
 	// Create and configure the list-component of all TestDataPoints
-	generateAllAvailablePointsListUIComponent(&newOrEditTestDataPointGroupWindow, testDataModel)
+	generateAllAvailablePointsListUIComponent(&newOrEditTestDataPointGroupWindow, &testDataEngine.TestDataModel)
 
 	// *** Create the selection boxes for selecting TestDataValues values
-	generateTestDataSelectionsUIComponent(testDataModel, testDataModelMap)
+	generateTestDataSelectionsUIComponent(&testDataEngine.TestDataModel, testDataModelMap, testDataDomainUuid, testDataAreaUuid)
 
 	// Create and configure the list-component of selected TestDataPoints
 	generateSelectedPointsListUIComponent(
@@ -86,9 +85,9 @@ func showNewOrEditGroupWindow(
 }
 
 // testDataPointIntersectionOfTwoSlices returns a new slice containing only the elements that appear in both a and b.
-func testDataPointIntersectionOfTwoSlices(firstSlice, secondSlice []TestDataPointRowUuidType) []TestDataPointRowUuidType {
+func testDataPointIntersectionOfTwoSlices(firstSlice, secondSlice []testDataEngine.TestDataPointRowUuidType) []testDataEngine.TestDataPointRowUuidType {
 	// Use firstSlice map to count occurrences of elements in the first slice
-	elemCount := make(map[TestDataPointRowUuidType]bool)
+	elemCount := make(map[testDataEngine.TestDataPointRowUuidType]bool)
 
 	// Fill the map with elements from the first slice
 	for _, item := range firstSlice {
@@ -96,7 +95,7 @@ func testDataPointIntersectionOfTwoSlices(firstSlice, secondSlice []TestDataPoin
 	}
 
 	// Create firstSlice slice to hold the intersectionSlice
-	var intersectionSlice []TestDataPointRowUuidType
+	var intersectionSlice []testDataEngine.TestDataPointRowUuidType
 
 	// Check each element in the second slice; if it's in the map, add to the intersectionSlice
 	for _, item := range secondSlice {

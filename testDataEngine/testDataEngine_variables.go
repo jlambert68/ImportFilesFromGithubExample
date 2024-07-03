@@ -1,9 +1,5 @@
 package testDataEngine
 
-import (
-	"fyne.io/fyne/v2/widget"
-)
-
 // TestDataModelStruct
 // The structure holding all TestData
 type TestDataModelStruct struct {
@@ -123,29 +119,17 @@ type TestDataValueNameType string
 type TestDataPointRowValuesSummaryType string
 
 // The slices for Groups ans TestDataPoints for a Group
-var testDataPointGroups []testDataPointGroupNameType // Define testDataPointGroups
-var testDataPointsForAGroup []TestDataValueNameType  // Define testDataPointGroups
-
-// The List-items for Groups ans TestDataPoints for a Group
-var testDataPointGroupsList *widget.List
-var testDataPointsForAGroupList *widget.List
-
-// Current selected index for List items
-var selectedIndexForGroups int = -1
-var selectedIndexForGroupTestDataPoints int = -1
-
-// The Select-items for Groups ans TestDataPoints for a Group
-var testDataPointGroupsSelect *widget.Select
-var testDataPointsForAGroupSelect *widget.Select
+var TestDataPointGroups []TestDataPointGroupNameType // Define TestDataPointGroups
+var TestDataPointsForAGroup []TestDataValueNameType  // Define TestDataPointGroups
 
 // The type for Group name
-type testDataPointGroupNameType string
+type TestDataPointGroupNameType string
 
 // The map holding all data for Groups and TestDataPoints for a group
-var chosenTestDataPointsPerGroupMap map[testDataPointGroupNameType]*testDataPointNameMapType
+var ChosenTestDataPointsPerGroupMap map[TestDataPointGroupNameType]*TestDataPointNameMapType
 
 // The type for the map that holds the connection between TestDataÅpintName and all the RowUUids connectoed to it
-type testDataPointNameMapType map[TestDataValueNameType]*[]*dataPointTypeForGroupsStruct
+type TestDataPointNameMapType map[TestDataValueNameType]*[]*DataPointTypeForGroupsStruct
 
 // Types used for data structures for a specific rowValue
 /*type testDataPointRowStruct struct {
@@ -161,44 +145,44 @@ type testDataPointNameMapType map[TestDataValueNameType]*[]*dataPointTypeForGrou
 
 // Error/warning texts for control of Group Name
 const (
-	groupNameIsUnique                  string = "Group name is OK!"
-	groupNameIsNotUnique               string = "Group name already exists!"
-	groupNameIsEmpty                   string = "Group name can't be empty"
-	groupNameCanNotStartOrEndWithSpace string = "Group name can not start or end with a space"
-	selectedListIsEmpty                string = "There is nothing to save"
+	GroupNameIsUnique                  string = "Group name is OK!"
+	GroupNameIsNotUnique               string = "Group name already exists!"
+	GroupNameIsEmpty                   string = "Group name can't be empty"
+	GroupNameCanNotStartOrEndWithSpace string = "Group name can not start or end with a space"
+	SelectedListIsEmpty                string = "There is nothing to save"
 )
 
-var setStateForSaveButtonAndGroupNameTextEntryExternalCall func()
+var SetStateForSaveButtonAndGroupNameTextEntryExternalCall func()
 
 // Variable to be used when closing window to inform calling window if the data was updated or not
-var shouldUpdateMainWindow responseChannelStruct
+var ShouldUpdateMainWindow ResponseChannelStruct
 
 // Message sent back when a Group is Created or is Edited
-type responseChannelStruct struct {
-	shouldBeUpdated        bool
-	testDataPointGroupName testDataPointGroupNameType
+type ResponseChannelStruct struct {
+	ShouldBeUpdated        bool
+	TestDataPointGroupName TestDataPointGroupNameType
 }
 
 type TestDataPointRowUuidStruct struct {
-	testDataPointRowUuid          TestDataPointRowUuidType
-	testDataPointRowValuesSummary TestDataPointRowValuesSummaryType
+	TestDataPointRowUuid          TestDataPointRowUuidType
+	TestDataPointRowValuesSummary TestDataPointRowValuesSummaryType
 }
 
 // Structure for the Group
-type dataPointTypeForGroupsStruct struct {
-	testDataDomainUuid            TestDataDomainUuidType
-	testDataDomainName            TestDataDomainNameType
-	testDataAreaUuid              TestDataAreaUuidType
-	testDataAreaName              TestDataAreaNameType
-	testDataPointName             TestDataValueNameType
-	searchResultDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
-	availableTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
-	selectedTestDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
+type DataPointTypeForGroupsStruct struct {
+	TestDataDomainUuid            TestDataDomainUuidType
+	TestDataDomainName            TestDataDomainNameType
+	TestDataAreaUuid              TestDataAreaUuidType
+	TestDataAreaName              TestDataAreaNameType
+	TestDataPointName             TestDataValueNameType
+	SearchResultDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
+	AvailableTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
+	SelectedTestDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
 }
 
 // Slices used to keep track of filtered, available and selected DataPoints
-var allPointsAvailable []dataPointTypeForGroupsStruct
-var allSelectedPoints []dataPointTypeForGroupsStruct
+var AllPointsAvailable []DataPointTypeForGroupsStruct
+var AllSelectedPoints []DataPointTypeForGroupsStruct
 
 // The Full TestDataModel
-var testDataModel TestDataModelStruct
+var TestDataModel TestDataModelStruct

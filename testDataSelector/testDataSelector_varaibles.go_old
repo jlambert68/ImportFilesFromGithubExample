@@ -175,12 +175,6 @@ var setStateForSaveButtonAndGroupNameTextEntryExternalCall func()
 // Variable to be used when closing window to inform calling window if the data was updated or not
 var shouldUpdateMainWindow responseChannelStruct
 
-// Message sent back when a Group is Created or is Edited
-type responseChannelStruct struct {
-	shouldBeUpdated        bool
-	testDataPointGroupName testDataPointGroupNameType
-}
-
 type TestDataPointRowUuidStruct struct {
 	testDataPointRowUuid          TestDataPointRowUuidType
 	testDataPointRowValuesSummary TestDataPointRowValuesSummaryType

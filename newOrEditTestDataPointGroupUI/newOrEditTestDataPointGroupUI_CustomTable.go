@@ -1,6 +1,7 @@
-package testDataSelector
+package newOrEditTestDataPointGroupUI
 
 import (
+	"ImportFilesFromGithub/testDataEngine"
 	"fyne.io/fyne/v2/dialog"
 
 	//"fmt"
@@ -216,7 +217,7 @@ var tableMutex sync.Mutex
 
 func NewCustomTableWidget(
 	data [][]string,
-	selectedTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidStruct) *CustomTableWidget {
+	selectedTestDataPointUuidMap map[testDataEngine.TestDataPointRowUuidType]testDataEngine.TestDataPointRowUuidStruct) *CustomTableWidget {
 
 	table := &CustomTableWidget{
 		tableData:          data,
@@ -303,14 +304,14 @@ func NewCustomTableWidget(
 	setColumnWidths(table.Table, data)
 
 	// Pre-select rows that exists in SelectDataPoint-list
-	var testDataPointRowUuid TestDataPointRowUuidType
+	var testDataPointRowUuid testDataEngine.TestDataPointRowUuidType
 	var existInMap bool
 	var cellID widget.TableCellID
 
 	for rowIndex, dataRow := range data {
 
 		// Extract the 'TestDataPointRowUuid' from the row and check if it exists in Selected-amp
-		testDataPointRowUuid = TestDataPointRowUuidType(dataRow[len(dataRow)-1])
+		testDataPointRowUuid = testDataEngine.TestDataPointRowUuidType(dataRow[len(dataRow)-1])
 		_, existInMap = selectedTestDataPointUuidMap[testDataPointRowUuid]
 		if existInMap == true {
 
@@ -529,7 +530,7 @@ func setColumnWidths(table *widget.Table, data [][]string) {
 func showTable(
 	w fyne.Window,
 	data [][]string,
-	selectedTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidStruct) {
+	selectedTestDataPointUuidMap map[testDataEngine.TestDataPointRowUuidType]testDataEngine.TestDataPointRowUuidStruct) {
 
 	// Create a new table with an extra column for checkboxes
 	table := NewCustomTableWidget(data, selectedTestDataPointUuidMap)
@@ -546,15 +547,15 @@ func showTable(
 			if response {
 				println("User confirmed action")
 
-				var testDataPointName TestDataValueNameType
-				var testDataPointRowUuid TestDataPointRowUuidType
-				var testDataPointRowUuidObject TestDataPointRowUuidStruct
+				var testDataPointName testDataEngine.TestDataValueNameType
+				var testDataPointRowUuid testDataEngine.TestDataPointRowUuidType
+				var testDataPointRowUuidObject testDataEngine.TestDataPointRowUuidStruct
 
 				// Extract rows that were selected
 				for row, isSelected := range table.rowIsSelectedMap {
 
-					testDataPointName = TestDataValueNameType(table.tableData[row][len(table.tableData[1])-2])
-					testDataPointRowUuid = TestDataPointRowUuidType(table.tableData[row][len(table.tableData[1])-1])
+					testDataPointName = testDataEngine.TestDataValueNameType(table.tableData[row][len(table.tableData[1])-2])
+					testDataPointRowUuid = testDataEngine.TestDataPointRowUuidType(table.tableData[row][len(table.tableData[1])-1])
 
 					// Generate the DataRowSummary
 					testDataPointRowUuidObject = generateTestDataPointRowUuidObject(testDataPointRowUuid, table.tableData[row])
@@ -579,20 +580,20 @@ func showTable(
 
 }
 
-func generateTestDataPointRowUuidObject(testDataPointRowUuid TestDataPointRowUuidType, dataRow []string) (TestDataPointRowUuidObject TestDataPointRowUuidStruct) {
+func generateTestDataPointRowUuidObject(testDataPointRowUuid testDataEngine.TestDataPointRowUuidType, dataRow []string) (TestDataPointRowUuidObject testDataEngine.TestDataPointRowUuidStruct) {
 
 	// Loop the data for the row
 	for _, testDataValue := range dataRow {
 
-		if len(TestDataPointRowUuidObject.testDataPointRowValuesSummary) == 0 {
+		if len(TestDataPointRowUuidObject.TestDataPointRowValuesSummary) == 0 {
 
-			TestDataPointRowUuidObject.testDataPointRowValuesSummary = TestDataPointRowValuesSummaryType(testDataValue)
-			TestDataPointRowUuidObject.testDataPointRowUuid = testDataPointRowUuid
+			TestDataPointRowUuidObject.TestDataPointRowValuesSummary = testDataEngine.TestDataPointRowValuesSummaryType(testDataValue)
+			TestDataPointRowUuidObject.TestDataPointRowUuid = testDataPointRowUuid
 
 		} else {
 
-			TestDataPointRowUuidObject.testDataPointRowValuesSummary = TestDataPointRowUuidObject.testDataPointRowValuesSummary +
-				"/" + TestDataPointRowValuesSummaryType(testDataValue)
+			TestDataPointRowUuidObject.TestDataPointRowValuesSummary = TestDataPointRowUuidObject.TestDataPointRowValuesSummary +
+				"/" + testDataEngine.TestDataPointRowValuesSummaryType(testDataValue)
 
 		}
 	}
@@ -602,23 +603,23 @@ func generateTestDataPointRowUuidObject(testDataPointRowUuid TestDataPointRowUui
 
 // Add the TestDataPoint to the Selected-list and removes it from the Avaialables-lsit
 func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
-	testDataPointName TestDataValueNameType,
-	testDataPointRowUuidObject TestDataPointRowUuidStruct) {
+	testDataPointName testDataEngine.TestDataValueNameType,
+	testDataPointRowUuidObject testDataEngine.TestDataPointRowUuidStruct) {
 
 	var foundInSelectedPointsList bool
-	var tempDataPoint dataPointTypeForGroupsStruct
+	var tempDataPoint testDataEngine.DataPointTypeForGroupsStruct
 
 	// Loop Available TestDataPoints
-	for _, availableDataPoint := range allPointsAvailable {
+	for _, availableDataPoint := range testDataEngine.AllPointsAvailable {
 
 		// If correct DataPoint found the process on RowUuid-level
-		if availableDataPoint.testDataPointName == testDataPointName {
+		if availableDataPoint.TestDataPointName == testDataPointName {
 
 			// Remove it from Available DataPoint-map
-			delete(availableDataPoint.availableTestDataPointUuidMap, testDataPointRowUuidObject.testDataPointRowUuid)
+			delete(availableDataPoint.AvailableTestDataPointUuidMap, testDataPointRowUuidObject.TestDataPointRowUuid)
 
 			//Add it to the Selected Datapoint-map
-			availableDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuidObject.testDataPointRowUuid] = testDataPointRowUuidObject
+			availableDataPoint.SelectedTestDataPointUuidMap[testDataPointRowUuidObject.TestDataPointRowUuid] = testDataPointRowUuidObject
 
 			// Make a copy of the DataPoint to be used when the DataPoint doesn't exist in Selected-pointslist
 			tempDataPoint = availableDataPoint
@@ -631,18 +632,18 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 
 	// Loop Selected TestDataPoints
 	foundInSelectedPointsList = false
-	for _, selectedDataPoint := range allSelectedPoints {
+	for _, selectedDataPoint := range testDataEngine.AllSelectedPoints {
 
 		// If correct DataPoint found the process on RowUuid-level
-		if selectedDataPoint.testDataPointName == testDataPointName {
+		if selectedDataPoint.TestDataPointName == testDataPointName {
 
 			foundInSelectedPointsList = true
 
 			// Remove it from Available DataPoint-map
-			delete(selectedDataPoint.availableTestDataPointUuidMap, testDataPointRowUuidObject.testDataPointRowUuid)
+			delete(selectedDataPoint.AvailableTestDataPointUuidMap, testDataPointRowUuidObject.TestDataPointRowUuid)
 
 			//Add it to the Selected Datapoint-map
-			selectedDataPoint.selectedTestDataPointUuidMap[testDataPointRowUuidObject.testDataPointRowUuid] = testDataPointRowUuidObject
+			selectedDataPoint.SelectedTestDataPointUuidMap[testDataPointRowUuidObject.TestDataPointRowUuid] = testDataPointRowUuidObject
 
 			// Exit for loop
 			break
@@ -655,10 +656,10 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 	if foundInSelectedPointsList == false {
 
 		// Add a copy of the DataPoint from the Available-points-list
-		allSelectedPoints = append(allSelectedPoints, tempDataPoint)
+		testDataEngine.AllSelectedPoints = append(testDataEngine.AllSelectedPoints, tempDataPoint)
 
 		// Sort the allSelectedPoints-list
-		allSelectedPoints = sortDataPointsList(allSelectedPoints)
+		testDataEngine.AllSelectedPoints = sortDataPointsList(testDataEngine.AllSelectedPoints)
 
 	}
 
@@ -667,25 +668,25 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 	selectedPointsList.Refresh()
 
 	// Check disable SaveButton of SelectedList is emtpy
-	setStateForSaveButtonAndGroupNameTextEntryExternalCall()
+	testDataEngine.SetStateForSaveButtonAndGroupNameTextEntryExternalCall()
 
 }
 
 func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
-	testDataPointName TestDataValueNameType,
-	testDataPointRowUuidObject TestDataPointRowUuidStruct) {
+	testDataPointName testDataEngine.TestDataValueNameType,
+	testDataPointRowUuidObject testDataEngine.TestDataPointRowUuidStruct) {
 
 	// Loop Available TestDataPoints
-	for _, availableDataPoint := range allPointsAvailable {
+	for _, availableDataPoint := range testDataEngine.AllPointsAvailable {
 
 		// If correct DataPoint found the process on RowUuid-level
-		if availableDataPoint.testDataPointName == testDataPointName {
+		if availableDataPoint.TestDataPointName == testDataPointName {
 
 			// Remove it from Selected DataPoint-map
-			delete(availableDataPoint.selectedTestDataPointUuidMap, testDataPointRowUuidObject.testDataPointRowUuid)
+			delete(availableDataPoint.SelectedTestDataPointUuidMap, testDataPointRowUuidObject.TestDataPointRowUuid)
 
 			//Add it to the Available Datapoint-map
-			availableDataPoint.availableTestDataPointUuidMap[testDataPointRowUuidObject.testDataPointRowUuid] = testDataPointRowUuidObject
+			availableDataPoint.AvailableTestDataPointUuidMap[testDataPointRowUuidObject.TestDataPointRowUuid] = testDataPointRowUuidObject
 
 			// Exit for loop
 			break
@@ -694,22 +695,22 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 	}
 
 	// Loop Selected TestDataPoints
-	for selectedDataPointIndex, selectedDataPoint := range allSelectedPoints {
+	for selectedDataPointIndex, selectedDataPoint := range testDataEngine.AllSelectedPoints {
 
 		// If correct DataPoint found the process on RowUuid-level
-		if selectedDataPoint.testDataPointName == testDataPointName {
+		if selectedDataPoint.TestDataPointName == testDataPointName {
 
 			// Remove it from Selected DataPoint-map
-			delete(selectedDataPoint.selectedTestDataPointUuidMap, testDataPointRowUuidObject.testDataPointRowUuid)
+			delete(selectedDataPoint.SelectedTestDataPointUuidMap, testDataPointRowUuidObject.TestDataPointRowUuid)
 
 			//Add it to the Available Datapoint-map
-			selectedDataPoint.availableTestDataPointUuidMap[testDataPointRowUuidObject.testDataPointRowUuid] = testDataPointRowUuidObject
+			selectedDataPoint.AvailableTestDataPointUuidMap[testDataPointRowUuidObject.TestDataPointRowUuid] = testDataPointRowUuidObject
 
 			// When there are no more RowUuids in map then Delete the DataPoint from the Slice
-			if len(selectedDataPoint.selectedTestDataPointUuidMap) == 0 {
+			if len(selectedDataPoint.SelectedTestDataPointUuidMap) == 0 {
 
 				// Remove the element at the specified index
-				allSelectedPoints = append(allSelectedPoints[:selectedDataPointIndex], allSelectedPoints[selectedDataPointIndex+1:]...)
+				testDataEngine.AllSelectedPoints = append(testDataEngine.AllSelectedPoints[:selectedDataPointIndex], testDataEngine.AllSelectedPoints[selectedDataPointIndex+1:]...)
 			}
 
 			// Exit for loop
@@ -723,6 +724,6 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 	selectedPointsList.Refresh()
 
 	// Check disable SaveButton of SelectedList is emtpy
-	setStateForSaveButtonAndGroupNameTextEntryExternalCall()
+	testDataEngine.SetStateForSaveButtonAndGroupNameTextEntryExternalCall()
 
 }

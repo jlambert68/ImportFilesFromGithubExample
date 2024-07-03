@@ -1,6 +1,7 @@
 package testDataSelector
 
 import (
+	"ImportFilesFromGithub/newOrEditTestDataPointGroupUI"
 	"sort"
 )
 
@@ -110,7 +111,7 @@ func GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
 
 	// Create the data table for all matching 'testDataPointRowUuid'
 	var tableData [][]string
-	tableData = buildPopUpTableDataFromTestDataPointName(testDataPointName, testDataModelPtr)
+	tableData = newOrEditTestDataPointGroupUI.buildPopUpTableDataFromTestDataPointName(testDataPointName, testDataModelPtr)
 
 	var headerSlice []string
 

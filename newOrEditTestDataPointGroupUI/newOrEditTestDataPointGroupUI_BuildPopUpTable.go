@@ -1,6 +1,7 @@
-package testDataSelector
+package newOrEditTestDataPointGroupUI
 
 import (
+	"ImportFilesFromGithub/testDataEngine"
 	"fmt"
 	"regexp"
 )
@@ -8,7 +9,7 @@ import (
 // Build the Table Data, based on TestDataPointName, to be used when the popup table is shown to the user to pick from
 func buildPopUpTableDataFromTestDataPointName(
 	tempTestDataPointRowName string,
-	testDataModel *TestDataModelStruct) (
+	testDataModel *testDataEngine.TestDataModelStruct) (
 	tableData [][]string) {
 
 	re := regexp.MustCompile(`^([^/]+)/([^/]+)`)
@@ -21,27 +22,27 @@ func buildPopUpTableDataFromTestDataPointName(
 		fmt.Println("No matching parts found")
 	}
 
-	var tempTestDataModelMap map[TestDataDomainUuidType]*TestDataDomainModelStruct
-	var tempTestDataDomainModel TestDataDomainModelStruct
-	var tempTestDataAreaMap map[TestDataAreaUuidType]*TestDataAreaStruct
-	var tempTestDataArea TestDataAreaStruct
-	var tempTestDataDomainAndAreaNameToUuidMap map[TestDataDomainOrAreaNameType]TestDataDomainOrAreaUuidType
-	var tempTestDataValuesForRowNameMap map[TestDataValueNameType]*[]TestDataPointRowUuidType
-	var tempTestDataValuesForRowMap map[TestDataPointRowUuidType]*[]*TestDataPointValueStruct
-	var tempTestDataValuesForRowUuidMapBaseOnNameSlice []TestDataPointRowUuidType
+	var tempTestDataModelMap map[testDataEngine.TestDataDomainUuidType]*testDataEngine.TestDataDomainModelStruct
+	var tempTestDataDomainModel testDataEngine.TestDataDomainModelStruct
+	var tempTestDataAreaMap map[testDataEngine.TestDataAreaUuidType]*testDataEngine.TestDataAreaStruct
+	var tempTestDataArea testDataEngine.TestDataAreaStruct
+	var tempTestDataDomainAndAreaNameToUuidMap map[testDataEngine.TestDataDomainOrAreaNameType]testDataEngine.TestDataDomainOrAreaUuidType
+	var tempTestDataValuesForRowNameMap map[testDataEngine.TestDataValueNameType]*[]testDataEngine.TestDataPointRowUuidType
+	var tempTestDataValuesForRowMap map[testDataEngine.TestDataPointRowUuidType]*[]*testDataEngine.TestDataPointValueStruct
+	var tempTestDataValuesForRowUuidMapBaseOnNameSlice []testDataEngine.TestDataPointRowUuidType
 
-	var tempTestDataDomainOrAreaUuid TestDataDomainOrAreaUuidType
-	var tempTestDataDomainUuid TestDataDomainUuidType
-	var tempTestDataAreaUuid TestDataAreaUuidType
+	var tempTestDataDomainOrAreaUuid testDataEngine.TestDataDomainOrAreaUuidType
+	var tempTestDataDomainUuid testDataEngine.TestDataDomainUuidType
+	var tempTestDataAreaUuid testDataEngine.TestDataAreaUuidType
 
 	tempTestDataModelMap = *testDataModel.TestDataModelMap
 
 	// Extract the UUID for Domain and Area
 	tempTestDataDomainAndAreaNameToUuidMap = *testDataModel.TestDataDomainAndAreaNameToUuidMap
-	tempTestDataDomainOrAreaUuid, _ = tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(matches[1])]
-	tempTestDataDomainUuid = TestDataDomainUuidType(tempTestDataDomainOrAreaUuid)
-	tempTestDataDomainOrAreaUuid, _ = tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(matches[2])]
-	tempTestDataAreaUuid = TestDataAreaUuidType(tempTestDataDomainOrAreaUuid)
+	tempTestDataDomainOrAreaUuid, _ = tempTestDataDomainAndAreaNameToUuidMap[testDataEngine.TestDataDomainOrAreaNameType(matches[1])]
+	tempTestDataDomainUuid = testDataEngine.TestDataDomainUuidType(tempTestDataDomainOrAreaUuid)
+	tempTestDataDomainOrAreaUuid, _ = tempTestDataDomainAndAreaNameToUuidMap[testDataEngine.TestDataDomainOrAreaNameType(matches[2])]
+	tempTestDataAreaUuid = testDataEngine.TestDataAreaUuidType(tempTestDataDomainOrAreaUuid)
 
 	// Extract Domain and Area maps
 	tempTestDataDomainModel = *tempTestDataModelMap[tempTestDataDomainUuid]
@@ -53,7 +54,7 @@ func buildPopUpTableDataFromTestDataPointName(
 	var tempTestDataPointRowNameToSearchFor string
 	tempTestDataPointRowNameToSearchFor = tempTestDataPointRowName //[len(matches[0]+"/"):]
 
-	tempTestDataValuesForRowUuidMapBaseOnNameSlice = *tempTestDataValuesForRowNameMap[TestDataValueNameType(tempTestDataPointRowNameToSearchFor)]
+	tempTestDataValuesForRowUuidMapBaseOnNameSlice = *tempTestDataValuesForRowNameMap[testDataEngine.TestDataValueNameType(tempTestDataPointRowNameToSearchFor)]
 
 	// Loop the slice to extract the RowUuids
 
