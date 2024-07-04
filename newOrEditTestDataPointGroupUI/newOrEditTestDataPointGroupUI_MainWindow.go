@@ -20,7 +20,8 @@ func ShowNewOrEditGroupWindow(
 	incomingGroupName testDataEngine.TestDataPointGroupNameType,
 	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataEngine.TestDataPointGroupNameType]*testDataEngine.TestDataPointNameMapType,
 	testDataDomainUuid testDataEngine.TestDataDomainUuidType,
-	testDataAreaUuid testDataEngine.TestDataAreaUuidType) {
+	testDataAreaUuid testDataEngine.TestDataAreaUuidType,
+	testDataModelObject *testDataEngine.TestDataModelObjectStruct) {
 
 	var testDataModelMap map[testDataEngine.TestDataDomainUuidType]*testDataEngine.TestDataDomainModelStruct
 	testDataModelMap = *testDataEngine.TestDataModel.TestDataModelMap
@@ -31,7 +32,7 @@ func ShowNewOrEditGroupWindow(
 	parent.Hide()
 
 	// Set Default value
-	testDataEngine.ShouldUpdateMainWindow = testDataEngine.ResponseChannelStruct{
+	testDataModelObject.ShouldUpdateMainWindow = testDataEngine.ResponseChannelStruct{
 		ShouldBeUpdated:        false,
 		TestDataPointGroupName: "",
 	}
@@ -47,7 +48,7 @@ func ShowNewOrEditGroupWindow(
 	// When this window closed then show parent and send response to parent window
 	newOrEditTestDataPointGroupWindow.SetOnClosed(func() {
 		parent.Show()
-		*responseChannel <- testDataEngine.ShouldUpdateMainWindow
+		*responseChannel <- testDataModelObject.ShouldUpdateMainWindow
 	})
 
 	// Create and configure the list-component of all TestDataPoints
@@ -61,7 +62,8 @@ func ShowNewOrEditGroupWindow(
 		&newOrEditTestDataPointGroupWindow,
 		incomingGroupName,
 		isNew,
-		newOrEditedChosenTestDataPointsThisGroupMapPtr)
+		newOrEditedChosenTestDataPointsThisGroupMapPtr,
+		testDataModelObject)
 
 	var tempTestDataPointsLabel *widget.Label
 	tempTestDataPointsLabel = widget.NewLabel("TestDataPoints based on filter")

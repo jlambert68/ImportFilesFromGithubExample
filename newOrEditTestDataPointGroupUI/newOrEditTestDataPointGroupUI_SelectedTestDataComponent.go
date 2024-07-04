@@ -13,7 +13,8 @@ func generateSelectedPointsListUIComponent(
 	newOrEditTestDataPointGroupWindowPtr *fyne.Window,
 	incomingGroupName testDataEngine.TestDataPointGroupNameType,
 	isNew bool,
-	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataEngine.TestDataPointGroupNameType]*testDataEngine.TestDataPointNameMapType) {
+	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataEngine.TestDataPointGroupNameType]*testDataEngine.TestDataPointNameMapType,
+	testDataModelObject *testDataEngine.TestDataModelObjectStruct) {
 
 	var newOrEditTestDataPointGroupWindow fyne.Window
 	newOrEditTestDataPointGroupWindow = *newOrEditTestDataPointGroupWindowPtr
@@ -40,7 +41,7 @@ func generateSelectedPointsListUIComponent(
 			// Loop the TestDataPointNames
 			for _, tempDataPointForGroup := range dataPointsForGroup {
 
-				testDataEngine.AllSelectedPoints = append(testDataEngine.AllSelectedPoints, *tempDataPointForGroup)
+				allSelectedPoints = append(allSelectedPoints, *tempDataPointForGroup)
 
 			}
 
@@ -49,7 +50,7 @@ func generateSelectedPointsListUIComponent(
 
 	// Create and configure the list-component of selected TestDataPoints
 	selectedPointsList = widget.NewList(
-		func() int { return len(testDataEngine.AllSelectedPoints) },
+		func() int { return len(allSelectedPoints) },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("")
 		},
@@ -57,10 +58,10 @@ func generateSelectedPointsListUIComponent(
 
 			obj.(*widget.Label).SetText(fmt.Sprintf(
 				"%s [%d(%d)]",
-				string(testDataEngine.AllSelectedPoints[id].TestDataPointName),
-				len(testDataEngine.AllSelectedPoints[id].SelectedTestDataPointUuidMap),
-				len(testDataEngine.AllSelectedPoints[id].AvailableTestDataPointUuidMap)+
-					len(testDataEngine.AllSelectedPoints[id].SelectedTestDataPointUuidMap)))
+				string(allSelectedPoints[id].TestDataPointName),
+				len(allSelectedPoints[id].SelectedTestDataPointUuidMap),
+				len(allSelectedPoints[id].AvailableTestDataPointUuidMap)+
+					len(allSelectedPoints[id].SelectedTestDataPointUuidMap)))
 		},
 	)
 
@@ -80,7 +81,7 @@ func generateSelectedPointsListUIComponent(
 			delete(newOrEditedChosenTestDataPointsThisGroupMap, incomingGroupName)
 		}
 
-		for _, selectedPoint := range testDataEngine.AllSelectedPoints {
+		for _, selectedPoint := range allSelectedPoints {
 
 			var dataPointsForGroup []*testDataEngine.DataPointTypeForGroupsStruct
 			dataPointsForGroup = append(dataPointsForGroup, &selectedPoint)
@@ -93,7 +94,7 @@ func generateSelectedPointsListUIComponent(
 		newOrEditedChosenTestDataPointsThisGroupMapPtr = &newOrEditedChosenTestDataPointsThisGroupMap
 
 		// Inform calling window that an update is done
-		testDataEngine.ShouldUpdateMainWindow = testDataEngine.ResponseChannelStruct{
+		testDataModelObject.ShouldUpdateMainWindow = testDataEngine.ResponseChannelStruct{
 			ShouldBeUpdated:        true,
 			TestDataPointGroupName: testDataEngine.TestDataPointGroupNameType(nameEntry.Text),
 		}
@@ -110,7 +111,8 @@ func generateSelectedPointsListUIComponent(
 	nameEntry.OnChanged = func(entryValue string) {
 
 		// Trigger State change control for Save Button and GroupName Entry
-		setStateForSaveButtonAndGroupNameTextEntry(entryValue, nameStatusLabel, saveButton, isNew, incomingGroupName)
+		setStateForSaveButtonAndGroupNameTextEntry(
+			entryValue, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataModelObject)
 	}
 
 	// Set placeholder text for GroupName Entry
@@ -127,7 +129,8 @@ func generateSelectedPointsListUIComponent(
 	}
 
 	// Trigger State change control for Save Button and GroupName Entry
-	setStateForSaveButtonAndGroupNameTextEntry(nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName)
+	setStateForSaveButtonAndGroupNameTextEntry(
+		nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataModelObject)
 
 	var buttonsContainer *fyne.Container
 	buttonsContainer = container.NewHBox(saveButton, cancelButton)
@@ -145,8 +148,9 @@ func generateSelectedPointsListUIComponent(
 		selectedPointsList)
 
 	// Create function call to 'setStateForSaveButtonAndGroupNameTextEntry' from outside
-	testDataEngine.SetStateForSaveButtonAndGroupNameTextEntryExternalCall = func() {
-		setStateForSaveButtonAndGroupNameTextEntry(nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName)
+	setStateForSaveButtonAndGroupNameTextEntryExternalCall = func() {
+		setStateForSaveButtonAndGroupNameTextEntry(
+			nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataModelObject)
 	}
 
 }
@@ -157,10 +161,11 @@ func setStateForSaveButtonAndGroupNameTextEntry(
 	nameStatusLabel *widget.Label,
 	saveButton *widget.Button,
 	isNew bool,
-	incomingGroupName testDataEngine.TestDataPointGroupNameType) {
+	incomingGroupName testDataEngine.TestDataPointGroupNameType,
+	testDataModelObject *testDataEngine.TestDataModelObjectStruct) {
 
 	// Handle when the Selected List is empty
-	if len(testDataEngine.AllSelectedPoints) == 0 {
+	if len(allSelectedPoints) == 0 {
 		nameStatusLabel.SetText(testDataEngine.SelectedListIsEmpty)
 		saveButton.Disable()
 
@@ -184,7 +189,7 @@ func setStateForSaveButtonAndGroupNameTextEntry(
 	}
 
 	// Handle when this there are no existing Groups in the map
-	if len(testDataEngine.ChosenTestDataPointsPerGroupMap) == 0 {
+	if len(testDataModelObject.ChosenTestDataPointsPerGroupMap) == 0 {
 		if isNew == true && len(entryValue) == 0 {
 			nameStatusLabel.SetText(testDataEngine.GroupNameIsEmpty)
 			saveButton.Disable()
@@ -196,7 +201,7 @@ func setStateForSaveButtonAndGroupNameTextEntry(
 		}
 	}
 
-	for existingTestDataPointGroupName, _ := range testDataEngine.ChosenTestDataPointsPerGroupMap {
+	for existingTestDataPointGroupName, _ := range testDataModelObject.ChosenTestDataPointsPerGroupMap {
 
 		if len(entryValue) == 0 {
 			nameStatusLabel.SetText(testDataEngine.GroupNameIsEmpty)

@@ -1,5 +1,34 @@
 package testDataEngine
 
+// Error/warning texts for control of Group Name
+const (
+	GroupNameIsUnique                  string = "Group name is OK!"
+	GroupNameIsNotUnique               string = "Group name already exists!"
+	GroupNameIsEmpty                   string = "Group name can't be empty"
+	GroupNameCanNotStartOrEndWithSpace string = "Group name can not start or end with a space"
+	SelectedListIsEmpty                string = "There is nothing to save"
+)
+
+// TestDataModel
+// The Full TestDataModel
+var TestDataModel TestDataModelStruct
+
+// TestDataModelObjectStruct
+// Is used to keep variables per instance of 'TestDataModelObject'
+// Used for keep track of Group-TestData per TestCase or per TestSuite
+type TestDataModelObjectStruct struct {
+
+	// The slices for Groups ans TestDataPoints for a Group
+	TestDataPointGroups     []TestDataPointGroupNameType // Define TestDataPointGroups
+	TestDataPointsForAGroup []TestDataValueNameType      // Define TestDataPointGroups
+
+	// The map holding all data for Groups and TestDataPoints for a group
+	ChosenTestDataPointsPerGroupMap map[TestDataPointGroupNameType]*TestDataPointNameMapType
+
+	// Variable to be used when closing window to inform calling window if the data was updated or not
+	ShouldUpdateMainWindow ResponseChannelStruct
+}
+
 // TestDataModelStruct
 // The structure holding all TestData
 type TestDataModelStruct struct {
@@ -118,16 +147,6 @@ type TestDataValueNameType string
 // All values for a TestDataRow is concatenated into single value as a summary
 type TestDataPointRowValuesSummaryType string
 
-// The slices for Groups ans TestDataPoints for a Group
-var TestDataPointGroups []TestDataPointGroupNameType // Define TestDataPointGroups
-var TestDataPointsForAGroup []TestDataValueNameType  // Define TestDataPointGroups
-
-// The type for Group name
-type TestDataPointGroupNameType string
-
-// The map holding all data for Groups and TestDataPoints for a group
-var ChosenTestDataPointsPerGroupMap map[TestDataPointGroupNameType]*TestDataPointNameMapType
-
 // The type for the map that holds the connection between TestDataÅpintName and all the RowUUids connectoed to it
 type TestDataPointNameMapType map[TestDataValueNameType]*[]*DataPointTypeForGroupsStruct
 
@@ -143,19 +162,8 @@ type TestDataPointNameMapType map[TestDataValueNameType]*[]*DataPointTypeForGrou
 	testDatapointValue           TestDataValueType
 } */
 
-// Error/warning texts for control of Group Name
-const (
-	GroupNameIsUnique                  string = "Group name is OK!"
-	GroupNameIsNotUnique               string = "Group name already exists!"
-	GroupNameIsEmpty                   string = "Group name can't be empty"
-	GroupNameCanNotStartOrEndWithSpace string = "Group name can not start or end with a space"
-	SelectedListIsEmpty                string = "There is nothing to save"
-)
-
-var SetStateForSaveButtonAndGroupNameTextEntryExternalCall func()
-
-// Variable to be used when closing window to inform calling window if the data was updated or not
-var ShouldUpdateMainWindow ResponseChannelStruct
+// The type for Group name
+type TestDataPointGroupNameType string
 
 // Message sent back when a Group is Created or is Edited
 type ResponseChannelStruct struct {
@@ -179,10 +187,3 @@ type DataPointTypeForGroupsStruct struct {
 	AvailableTestDataPointUuidMap map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
 	SelectedTestDataPointUuidMap  map[TestDataPointRowUuidType]TestDataPointRowUuidStruct
 }
-
-// Slices used to keep track of filtered, available and selected DataPoints
-var AllPointsAvailable []DataPointTypeForGroupsStruct
-var AllSelectedPoints []DataPointTypeForGroupsStruct
-
-// The Full TestDataModel
-var TestDataModel TestDataModelStruct

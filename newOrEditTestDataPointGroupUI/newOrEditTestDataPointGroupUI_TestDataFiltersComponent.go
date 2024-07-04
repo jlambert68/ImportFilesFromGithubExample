@@ -285,7 +285,7 @@ func generateTestDataSelectionsUIComponent(
 		var existInSelectedPoints bool
 		var tempMapForSearchResultDataPoints map[testDataEngine.TestDataValueNameType]testDataEngine.DataPointTypeForGroupsStruct
 		tempMapForSearchResultDataPoints = make(map[testDataEngine.TestDataValueNameType]testDataEngine.DataPointTypeForGroupsStruct)
-		testDataEngine.AllPointsAvailable = nil
+		allPointsAvailable = nil
 
 		for _, testDataPointRowUuid := range searchResult {
 
@@ -299,8 +299,8 @@ func generateTestDataSelectionsUIComponent(
 
 			// Check if RowUuid already exists in SelectedDataPoints-list
 			existInSelectedPoints = false
-			if len(testDataEngine.AllSelectedPoints) != 0 {
-				for _, selectedPoint := range testDataEngine.AllSelectedPoints {
+			if len(allSelectedPoints) != 0 {
+				for _, selectedPoint := range allSelectedPoints {
 
 					_, existInSelectedPoints = selectedPoint.AvailableTestDataPointUuidMap[tempTestDataPointRowUuid]
 
@@ -394,7 +394,7 @@ func generateTestDataSelectionsUIComponent(
 		allPointsAvailableToBeSorted = sortDataPointsList(allPointsAvailableToBeSorted)
 
 		// copy back from sorted slice
-		testDataEngine.AllPointsAvailable = allPointsAvailableToBeSorted
+		allPointsAvailable = allPointsAvailableToBeSorted
 
 		// Refresh the List-widget
 		allAvailablePointsList.Refresh()
@@ -477,7 +477,7 @@ func generateTestDataSelectionsUIComponent(
 				nameExistInSelectedPoints = false
 				rowUuidExistInSelectedPoints = false
 
-				// Clear the flag if the TestDataPointName exist in AllPointsAvailable-slice
+				// Clear the flag if the TestDataPointName exist in allPointsAvailable-slice
 				nameExistInAvailablePoints = false
 
 				for _, selectedPoint := range allSelectedPoints {
@@ -501,7 +501,7 @@ func generateTestDataSelectionsUIComponent(
 						// If the TestDataPointUuid doesn't exist in SelectedPoints then add to the Available TestDataPoints
 						if rowUuidExistInSelectedPoints == false {
 
-							// Check if the TestDataPointName exist in the AllPointsAvailable slice
+							// Check if the TestDataPointName exist in the allPointsAvailable slice
 							for tempAvailablePointsIndex, availablePoint := range allPointsAvailable {
 
 								if availablePoint.testDataPointName == filteredPoint.testDataPointName {

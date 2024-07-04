@@ -37,7 +37,8 @@ func ImportTestData() {
 
 func MainTestDataSelector(
 	app fyne.App,
-	parent fyne.Window) {
+	parent fyne.Window,
+	testDataModelObject *testDataEngine.TestDataModelObjectStruct) {
 
 	parent.Hide()
 
@@ -50,18 +51,18 @@ func MainTestDataSelector(
 	})
 
 	// Initiate 'chosenTestDataPointsPerGroupMap'
-	if testDataEngine.ChosenTestDataPointsPerGroupMap == nil {
-		testDataEngine.ChosenTestDataPointsPerGroupMap = make(map[testDataEngine.TestDataPointGroupNameType]*testDataEngine.TestDataPointNameMapType)
+	if testDataModelObject.ChosenTestDataPointsPerGroupMap == nil {
+		testDataModelObject.ChosenTestDataPointsPerGroupMap = make(map[testDataEngine.TestDataPointGroupNameType]*testDataEngine.TestDataPointNameMapType)
 	}
 
 	// Create List UI for 'testDataPointGroups'
 	newOrEditTestDataPointGroupUI.TestDataPointGroupsList = widget.NewList(
-		func() int { return len(testDataEngine.TestDataPointGroups) },
+		func() int { return len(testDataModelObject.TestDataPointGroups) },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			obj.(*widget.Label).SetText(string(testDataEngine.TestDataPointGroups[id]))
+			obj.(*widget.Label).SetText(string(testDataModelObject.TestDataPointGroups[id]))
 		},
 	)
 
@@ -69,10 +70,10 @@ func MainTestDataSelector(
 		newOrEditTestDataPointGroupUI.SelectedIndexForGroups = id
 
 		// Update List for  'testDataPointsForAGroup'
-		updateTestDataPointsForAGroupList(testDataEngine.TestDataPointGroups[id])
+		updateTestDataPointsForAGroupList(testDataModelObject.TestDataPointGroups[id], testDataModelObject)
 
 		// Select correct Group in Select-dropdown
-		newOrEditTestDataPointGroupUI.TestDataPointGroupsSelect.SetSelected(string(testDataEngine.TestDataPointGroups[id]))
+		newOrEditTestDataPointGroupUI.TestDataPointGroupsSelect.SetSelected(string(testDataModelObject.TestDataPointGroups[id]))
 
 		// UnSelect in DropDown- and List for TestDataPoints
 		newOrEditTestDataPointGroupUI.TestDataPointsForAGroupSelect.ClearSelected()
@@ -85,7 +86,7 @@ func MainTestDataSelector(
 	testDataPointGroupsToStringSliceFunction := func() []string {
 		var tempStringSlice []string
 
-		for _, testDataPointGroup := range testDataEngine.TestDataPointGroups {
+		for _, testDataPointGroup := range testDataModelObject.TestDataPointGroups {
 			tempStringSlice = append(tempStringSlice, string(testDataPointGroup))
 		}
 
@@ -96,7 +97,7 @@ func MainTestDataSelector(
 	testDataPointsToStringSliceFunction := func() []string {
 		var tempStringSlice []string
 
-		for _, testDataPointForAGroup := range testDataEngine.TestDataPointsForAGroup {
+		for _, testDataPointForAGroup := range testDataModelObject.TestDataPointsForAGroup {
 			tempStringSlice = append(tempStringSlice, string(testDataPointForAGroup))
 		}
 
@@ -107,7 +108,7 @@ func MainTestDataSelector(
 	newOrEditTestDataPointGroupUI.TestDataPointGroupsSelect = widget.NewSelect(testDataPointGroupsToStringSliceFunction(), func(selected string) {
 
 		// Find List-item to select
-		for index, group := range testDataEngine.TestDataPointGroups {
+		for index, group := range testDataModelObject.TestDataPointGroups {
 			if string(group) == selected {
 				newOrEditTestDataPointGroupUI.SelectedIndexForGroups = index
 
@@ -133,7 +134,7 @@ func MainTestDataSelector(
 	newOrEditTestDataPointGroupUI.TestDataPointsForAGroupSelect = widget.NewSelect(testDataPointsToStringSliceFunction(), func(selected string) {
 
 		// Find List-item to select
-		for index, group := range testDataEngine.TestDataPointsForAGroup {
+		for index, group := range testDataModelObject.TestDataPointsForAGroup {
 			if string(group) == selected {
 				newOrEditTestDataPointGroupUI.SelectedIndexForGroupTestDataPoints = index
 
@@ -147,12 +148,12 @@ func MainTestDataSelector(
 
 	// Create List UI for 'testDataPointsForAGroup'
 	newOrEditTestDataPointGroupUI.TestDataPointsForAGroupList = widget.NewList(
-		func() int { return len(testDataEngine.TestDataPointsForAGroup) },
+		func() int { return len(testDataModelObject.TestDataPointsForAGroup) },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("")
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			obj.(*widget.Label).SetText(string(testDataEngine.TestDataPointsForAGroup[id]))
+			obj.(*widget.Label).SetText(string(testDataModelObject.TestDataPointsForAGroup[id]))
 		},
 	)
 
@@ -160,7 +161,7 @@ func MainTestDataSelector(
 		newOrEditTestDataPointGroupUI.SelectedIndexForGroupTestDataPoints = id
 
 		// Select correct Group in Select-dropdown
-		newOrEditTestDataPointGroupUI.TestDataPointsForAGroupSelect.SetSelected(string(testDataEngine.TestDataPointsForAGroup[id]))
+		newOrEditTestDataPointGroupUI.TestDataPointsForAGroupSelect.SetSelected(string(testDataModelObject.TestDataPointsForAGroup[id]))
 
 		// Select the correct TestDataPoint in the dropdown for TestDataPoints
 		newOrEditTestDataPointGroupUI.TestDataPointsForAGroupSelect.SetOptions(testDataPointsToStringSliceFunction())
@@ -196,14 +197,15 @@ func MainTestDataSelector(
 			true,
 			&responseChannel,
 			"",
-			&testDataEngine.ChosenTestDataPointsPerGroupMap,
+			&testDataModelObject.ChosenTestDataPointsPerGroupMap,
 			testDataDomainUuid,
-			testDataAreaUuid)
+			testDataAreaUuid,
+			testDataModelObject)
 	})
 
 	// Crete the 'Edit'-button for editing an existing Group for TestDataPoints
 	editButton := widget.NewButton("Edit", func() {
-		if newOrEditTestDataPointGroupUI.SelectedIndexForGroups == -1 || len(testDataEngine.TestDataPointGroups) == 0 {
+		if newOrEditTestDataPointGroupUI.SelectedIndexForGroups == -1 || len(testDataModelObject.TestDataPointGroups) == 0 {
 			dialog.ShowInformation("Error", "No selection made", myWindow)
 			return
 		}
@@ -213,34 +215,36 @@ func MainTestDataSelector(
 			myWindow,
 			false,
 			&responseChannel,
-			testDataEngine.TestDataPointGroups[newOrEditTestDataPointGroupUI.SelectedIndexForGroups],
-			&testDataEngine.ChosenTestDataPointsPerGroupMap,
+			testDataModelObject.TestDataPointGroups[newOrEditTestDataPointGroupUI.SelectedIndexForGroups],
+			&testDataModelObject.ChosenTestDataPointsPerGroupMap,
 			testDataDomainUuid,
-			testDataAreaUuid)
+			testDataAreaUuid,
+			testDataModelObject)
 	})
 
 	// Crete the 'Delete'-button for deleting an existing Group for TestDataPoints
 	deleteButton := widget.NewButton("Delete", func() {
-		if newOrEditTestDataPointGroupUI.SelectedIndexForGroups == -1 || len(testDataEngine.TestDataPointGroups) == 0 {
+		if newOrEditTestDataPointGroupUI.SelectedIndexForGroups == -1 || len(testDataModelObject.TestDataPointGroups) == 0 {
 			dialog.ShowInformation("Error", "No selection made", myWindow)
 			return
 		}
 
-		dialog.ShowConfirm("Confirm to Delete", fmt.Sprintf("Are you sure that you what to delete TestDataPointGroup '%s'?", testDataEngine.TestDataPointGroups[newOrEditTestDataPointGroupUI.SelectedIndexForGroups]), func(confirm bool) {
+		dialog.ShowConfirm("Confirm to Delete", fmt.Sprintf("Are you sure that you what to delete TestDataPointGroup '%s'?",
+			testDataModelObject.TestDataPointGroups[newOrEditTestDataPointGroupUI.SelectedIndexForGroups]), func(confirm bool) {
 			if confirm {
 
 				// Get the GroupName from the List to be deleted
 				var groupNameToDelete testDataEngine.TestDataPointGroupNameType
-				groupNameToDelete = testDataEngine.TestDataPointGroups[newOrEditTestDataPointGroupUI.SelectedIndexForGroups]
+				groupNameToDelete = testDataModelObject.TestDataPointGroups[newOrEditTestDataPointGroupUI.SelectedIndexForGroups]
 
 				// Delete the group
-				delete(testDataEngine.ChosenTestDataPointsPerGroupMap, groupNameToDelete)
+				delete(testDataModelObject.ChosenTestDataPointsPerGroupMap, groupNameToDelete)
 
 				// Rebuild the TestDataPointGroup-list
-				testDataEngine.TestDataPointGroups = nil
-				for testDataPointsGroupName, _ := range testDataEngine.ChosenTestDataPointsPerGroupMap {
+				testDataModelObject.TestDataPointGroups = nil
+				for testDataPointsGroupName, _ := range testDataModelObject.ChosenTestDataPointsPerGroupMap {
 
-					testDataEngine.TestDataPointGroups = append(testDataEngine.TestDataPointGroups, testDataPointsGroupName)
+					testDataModelObject.TestDataPointGroups = append(testDataModelObject.TestDataPointGroups, testDataPointsGroupName)
 				}
 
 				newOrEditTestDataPointGroupUI.SelectedIndexForGroups = -1
@@ -249,7 +253,7 @@ func MainTestDataSelector(
 				newOrEditTestDataPointGroupUI.TestDataPointGroupsList.UnselectAll()
 
 				// Clear the TestDataPointsList
-				testDataEngine.TestDataPointsForAGroup = nil
+				testDataModelObject.TestDataPointsForAGroup = nil
 				newOrEditTestDataPointGroupUI.TestDataPointsForAGroupList.Refresh()
 
 				// UnSelect in DropDown- and List for TestDataPoints
@@ -284,13 +288,13 @@ func MainTestDataSelector(
 			if shouldListBeUpdated.ShouldBeUpdated == true {
 
 				// Clear slice and variables used
-				testDataEngine.TestDataPointGroups = nil
+				testDataModelObject.TestDataPointGroups = nil
 				groupNameIndex = 0
 				groupNameIndexToSelect = 0
 
-				for testDataPointsGroupName, _ := range testDataEngine.ChosenTestDataPointsPerGroupMap {
+				for testDataPointsGroupName, _ := range testDataModelObject.ChosenTestDataPointsPerGroupMap {
 
-					testDataEngine.TestDataPointGroups = append(testDataEngine.TestDataPointGroups, testDataPointsGroupName)
+					testDataModelObject.TestDataPointGroups = append(testDataModelObject.TestDataPointGroups, testDataPointsGroupName)
 
 					if testDataPointsGroupName == shouldListBeUpdated.TestDataPointGroupName {
 

@@ -15,7 +15,7 @@ func generateAllAvailablePointsListUIComponent(
 
 	// Create and configure the list-component of all TestDataPoints
 	allAvailablePointsList = widget.NewList(
-		func() int { return len(testDataEngine.AllPointsAvailable) },
+		func() int { return len(allPointsAvailable) },
 		func() fyne.CanvasObject {
 
 			return widget.NewLabel("")
@@ -24,10 +24,10 @@ func generateAllAvailablePointsListUIComponent(
 
 			obj.(*widget.Label).SetText(fmt.Sprintf(
 				"%s [%d(%d)]",
-				string(testDataEngine.AllPointsAvailable[id].TestDataPointName),
-				len(testDataEngine.AllPointsAvailable[id].AvailableTestDataPointUuidMap),
-				len(testDataEngine.AllPointsAvailable[id].AvailableTestDataPointUuidMap)+
-					len(testDataEngine.AllPointsAvailable[id].SelectedTestDataPointUuidMap)))
+				string(allPointsAvailable[id].TestDataPointName),
+				len(allPointsAvailable[id].AvailableTestDataPointUuidMap),
+				len(allPointsAvailable[id].AvailableTestDataPointUuidMap)+
+					len(allPointsAvailable[id].SelectedTestDataPointUuidMap)))
 		},
 	)
 
@@ -35,7 +35,7 @@ func generateAllAvailablePointsListUIComponent(
 
 		// Remove the number part of the visible name
 		var clickedDataPointName string
-		clickedDataPointName = string(testDataEngine.AllPointsAvailable[id].TestDataPointName) //filterToRemoveNumberOfSimilarTestDataPointsInName(string(allPointsAvailable[id].testDataPointName))
+		clickedDataPointName = string(allPointsAvailable[id].TestDataPointName) //filterToRemoveNumberOfSimilarTestDataPointsInName(string(allPointsAvailable[id].testDataPointName))
 
 		var tableData [][]string
 		tableData = buildPopUpTableDataFromTestDataPointName(clickedDataPointName, testDataModel)
@@ -43,7 +43,7 @@ func generateAllAvailablePointsListUIComponent(
 		showTable(
 			*newOrEditTestDataPointGroupWindow,
 			tableData,
-			testDataEngine.AllPointsAvailable[id].SelectedTestDataPointUuidMap)
+			allPointsAvailable[id].SelectedTestDataPointUuidMap)
 
 		allAvailablePointsList.UnselectAll()
 

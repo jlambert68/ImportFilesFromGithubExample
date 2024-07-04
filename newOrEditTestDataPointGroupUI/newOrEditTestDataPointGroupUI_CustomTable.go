@@ -610,7 +610,7 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 	var tempDataPoint testDataEngine.DataPointTypeForGroupsStruct
 
 	// Loop Available TestDataPoints
-	for _, availableDataPoint := range testDataEngine.AllPointsAvailable {
+	for _, availableDataPoint := range allPointsAvailable {
 
 		// If correct DataPoint found the process on RowUuid-level
 		if availableDataPoint.TestDataPointName == testDataPointName {
@@ -632,7 +632,7 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 
 	// Loop Selected TestDataPoints
 	foundInSelectedPointsList = false
-	for _, selectedDataPoint := range testDataEngine.AllSelectedPoints {
+	for _, selectedDataPoint := range allSelectedPoints {
 
 		// If correct DataPoint found the process on RowUuid-level
 		if selectedDataPoint.TestDataPointName == testDataPointName {
@@ -656,10 +656,10 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 	if foundInSelectedPointsList == false {
 
 		// Add a copy of the DataPoint from the Available-points-list
-		testDataEngine.AllSelectedPoints = append(testDataEngine.AllSelectedPoints, tempDataPoint)
+		allSelectedPoints = append(allSelectedPoints, tempDataPoint)
 
 		// Sort the allSelectedPoints-list
-		testDataEngine.AllSelectedPoints = sortDataPointsList(testDataEngine.AllSelectedPoints)
+		allSelectedPoints = sortDataPointsList(allSelectedPoints)
 
 	}
 
@@ -668,7 +668,7 @@ func addDataPointToSelectedDataPointsAndRemoveFromAvailableDataPoints(
 	selectedPointsList.Refresh()
 
 	// Check disable SaveButton of SelectedList is emtpy
-	testDataEngine.SetStateForSaveButtonAndGroupNameTextEntryExternalCall()
+	setStateForSaveButtonAndGroupNameTextEntryExternalCall()
 
 }
 
@@ -677,7 +677,7 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 	testDataPointRowUuidObject testDataEngine.TestDataPointRowUuidStruct) {
 
 	// Loop Available TestDataPoints
-	for _, availableDataPoint := range testDataEngine.AllPointsAvailable {
+	for _, availableDataPoint := range allPointsAvailable {
 
 		// If correct DataPoint found the process on RowUuid-level
 		if availableDataPoint.TestDataPointName == testDataPointName {
@@ -695,7 +695,7 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 	}
 
 	// Loop Selected TestDataPoints
-	for selectedDataPointIndex, selectedDataPoint := range testDataEngine.AllSelectedPoints {
+	for selectedDataPointIndex, selectedDataPoint := range allSelectedPoints {
 
 		// If correct DataPoint found the process on RowUuid-level
 		if selectedDataPoint.TestDataPointName == testDataPointName {
@@ -710,7 +710,7 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 			if len(selectedDataPoint.SelectedTestDataPointUuidMap) == 0 {
 
 				// Remove the element at the specified index
-				testDataEngine.AllSelectedPoints = append(testDataEngine.AllSelectedPoints[:selectedDataPointIndex], testDataEngine.AllSelectedPoints[selectedDataPointIndex+1:]...)
+				allSelectedPoints = append(allSelectedPoints[:selectedDataPointIndex], allSelectedPoints[selectedDataPointIndex+1:]...)
 			}
 
 			// Exit for loop
@@ -724,6 +724,6 @@ func addDataPointToAvailableDataPointsAndRemoveFromSelectedDataPoints(
 	selectedPointsList.Refresh()
 
 	// Check disable SaveButton of SelectedList is emtpy
-	testDataEngine.SetStateForSaveButtonAndGroupNameTextEntryExternalCall()
+	setStateForSaveButtonAndGroupNameTextEntryExternalCall()
 
 }

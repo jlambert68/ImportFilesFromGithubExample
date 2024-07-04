@@ -1,6 +1,7 @@
 package newOrEditTestDataPointGroupUI
 
 import (
+	"ImportFilesFromGithub/testDataEngine"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -47,3 +48,9 @@ var lowerRightSideContainer *fyne.Container
 // The List-items for Groups ans TestDataPoints for a Group
 var TestDataPointGroupsList *widget.List
 var TestDataPointsForAGroupList *widget.List
+
+var setStateForSaveButtonAndGroupNameTextEntryExternalCall func()
+
+// Slices used to keep track of filtered, available and selected DataPoints
+var allPointsAvailable []testDataEngine.DataPointTypeForGroupsStruct
+var allSelectedPoints []testDataEngine.DataPointTypeForGroupsStruct

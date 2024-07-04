@@ -3,6 +3,7 @@ package main
 import (
 	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
+	"ImportFilesFromGithub/testDataEngine"
 	"ImportFilesFromGithub/testDataSelector"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -41,6 +42,9 @@ func main() {
 	// Set initial size of the window
 	myMainWindow.Resize(fyne.NewSize(800, 600))
 
+	var testDataModelObject *testDataEngine.TestDataModelObjectStruct
+	testDataModelObject = &testDataEngine.TestDataModelObjectStruct{}
+
 	var fileTable *widget.Table
 
 	var responseChannel chan bool
@@ -56,7 +60,7 @@ func main() {
 
 	filesViewerButton := widget.NewButton("View imported files", func() {
 		myMainWindow.Hide()
-		fileViewer.InitiateFileViewer(myMainWindow, myApp, selectedFiles)
+		fileViewer.InitiateFileViewer(myMainWindow, myApp, selectedFiles, testDataModelObject)
 
 	})
 
@@ -65,7 +69,8 @@ func main() {
 		myMainWindow.Hide()
 		testDataSelector.MainTestDataSelector(
 			myApp,
-			myMainWindow)
+			myMainWindow,
+			testDataModelObject)
 	})
 
 	//inputText := "This is {{bold}} text and this is {{also bold}} and this normal again."

@@ -17,7 +17,8 @@ import (
 func InitiateFileViewer(
 	mainWindow fyne.Window,
 	myApp fyne.App,
-	importedFilesPtr *[]importFilesFromGitHub.GitHubFile) {
+	importedFilesPtr *[]importFilesFromGitHub.GitHubFile,
+	testDataModelObject *testDataEngine.TestDataModelObjectStruct) {
 
 	// Disable the main window
 	mainWindow.Hide()
@@ -80,7 +81,7 @@ func InitiateFileViewer(
 
 		selectedFile = selected
 
-		testDataPointValues = testDataEngine.GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
+		testDataPointValues = testDataModelObject.GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
 			testDataPointGroupsSelectSelected,
 			testDataPointForAGroupSelectSelected,
 			testDataRowForTestDataPointsSelectSelected)
@@ -115,7 +116,7 @@ func InitiateFileViewer(
 	// Create function that converts a GroupSlice into a string slice
 	getTestGroupsFromTestDataEngineFunction := func() []string {
 
-		testDataPointGroups = testDataEngine.ListTestDataGroups()
+		testDataPointGroups = testDataModelObject.ListTestDataGroups()
 
 		return testDataPointGroups
 	}
@@ -127,7 +128,7 @@ func InitiateFileViewer(
 			return []string{}
 		}
 
-		testDataPointsForAGroup = testDataEngine.ListTestDataGroupPointsForAGroup(testDataGroup)
+		testDataPointsForAGroup = testDataModelObject.ListTestDataGroupPointsForAGroup(testDataGroup)
 
 		return testDataPointsForAGroup
 	}
@@ -139,7 +140,7 @@ func InitiateFileViewer(
 			return []string{}
 		}
 
-		testDataRowsForATestDataPoint = testDataEngine.ListTestDataRowsForAGroupPoint(testDataGroup, testDataGroupPoint)
+		testDataRowsForATestDataPoint = testDataModelObject.ListTestDataRowsForAGroupPoint(testDataGroup, testDataGroupPoint)
 
 		return testDataRowsForATestDataPoint
 	}

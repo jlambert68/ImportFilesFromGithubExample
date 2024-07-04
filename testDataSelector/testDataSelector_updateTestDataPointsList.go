@@ -6,19 +6,21 @@ import (
 )
 
 // Updates the list that show the TestDataPoints for a specific Group in main window
-func updateTestDataPointsForAGroupList(testDataPointGroupName testDataEngine.TestDataPointGroupNameType) {
+func updateTestDataPointsForAGroupList(
+	testDataPointGroupName testDataEngine.TestDataPointGroupNameType,
+	testDataModelObject *testDataEngine.TestDataModelObjectStruct) {
 
 	// Clear the slice that holds all TestDataPoints
-	testDataEngine.TestDataPointsForAGroup = nil
+	testDataModelObject.TestDataPointsForAGroup = nil
 
 	// Extract the map with the TestDataPoints
 	var tempTestDataPointNameMap testDataEngine.TestDataPointNameMapType
-	tempTestDataPointNameMap = *testDataEngine.ChosenTestDataPointsPerGroupMap[testDataPointGroupName]
+	tempTestDataPointNameMap = *testDataModelObject.ChosenTestDataPointsPerGroupMap[testDataPointGroupName]
 
 	// Refill the slice with all TestDataPoints
 	for testDataValueName, _ := range tempTestDataPointNameMap {
 
-		testDataEngine.TestDataPointsForAGroup = append(testDataEngine.TestDataPointsForAGroup, testDataValueName)
+		testDataModelObject.TestDataPointsForAGroup = append(testDataModelObject.TestDataPointsForAGroup, testDataValueName)
 
 	}
 
