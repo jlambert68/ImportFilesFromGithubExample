@@ -14,7 +14,7 @@ func generateSelectedPointsListUIComponent(
 	incomingGroupName testDataEngine.TestDataPointGroupNameType,
 	isNew bool,
 	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataEngine.TestDataPointGroupNameType]*testDataEngine.TestDataPointNameMapType,
-	testDataModelObject *testDataEngine.TestDataModelObjectStruct) {
+	testDataForGroupObject *testDataEngine.TestDataForGroupObjectStruct) {
 
 	var newOrEditTestDataPointGroupWindow fyne.Window
 	newOrEditTestDataPointGroupWindow = *newOrEditTestDataPointGroupWindowPtr
@@ -94,7 +94,7 @@ func generateSelectedPointsListUIComponent(
 		newOrEditedChosenTestDataPointsThisGroupMapPtr = &newOrEditedChosenTestDataPointsThisGroupMap
 
 		// Inform calling window that an update is done
-		testDataModelObject.ShouldUpdateMainWindow = testDataEngine.ResponseChannelStruct{
+		testDataForGroupObject.ShouldUpdateMainWindow = testDataEngine.ResponseChannelStruct{
 			ShouldBeUpdated:        true,
 			TestDataPointGroupName: testDataEngine.TestDataPointGroupNameType(nameEntry.Text),
 		}
@@ -112,7 +112,7 @@ func generateSelectedPointsListUIComponent(
 
 		// Trigger State change control for Save Button and GroupName Entry
 		setStateForSaveButtonAndGroupNameTextEntry(
-			entryValue, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataModelObject)
+			entryValue, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataForGroupObject)
 	}
 
 	// Set placeholder text for GroupName Entry
@@ -130,7 +130,7 @@ func generateSelectedPointsListUIComponent(
 
 	// Trigger State change control for Save Button and GroupName Entry
 	setStateForSaveButtonAndGroupNameTextEntry(
-		nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataModelObject)
+		nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataForGroupObject)
 
 	var buttonsContainer *fyne.Container
 	buttonsContainer = container.NewHBox(saveButton, cancelButton)
@@ -150,7 +150,7 @@ func generateSelectedPointsListUIComponent(
 	// Create function call to 'setStateForSaveButtonAndGroupNameTextEntry' from outside
 	setStateForSaveButtonAndGroupNameTextEntryExternalCall = func() {
 		setStateForSaveButtonAndGroupNameTextEntry(
-			nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataModelObject)
+			nameEntry.Text, nameStatusLabel, saveButton, isNew, incomingGroupName, testDataForGroupObject)
 	}
 
 }
@@ -162,7 +162,7 @@ func setStateForSaveButtonAndGroupNameTextEntry(
 	saveButton *widget.Button,
 	isNew bool,
 	incomingGroupName testDataEngine.TestDataPointGroupNameType,
-	testDataModelObject *testDataEngine.TestDataModelObjectStruct) {
+	testDataForGroupObject *testDataEngine.TestDataForGroupObjectStruct) {
 
 	// Handle when the Selected List is empty
 	if len(allSelectedPoints) == 0 {
@@ -189,7 +189,7 @@ func setStateForSaveButtonAndGroupNameTextEntry(
 	}
 
 	// Handle when this there are no existing Groups in the map
-	if len(testDataModelObject.ChosenTestDataPointsPerGroupMap) == 0 {
+	if len(testDataForGroupObject.ChosenTestDataPointsPerGroupMap) == 0 {
 		if isNew == true && len(entryValue) == 0 {
 			nameStatusLabel.SetText(testDataEngine.GroupNameIsEmpty)
 			saveButton.Disable()
@@ -201,7 +201,7 @@ func setStateForSaveButtonAndGroupNameTextEntry(
 		}
 	}
 
-	for existingTestDataPointGroupName, _ := range testDataModelObject.ChosenTestDataPointsPerGroupMap {
+	for existingTestDataPointGroupName, _ := range testDataForGroupObject.ChosenTestDataPointsPerGroupMap {
 
 		if len(entryValue) == 0 {
 			nameStatusLabel.SetText(testDataEngine.GroupNameIsEmpty)

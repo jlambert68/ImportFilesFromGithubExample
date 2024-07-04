@@ -13,10 +13,24 @@ const (
 // The Full TestDataModel
 var TestDataModel TestDataModelStruct
 
-// TestDataModelObjectStruct
-// Is used to keep variables per instance of 'TestDataModelObject'
+// TestDataFromTestDataAreaStruct
+// Struct for holding TestData for one TestDataArea within a TestDataDomain
+type TestDataFromTestDataAreaStruct struct {
+	TestDataDomainUuid string
+	TestDataDomainName string
+	TestDataAreaUuid   string
+	TestDataAreaName   string
+	Headers            []struct {
+		ShouldHeaderActAsFilter bool
+		HeaderName              string
+	}
+	TestDataRows [][]string
+}
+
+// TestDataForGroupObjectStruct
+// Is used to keep variables per instance of 'testDataForGroupObject'
 // Used for keep track of Group-TestData per TestCase or per TestSuite
-type TestDataModelObjectStruct struct {
+type TestDataForGroupObjectStruct struct {
 
 	// The slices for Groups ans TestDataPoints for a Group
 	TestDataPointGroups     []TestDataPointGroupNameType // Define TestDataPointGroups

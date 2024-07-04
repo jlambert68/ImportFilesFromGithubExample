@@ -17,8 +17,6 @@ import (
 
 func main() {
 
-	testDataSelector.ImportTestData()
-
 	var err error
 	// Initiate Lua Script Engine
 	err = luaEngine.InitiateLuaScriptEngine([][]byte{})
@@ -42,8 +40,12 @@ func main() {
 	// Set initial size of the window
 	myMainWindow.Resize(fyne.NewSize(800, 600))
 
-	var testDataModelObject *testDataEngine.TestDataModelObjectStruct
-	testDataModelObject = &testDataEngine.TestDataModelObjectStruct{}
+	// Initiate testDataForGroupObject used for keeping Groups TestData separate in different TestCases
+	var testDataForGroupObject *testDataEngine.TestDataForGroupObjectStruct
+	testDataForGroupObject = &testDataEngine.TestDataForGroupObjectStruct{}
+
+	//Add TestData to global TestDataModel
+	testDataSelector.ImportTestData()
 
 	var fileTable *widget.Table
 
@@ -60,7 +62,7 @@ func main() {
 
 	filesViewerButton := widget.NewButton("View imported files", func() {
 		myMainWindow.Hide()
-		fileViewer.InitiateFileViewer(myMainWindow, myApp, selectedFiles, testDataModelObject)
+		fileViewer.InitiateFileViewer(myMainWindow, myApp, selectedFiles, testDataForGroupObject)
 
 	})
 
@@ -70,7 +72,7 @@ func main() {
 		testDataSelector.MainTestDataSelector(
 			myApp,
 			myMainWindow,
-			testDataModelObject)
+			testDataForGroupObject)
 	})
 
 	//inputText := "This is {{bold}} text and this is {{also bold}} and this normal again."

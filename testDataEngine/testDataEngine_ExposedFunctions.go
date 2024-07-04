@@ -6,10 +6,10 @@ import (
 
 // ListTestDataGroups
 // List the current TestDataGroups that the User has
-func (testDataModelObject *TestDataModelObjectStruct) ListTestDataGroups() (testDataPointGroupsAsStringSlice []string) {
+func (testDataForGroupObject *TestDataForGroupObjectStruct) ListTestDataGroups() (testDataPointGroupsAsStringSlice []string) {
 
 	// Loop all 'TestDataPointGroups'
-	for _, tempTestDataPointGroup := range testDataModelObject.TestDataPointGroups {
+	for _, tempTestDataPointGroup := range testDataForGroupObject.TestDataPointGroups {
 		testDataPointGroupsAsStringSlice = append(testDataPointGroupsAsStringSlice, string(tempTestDataPointGroup))
 	}
 
@@ -22,11 +22,11 @@ func (testDataModelObject *TestDataModelObjectStruct) ListTestDataGroups() (test
 
 // ListTestDataGroupPointsForAGroup
 // List the current TestDataGroupPoints for a specific TestDataGroup
-func (testDataModelObject *TestDataModelObjectStruct) ListTestDataGroupPointsForAGroup(testDataGroup string) (testDataPointGroupsAsStringSlice []string) {
+func (testDataForGroupObject *TestDataForGroupObjectStruct) ListTestDataGroupPointsForAGroup(testDataGroup string) (testDataPointGroupsAsStringSlice []string) {
 
 	// Extract the map with the TestDataPoints
 	var tempTestDataPointNameMap TestDataPointNameMapType
-	tempTestDataPointNameMap = *testDataModelObject.ChosenTestDataPointsPerGroupMap[TestDataPointGroupNameType(testDataGroup)]
+	tempTestDataPointNameMap = *testDataForGroupObject.ChosenTestDataPointsPerGroupMap[TestDataPointGroupNameType(testDataGroup)]
 
 	// Refill the slice with all TestDataPoints
 	for testDataPoint, _ := range tempTestDataPointNameMap {
@@ -43,7 +43,7 @@ func (testDataModelObject *TestDataModelObjectStruct) ListTestDataGroupPointsFor
 
 // ListTestDataRowsForAGroupPoint
 // List the current TestDataRow for a specific TestDataGroupPoint
-func (testDataModelObject *TestDataModelObjectStruct) ListTestDataRowsForAGroupPoint(testDataGroup string, testDataGroupPoint string) (
+func (testDataForGroupObject *TestDataForGroupObjectStruct) ListTestDataRowsForAGroupPoint(testDataGroup string, testDataGroupPoint string) (
 	testDataGroupPointRowsSummaryValueAsStringSlice []string) {
 
 	//fixa denna
@@ -54,7 +54,7 @@ func (testDataModelObject *TestDataModelObjectStruct) ListTestDataRowsForAGroupP
 	var dataPointRowsSlice []*DataPointTypeForGroupsStruct
 
 	// Extract DataPoints from for Group
-	tempTestDataPointNameMap = *testDataModelObject.ChosenTestDataPointsPerGroupMap[TestDataPointGroupNameType(testDataGroup)]
+	tempTestDataPointNameMap = *testDataForGroupObject.ChosenTestDataPointsPerGroupMap[TestDataPointGroupNameType(testDataGroup)]
 
 	// Extract Rows for DataPoint
 	dataPointRowsSlicePtr = tempTestDataPointNameMap[TestDataValueNameType(testDataGroupPoint)]
@@ -76,7 +76,7 @@ func (testDataModelObject *TestDataModelObjectStruct) ListTestDataRowsForAGroupP
 
 // GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue
 // Generate a map with 'TestDataColumnDataName' as key and 'TestDataValue' as value
-func (testDataModelObject *TestDataModelObjectStruct) GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
+func (testDataForGroupObject *TestDataForGroupObjectStruct) GetTestDataPointValuesMapBasedOnGroupPointNameAndSummaryValue(
 	testDataGroup string,
 	testDataPointName string,
 	testDataPointRowSummaryValue string) (
@@ -93,7 +93,7 @@ func (testDataModelObject *TestDataModelObjectStruct) GetTestDataPointValuesMapB
 	var testDataPointRowUuid string
 
 	// Extract DataPoints from for Group
-	tempTestDataPointNameMap := *testDataModelObject.ChosenTestDataPointsPerGroupMap[TestDataPointGroupNameType(testDataGroup)]
+	tempTestDataPointNameMap := *testDataForGroupObject.ChosenTestDataPointsPerGroupMap[TestDataPointGroupNameType(testDataGroup)]
 
 	// Extract Rows for DataPoint
 	dataPointRowsSlicePtr := tempTestDataPointNameMap[TestDataValueNameType(testDataPointName)]

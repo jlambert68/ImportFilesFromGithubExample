@@ -3,13 +3,7 @@ package testDataEngine
 import uuidGenerator "github.com/google/uuid"
 
 func AddTestDataToTestDataModel(
-	testDataDomainUuid TestDataDomainUuidType,
-	testDataDomainName TestDataDomainNameType,
-	testDataAreaUuid TestDataAreaUuidType,
-	testDataAreaName TestDataAreaNameType,
-	testDataHeaders []string,
-	testDataRows [][]string) {
-
+	testDataFromTestDataArea TestDataFromTestDataAreaStruct) {
 	var existInMap bool
 
 	// Define a namespace UUID; this could be any valid UUID that you choose to use as a namespace for your IDs.
@@ -40,16 +34,18 @@ func AddTestDataToTestDataModel(
 	tempUniqueTestDataValuesForColumnMap = make(map[TestDataColumnUuidType]*map[TestDataValueType][]TestDataPointRowUuidType)
 
 	// Add the TestDataDomain and TestDataArea to map that map for Name to UUID conversion
-	tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(testDataDomainName)] = TestDataDomainOrAreaUuidType(testDataDomainUuid)
-	tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(testDataAreaName)] = TestDataDomainOrAreaUuidType(testDataAreaUuid)
+	tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(testDataFromTestDataArea.TestDataDomainName)] =
+		TestDataDomainOrAreaUuidType(testDataFromTestDataArea.TestDataDomainUuid)
+	tempTestDataDomainAndAreaNameToUuidMap[TestDataDomainOrAreaNameType(testDataFromTestDataArea.TestDataAreaName)] =
+		TestDataDomainOrAreaUuidType(testDataFromTestDataArea.TestDataAreaUuid)
 
 	// TestData for one Area within one Domain
 	var testDataArea *TestDataAreaStruct
 	testDataArea = &TestDataAreaStruct{
-		TestDataDomainUuid:                   testDataDomainUuid,
-		TestDataDomainName:                   testDataDomainName,
-		TestDataAreaUuid:                     testDataAreaUuid,
-		TestDataAreaName:                     testDataAreaName,
+		TestDataDomainUuid:                   TestDataDomainUuidType(testDataFromTestDataArea.TestDataDomainUuid),
+		TestDataDomainName:                   TestDataDomainNameType(testDataFromTestDataArea.TestDataDomainName),
+		TestDataAreaUuid:                     TestDataAreaUuidType(testDataFromTestDataArea.TestDataAreaUuid),
+		TestDataAreaName:                     TestDataAreaNameType(testDataFromTestDataArea.TestDataAreaName),
 		TestDataValuesForRowMap:              &tempTestDataValuesForRowMap,
 		TestDataValuesForRowNameMap:          &tempTestDataValuesForRowNameMap,
 		TestDataValuesForColumnMap:           &tempTestDataValuesForColumnMap,
@@ -64,32 +60,18 @@ func AddTestDataToTestDataModel(
 
 	var tempTestDataDomainModel TestDataDomainModelStruct
 	tempTestDataDomainModel = TestDataDomainModelStruct{
-		TestDataDomainUuid: testDataDomainUuid,
-		TestDataDomainName: testDataDomainName,
+		TestDataDomainUuid: TestDataDomainUuidType(testDataFromTestDataArea.TestDataDomainUuid),
+		TestDataDomainName: TestDataDomainNameType(testDataFromTestDataArea.TestDataDomainName),
 		TestDataAreasMap:   &tempTestDataAreasMap,
 	}
 
-	tempTestDataAreasMap[testDataAreaUuid] = testDataArea
+	tempTestDataAreasMap[TestDataAreaUuidType(testDataFromTestDataArea.TestDataAreaUuid)] = testDataArea
 
 	// Add the TestArea to under the TestDataDomain in the full TestDataModelMap
-	localTestDataDomainModelMap[testDataDomainUuid] = &tempTestDataDomainModel
-
-	// Columns that require true for specific properties
-	trueColumns := map[string]bool{
-		"AccountCurrency":               true,
-		"AccountEnvironment":            true,
-		"ClientJuristictionCountryCode": true,
-		"DebitOrCredit":                 true,
-		"MarketCountry":                 true,
-		"MarketName":                    true,
-		"MarketSubType":                 true,
-		"MarketCurrency":                true,
-		"InterimCurrency":               true,
-		"ContraCurrency":                true,
-	}
+	localTestDataDomainModelMap[TestDataDomainUuidType(testDataFromTestDataArea.TestDataDomainUuid)] = &tempTestDataDomainModel
 
 	// Iterate through the CSV records to extract the TestDataPoints
-	for _, tempTestDataRow := range testDataRows {
+	for _, tempTestDataRow := range testDataFromTestDataArea.TestDataRows {
 
 		rowUuid := uuidGenerator.NewSHA1(namespace, []byte(tempTestDataRow[0]))
 
@@ -104,25 +86,26 @@ func AddTestDataToTestDataModel(
 		// Loop over all TestDataPoints in the row
 		for testDataColumnIndex, tempTestDataPoint := range tempTestDataRow {
 
-			columnUuid := uuidGenerator.NewSHA1(namespace, []byte(testDataHeaders[testDataColumnIndex]))
+			columnUuid := uuidGenerator.NewSHA1(namespace, []byte(testDataFromTestDataArea.Headers[testDataColumnIndex].HeaderName))
 
 			columnAndRowUuid := uuidGenerator.NewSHA1(namespace, []byte(columnUuid.String()+rowUuid.String()))
 
 			// Create the TestDataPoint
 			var testDataPoint *TestDataPointValueStruct
 			testDataPoint = &TestDataPointValueStruct{
-				TestDataDomainUuid:           testDataDomainUuid,
-				TestDataDomainName:           testDataDomainName,
-				TestDataAreaUuid:             testDataAreaUuid,
-				TestDataAreaName:             testDataAreaName,
+				TestDataDomainUuid:           TestDataDomainUuidType(testDataFromTestDataArea.TestDataDomainUuid),
+				TestDataDomainName:           TestDataDomainNameType(testDataFromTestDataArea.TestDataDomainName),
+				TestDataAreaUuid:             TestDataAreaUuidType(testDataFromTestDataArea.TestDataAreaUuid),
+				TestDataAreaName:             TestDataAreaNameType(testDataFromTestDataArea.TestDataAreaName),
 				TestDataColumnUuid:           TestDataColumnUuidType(columnUuid.String()),
-				TestDataColumnDataName:       TestDataColumnDataNameType(testDataHeaders[testDataColumnIndex]),
-				TestDataColumnUIName:         TestDataColumnUINameType(testDataHeaders[testDataColumnIndex]),
+				TestDataColumnDataName:       TestDataColumnDataNameType(testDataFromTestDataArea.Headers[testDataColumnIndex].HeaderName),
+				TestDataColumnUIName:         TestDataColumnUINameType(testDataFromTestDataArea.Headers[testDataColumnIndex].HeaderName),
 				TestDataPointRowUuid:         TestDataPointRowUuidType(rowUuid.String()),
 				TestDataColumnAndRowUuid:     TestDataColumnAndRowUuidType(columnAndRowUuid.String()),
 				TestDataValue:                TestDataValueType(tempTestDataPoint),
 				TestDataValueNameDescription: "TestDataDomainName/TestDataAreaName/",
-				TestDataValueName:            TestDataValueNameType(testDataDomainName) + "/" + TestDataValueNameType(testDataAreaName) + "/",
+				TestDataValueName: TestDataValueNameType(testDataFromTestDataArea.TestDataDomainName) + "/" +
+					TestDataValueNameType(testDataFromTestDataArea.TestDataAreaName) + "/",
 			}
 
 			// Add TestDataPoint to 'testDataPointsForRow'
@@ -138,7 +121,7 @@ func AddTestDataToTestDataModel(
 			testDataPointsForColumns[testDataColumnIndex] = append(testDataPointsForColumns[testDataColumnIndex], testDataPoint)
 
 			// If this column is in the TestDataPointName the add it
-			if trueColumns[string(testDataPoint.TestDataColumnDataName)] == true {
+			if testDataFromTestDataArea.Headers[testDataColumnIndex].ShouldHeaderActAsFilter == true {
 				if len(testDataPointNameDescription) == 0 {
 					testDataPointNameDescription = string(testDataPoint.TestDataColumnDataName)
 					testDataPointName = string(testDataPoint.TestDataValue)
@@ -168,7 +151,7 @@ func AddTestDataToTestDataModel(
 
 	// Loop 'testDataPointsForColumns' and add to column Map and create ColumnMetaData
 	var tempTestDataColumnUuid TestDataColumnUuidType
-	for _, testDataPointsForColumn := range testDataPointsForColumns {
+	for columnIndex, testDataPointsForColumn := range testDataPointsForColumns {
 
 		tempTestDataColumnUuid = testDataPointsForColumn[0].TestDataColumnUuid
 		tempTestDataValuesForColumnMap[tempTestDataColumnUuid] = &testDataPointsForColumn
@@ -202,8 +185,8 @@ func AddTestDataToTestDataModel(
 			TestDataColumnDataName: testDataPointsForColumn[0].TestDataColumnDataName,
 			TestDataColumnUIName:   testDataPointsForColumn[0].TestDataColumnUIName,
 			//TestDataPointRowsUuid: 						,
-			ShouldColumnBeUsedForFindingTestData:    trueColumns[string(testDataPointsForColumn[0].TestDataColumnDataName)],
-			ShouldColumnBeUsedWithinTestDataSetName: trueColumns[string(testDataPointsForColumn[0].TestDataColumnDataName)],
+			ShouldColumnBeUsedForFindingTestData:    testDataFromTestDataArea.Headers[columnIndex].ShouldHeaderActAsFilter,
+			ShouldColumnBeUsedWithinTestDataSetName: testDataFromTestDataArea.Headers[columnIndex].ShouldHeaderActAsFilter,
 		}
 
 		// Add Column MetaData to Map
