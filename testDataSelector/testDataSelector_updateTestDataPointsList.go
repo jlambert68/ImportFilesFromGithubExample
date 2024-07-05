@@ -1,7 +1,6 @@
 package testDataSelector
 
 import (
-	"ImportFilesFromGithub/newOrEditTestDataPointGroupUI"
 	"ImportFilesFromGithub/testDataEngine"
 )
 
@@ -25,6 +24,6 @@ func updateTestDataPointsForAGroupList(
 	}
 
 	// Refresh the List in the UI
-	newOrEditTestDataPointGroupUI.TestDataPointsForAGroupList.Refresh()
+	testDataPointsForAGroupList.Refresh()
 
 }

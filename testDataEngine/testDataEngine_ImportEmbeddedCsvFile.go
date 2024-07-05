@@ -19,18 +19,23 @@ func ImportEmbeddedSimpleCsvTestDataFile(
 	testDataFromTestDataArea TestDataFromTestDataAreaStruct) {
 
 	var err error
+
+	// This is the structure of the "simple" csv-version of the testdata
+	// i.e. the file should follow this structure
+	// Domain and Area info consists of only one value per row
+	var testDataHeadersInCsv []string
 	var testDataDomainUuid []string
 	var testDataDomainName []string
 	var testDataAreaUuid []string
 	var testDataAreaName []string
 	var testDataHeadersUsedInFiltersInCsv []string
+	var testDataRows [][]string
+
 	var testDataHeadersUsedInFiltersInCsvMap map[string]bool
-	var testDataHeadersInCsv []string
 	var testDataHeaders []struct {
 		ShouldHeaderActAsFilter bool
 		HeaderName              string
 	}
-	var testDataRows [][]string
 
 	// Read the embedded file
 	data, err := embeddedFilePtr.ReadFile(fileNameAndRelativePath)

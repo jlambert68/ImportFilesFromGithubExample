@@ -45,10 +45,6 @@ var upperSplitContainer *fyne.Container
 
 var lowerRightSideContainer *fyne.Container
 
-// The List-items for Groups ans TestDataPoints for a Group
-var TestDataPointGroupsList *widget.List
-var TestDataPointsForAGroupList *widget.List
-
 var setStateForSaveButtonAndGroupNameTextEntryExternalCall func()
 
 // Slices used to keep track of filtered, available and selected DataPoints

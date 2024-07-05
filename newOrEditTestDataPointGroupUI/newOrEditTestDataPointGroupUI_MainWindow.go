@@ -43,7 +43,7 @@ func ShowNewOrEditGroupWindow(
 
 	newOrEditTestDataPointGroupWindow.Resize(fyne.NewSize(600, 1000))
 
-	// When this window closed then show parent and send response to parent window
+	// When this window closes then show parent and send response to parent window
 	newOrEditTestDataPointGroupWindow.SetOnClosed(func() {
 		parent.Show()
 		*responseChannel <- testDataForGroupObject.ShouldUpdateMainWindow
