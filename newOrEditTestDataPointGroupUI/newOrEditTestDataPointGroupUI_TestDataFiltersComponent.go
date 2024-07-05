@@ -13,11 +13,12 @@ import (
 // *** Create the selection boxes for selecting TestDataValues values
 func generateTestDataSelectionsUIComponent(
 	testDataModel *testDataEngine.TestDataModelStruct,
-	testDataModelMap map[testDataEngine.TestDataDomainUuidType]*testDataEngine.TestDataDomainModelStruct,
-	testDataDomainUuid testDataEngine.TestDataDomainUuidType,
-	testDataAreaUuid testDataEngine.TestDataAreaUuidType) {
+	testDataModelMap map[testDataEngine.TestDataDomainUuidType]*testDataEngine.TestDataDomainModelStruct) {
 
 	var existInMap bool
+
+	var testDataDomainAndAreaNameToUuidMap map[testDataEngine.TestDataDomainOrAreaNameType]testDataEngine.TestDataDomainOrAreaUuidType
+	testDataDomainAndAreaNameToUuidMap = *testDataModel.TestDataDomainAndAreaNameToUuidMap
 
 	var searchResult []testDataEngine.TestDataPointRowUuidType
 
@@ -233,9 +234,9 @@ func generateTestDataSelectionsUIComponent(
 		var tempTestDataValuesForRowMap map[testDataEngine.TestDataPointRowUuidType]*[]*testDataEngine.TestDataPointValueStruct
 
 		tempTestDataModelMap = *testDataModel.TestDataModelMap
-		tempTestDataDomainModel = *tempTestDataModelMap[testDataDomainUuid]
+		tempTestDataDomainModel = *tempTestDataModelMap[testDataEngine.TestDataDomainUuidType(testDataDomainAndAreaNameToUuidMap[testDataEngine.TestDataDomainOrAreaNameType(domainsSelect.Selected)])]
 		tempTestDataAreaMap = *tempTestDataDomainModel.TestDataAreasMap
-		tempTestDataArea = *tempTestDataAreaMap[testDataAreaUuid]
+		tempTestDataArea = *tempTestDataAreaMap[testDataEngine.TestDataAreaUuidType(testDataDomainAndAreaNameToUuidMap[testDataEngine.TestDataDomainOrAreaNameType(testAreaSelect.Selected)])]
 		tempTestDataValuesForRowMap = *tempTestDataArea.TestDataValuesForRowMap
 
 		var tempTestDataPointValueSlice []*testDataEngine.TestDataPointValueStruct

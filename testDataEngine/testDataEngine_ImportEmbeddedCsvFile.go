@@ -8,18 +8,29 @@ import (
 	"log"
 )
 
-// ImportEmbeddedCsvTestDataFile
+// ImportEmbeddedSimpleCsvTestDataFile
 // Imports an embedded csv-file with relative path and name in 'fileNameAndRelativePath'
 // and having a data divider of type 'divider'
 // The first row must consist of column headers
-func ImportEmbeddedCsvTestDataFile(
+func ImportEmbeddedSimpleCsvTestDataFile(
 	embeddedFilePtr *embed.FS,
 	fileNameAndRelativePath string,
 	divider rune) (
-	testDataHeaders []string,
-	testDataRows [][]string) {
+	testDataFromTestDataArea TestDataFromTestDataAreaStruct) {
 
 	var err error
+	var testDataDomainUuid []string
+	var testDataDomainName []string
+	var testDataAreaUuid []string
+	var testDataAreaName []string
+	var testDataHeadersUsedInFiltersInCsv []string
+	var testDataHeadersUsedInFiltersInCsvMap map[string]bool
+	var testDataHeadersInCsv []string
+	var testDataHeaders []struct {
+		ShouldHeaderActAsFilter bool
+		HeaderName              string
+	}
+	var testDataRows [][]string
 
 	// Read the embedded file
 	data, err := embeddedFilePtr.ReadFile(fileNameAndRelativePath)
@@ -31,10 +42,40 @@ func ImportEmbeddedCsvTestDataFile(
 	r := csv.NewReader(bytes.NewReader(data))
 	r.Comma = divider
 
-	// Read the header row first
-	testDataHeaders, err = r.Read()
+	// Read the headers as 1st row
+	testDataHeadersInCsv, err = r.Read()
 	if err != nil {
-		log.Fatalf("Error reading headers: %v", err)
+		log.Fatalf("Error reading headers as 1st row: %v", err)
+	}
+
+	// Read the TestDataDomainUuid as 2nd row
+	testDataDomainUuid, err = r.Read()
+	if err != nil && err.Error() != "record on line 2: wrong number of fields" {
+		log.Fatalf("Error reading TestDataDomainUuid row as 2nd row: %v", err)
+	}
+
+	// Read the TestDataDomainName as 3rd row
+	testDataDomainName, err = r.Read()
+	if err != nil && err.Error() != "record on line 3: wrong number of fields" {
+		log.Fatalf("Error reading TestDataDomainName row as 3rd row: %v", err)
+	}
+
+	// Read the TestDataAreaUuid as 4th row
+	testDataAreaUuid, err = r.Read()
+	if err != nil && err.Error() != "record on line 4: wrong number of fields" {
+		log.Fatalf("Error reading TestDataAreaUuid row as 4th row: %v", err)
+	}
+
+	// Read the TestDataAreaName as 5th row
+	testDataAreaName, err = r.Read()
+	if err != nil && err.Error() != "record on line 5: wrong number of fields" {
+		log.Fatalf("Error reading TestDataAreaName row as 5th row: %v", err)
+	}
+
+	// Read the header filters as 6th row
+	testDataHeadersUsedInFiltersInCsv, err = r.Read()
+	if err != nil && err.Error() != "record on line 6: wrong number of fields" {
+		log.Fatalf("Error reading Headerfilter row as 6th row: %v", err)
 	}
 
 	// Iterate through the records and extract rows
@@ -62,5 +103,34 @@ func ImportEmbeddedCsvTestDataFile(
 
 	}
 
-	return testDataHeaders, testDataRows
+	// Create a Map with the headers that should be part of filter when searching TestData
+	testDataHeadersUsedInFiltersInCsvMap = make(map[string]bool)
+	for _, testDataHeaderUsedInFilter := range testDataHeadersUsedInFiltersInCsv {
+		testDataHeadersUsedInFiltersInCsvMap[testDataHeaderUsedInFilter] = true
+	}
+
+	// Convert Headers from CSV into TestData struct structure
+	for _, testDataHeader := range testDataHeadersInCsv {
+		var tempTestDataHeader struct {
+			ShouldHeaderActAsFilter bool
+			HeaderName              string
+		}
+
+		tempTestDataHeader.HeaderName = testDataHeader
+		tempTestDataHeader.ShouldHeaderActAsFilter = testDataHeadersUsedInFiltersInCsvMap[testDataHeader]
+
+		testDataHeaders = append(testDataHeaders, tempTestDataHeader)
+	}
+
+	// Create full TestDataFromTestDataArea-object
+	testDataFromTestDataArea = TestDataFromTestDataAreaStruct{
+		TestDataDomainUuid: testDataDomainUuid[0],
+		TestDataDomainName: testDataDomainName[0],
+		TestDataAreaUuid:   testDataAreaUuid[0],
+		TestDataAreaName:   testDataAreaName[0],
+		Headers:            testDataHeaders,
+		TestDataRows:       testDataRows,
+	}
+
+	return testDataFromTestDataArea
 }

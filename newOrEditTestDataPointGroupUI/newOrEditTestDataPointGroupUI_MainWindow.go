@@ -19,8 +19,6 @@ func ShowNewOrEditGroupWindow(
 	responseChannel *chan testDataEngine.ResponseChannelStruct,
 	incomingGroupName testDataEngine.TestDataPointGroupNameType,
 	newOrEditedChosenTestDataPointsThisGroupMapPtr *map[testDataEngine.TestDataPointGroupNameType]*testDataEngine.TestDataPointNameMapType,
-	testDataDomainUuid testDataEngine.TestDataDomainUuidType,
-	testDataAreaUuid testDataEngine.TestDataAreaUuidType,
 	testDataForGroupObject *testDataEngine.TestDataForGroupObjectStruct) {
 
 	var testDataModelMap map[testDataEngine.TestDataDomainUuidType]*testDataEngine.TestDataDomainModelStruct
@@ -55,7 +53,7 @@ func ShowNewOrEditGroupWindow(
 	generateAllAvailablePointsListUIComponent(&newOrEditTestDataPointGroupWindow, &testDataEngine.TestDataModel)
 
 	// *** Create the selection boxes for selecting TestDataValues values
-	generateTestDataSelectionsUIComponent(&testDataEngine.TestDataModel, testDataModelMap, testDataDomainUuid, testDataAreaUuid)
+	generateTestDataSelectionsUIComponent(&testDataEngine.TestDataModel, testDataModelMap)
 
 	// Create and configure the list-component of selected TestDataPoints
 	generateSelectedPointsListUIComponent(

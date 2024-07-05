@@ -12,24 +12,10 @@ import (
 )
 
 //go:embed testData/FenixRawTestdata_646rows_211220.csv
-var embeddedFile embed.FS
+var embeddedFile_SubCustody_MainTestDataArea embed.FS
 
-/*
-// Columns that require true for specific properties
-trueColumns := map[string]bool{
-"AccountCurrency":               true,
-"AccountEnvironment":            true,
-"ClientJuristictionCountryCode": true,
-"DebitOrCredit":                 true,
-"MarketCountry":                 true,
-"MarketName":                    true,
-"MarketSubType":                 true,
-"MarketCurrency":                true,
-"InterimCurrency":               true,
-"ContraCurrency":                true,
-}
-
-*/
+//go:embed testData/FenixRawTestdata_3rows_240705.csv
+var embeddedFile_SubCustody_ExtraTestDataArea embed.FS
 
 const (
 	testDataDomainUuid testDataEngine.TestDataDomainUuidType = "7edf2269-a8d3-472c-aed6-8cdcc4a8b6ae"
@@ -38,18 +24,25 @@ const (
 	testDataAreaName   testDataEngine.TestDataAreaNameType   = "Main TestData Area"
 )
 
-func ImportTestData() {
+func ImportTestData_SubCustody_MainTestDataArea() {
 
-	var headers []string
-	var testDataRows [][]string
+	var testDataFromTestDataArea testDataEngine.TestDataFromTestDataAreaStruct
 
-	headers, testDataRows = testDataEngine.ImportEmbeddedCsvTestDataFile(
-		&embeddedFile, "testData/FenixRawTestdata_646rows_211220.csv", ';')
+	testDataFromTestDataArea = testDataEngine.ImportEmbeddedSimpleCsvTestDataFile(
+		&embeddedFile_SubCustody_MainTestDataArea, "testData/FenixRawTestdata_646rows_211220.csv", ';')
 
-	testDataEngine.AddTestDataToTestDataModel(
-		testDataDomainUuid, testDataDomainName,
-		testDataAreaUuid, testDataAreaName,
-		headers, testDataRows)
+	testDataEngine.AddTestDataToTestDataModel(testDataFromTestDataArea)
+
+}
+
+func ImportTestData_SubCustody_ExtraTestDataArea() {
+
+	var testDataFromTestDataArea testDataEngine.TestDataFromTestDataAreaStruct
+
+	testDataFromTestDataArea = testDataEngine.ImportEmbeddedSimpleCsvTestDataFile(
+		&embeddedFile_SubCustody_ExtraTestDataArea, "testData/FenixRawTestdata_3rows_240705.csv", ';')
+
+	testDataEngine.AddTestDataToTestDataModel(testDataFromTestDataArea)
 
 }
 
@@ -216,8 +209,6 @@ func MainTestDataSelector(
 			&responseChannel,
 			"",
 			&testDataForGroupObject.ChosenTestDataPointsPerGroupMap,
-			testDataDomainUuid,
-			testDataAreaUuid,
 			testDataForGroupObject)
 	})
 
@@ -235,8 +226,6 @@ func MainTestDataSelector(
 			&responseChannel,
 			testDataForGroupObject.TestDataPointGroups[newOrEditTestDataPointGroupUI.SelectedIndexForGroups],
 			&testDataForGroupObject.ChosenTestDataPointsPerGroupMap,
-			testDataDomainUuid,
-			testDataAreaUuid,
 			testDataForGroupObject)
 	})
 

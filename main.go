@@ -45,7 +45,8 @@ func main() {
 	testDataForGroupObject = &testDataEngine.TestDataForGroupObjectStruct{}
 
 	//Add TestData to global TestDataModel
-	testDataSelector.ImportTestData()
+	testDataSelector.ImportTestData_SubCustody_MainTestDataArea()
+	testDataSelector.ImportTestData_SubCustody_ExtraTestDataArea()
 
 	var fileTable *widget.Table
 
