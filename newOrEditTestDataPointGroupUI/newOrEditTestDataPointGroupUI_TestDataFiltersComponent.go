@@ -37,6 +37,11 @@ func generateTestDataSelectionsUIComponent(
 	var testAreasContainer *fyne.Container
 	var testAreaMap *map[testDataEngine.TestDataAreaUuidType]*testDataEngine.TestDataAreaStruct
 
+	var currentSelectedTestDataDomain string
+	var currentSelectedTestDataArea string
+	currentSelectedTestDataDomain = "<Not Set Yet>"
+	currentSelectedTestDataArea = "<Not Set Yet>"
+
 	type testDataValueSelectionStruct struct {
 		testDataSelectionLabel       *widget.Label
 		testDataCheckGroup           *widget.CheckGroup
@@ -46,6 +51,7 @@ func generateTestDataSelectionsUIComponent(
 	}
 	var testDataValueSelections []*testDataValueSelectionStruct
 	var testDataValuesSelectionContainer *fyne.Container
+	testDataValuesSelectionContainer = container.NewHBox()
 
 	// Create Search TestData-button
 	var searchTestDataButton *widget.Button
@@ -66,7 +72,11 @@ func generateTestDataSelectionsUIComponent(
 	// Create Domain-Select-DropDown
 	domainsSelect = widget.NewSelect(domainOptions, func(selected string) {
 
-		// Clear UI object that need to be recreated
+		// If Selected didn't change then just return
+		if currentSelectedTestDataDomain == selected {
+			return
+		}
+		currentSelectedTestDataDomain = selected
 
 		// Extract correct TestArea
 		for index, domain := range domains {
@@ -75,6 +85,9 @@ func generateTestDataSelectionsUIComponent(
 				break
 			}
 		}
+
+		// Clear Existing TestAreas-options
+		testAreaOptions = []string{}
 
 		// Extract TestData on TestArea Level
 		for _, tempTestDataArea := range *testAreaMap {
@@ -85,120 +98,146 @@ func generateTestDataSelectionsUIComponent(
 		// Create TestArea-Select-DropDown
 		testAreaSelect = widget.NewSelect(testAreaOptions, func(selected string) {
 
+			// If Selected didn't change then just return
+			if currentSelectedTestDataArea == selected {
+				return
+			}
+			currentSelectedTestDataArea = selected
+
 			// Create available TestDataSelections for TestArea
+			var selectedTestDataArea *testDataEngine.TestDataAreaStruct
 			for _, testDataArea := range *testAreaMap {
 
-				// Clear UI component that holds 'TestDataValuesSelections'
-				testDataValuesSelectionContainer = container.NewHBox()
-
-				// Create a slice with 'testDataColumnsMetaData' that can be sorted
-				var testDataColumnsMetaDataToBeSorted []*testDataEngine.TestDataColumnMetaDataStruct
-				for _, testDataColumnsMetaData := range *testDataArea.TestDataColumnsMetaDataMap {
-					testDataColumnsMetaDataToBeSorted = append(testDataColumnsMetaDataToBeSorted, testDataColumnsMetaData)
-				}
-
-				// Sort the slice based on TestDataColumnUIName
-				sort.Slice(testDataColumnsMetaDataToBeSorted, func(i, j int) bool {
-					return testDataColumnsMetaDataToBeSorted[i].TestDataColumnUIName < testDataColumnsMetaDataToBeSorted[j].TestDataColumnUIName
-				})
-
-				// Loop 'testDataColumnsMetaDataToBeSorted' for Columns to present as separate CheckGroups
-				for _, testDataColumnsMetaData := range testDataColumnsMetaDataToBeSorted {
-
-					// Check if column should be used for filtering TestData as a CheckGroup
-					if testDataColumnsMetaData.ShouldColumnBeUsedForFindingTestData == true {
-
-						var checkGroupOptions []string
-						var tempTestDataColumnContainer *fyne.Container
-
-						// Set Label
-						var newColumnFilterLabel *widget.Label
-						newColumnFilterLabel = widget.NewLabel(string(testDataColumnsMetaData.TestDataColumnUIName))
-						newColumnFilterLabel.TextStyle.Bold = true
-
-						var tempTestDataPointValueRowUuidMap map[testDataEngine.TestDataValueType]*[]testDataEngine.TestDataPointRowUuidType
-						tempTestDataPointValueRowUuidMap = make(map[testDataEngine.TestDataValueType]*[]testDataEngine.TestDataPointRowUuidType)
-
-						var testDataValueSelection *testDataValueSelectionStruct
-						testDataValueSelection = &testDataValueSelectionStruct{
-							testDataSelectionLabel:       newColumnFilterLabel,
-							testDataCheckGroup:           nil,
-							TestDataColumnUuid:           testDataColumnsMetaData.TestDataColumnUuid,
-							TestDataColumnDataName:       testDataColumnsMetaData.TestDataColumnDataName,
-							TestDataPointValueRowUuidMap: &tempTestDataPointValueRowUuidMap,
-						}
-
-						// Extract the Map with the values
-						var uniqueTestDataValuesForColumnMapPtr *map[testDataEngine.TestDataValueType][]testDataEngine.TestDataPointRowUuidType
-						UniqueTestDataValuesForColumnMap := *testDataArea.UniqueTestDataValuesForColumnMap
-
-						uniqueTestDataValuesForColumnMapPtr = UniqueTestDataValuesForColumnMap[testDataColumnsMetaData.TestDataColumnUuid]
-
-						// Loop Values in Column and create Checkboxes, and store RowUuids for unique values
-						for uniqueTestDataValue, testDataPointRowsUuid := range *uniqueTestDataValuesForColumnMapPtr {
-
-							// Add value to slice for CheckBox-labels
-							checkGroupOptions = append(checkGroupOptions, string(uniqueTestDataValue))
-
-							// Add 'TestDataPointRowUuid' to correct slice for each unique value in the column
-							var testDataPointRowUuidSlicePtr *[]testDataEngine.TestDataPointRowUuidType
-							var testDataPointRowUuidSlice []testDataEngine.TestDataPointRowUuidType
-							testDataPointRowUuidSlicePtr, existInMap = tempTestDataPointValueRowUuidMap[uniqueTestDataValue]
-
-							if existInMap == false {
-								var tempTestDataPointRowUuidSlice []testDataEngine.TestDataPointRowUuidType
-								testDataPointRowUuidSlice = tempTestDataPointRowUuidSlice
-							} else {
-								testDataPointRowUuidSlice = *testDataPointRowUuidSlicePtr
-							}
-
-							testDataPointRowUuidSlice = append(testDataPointRowUuidSlice, testDataPointRowsUuid...)
-
-							tempTestDataPointValueRowUuidMap[uniqueTestDataValue] = &testDataPointRowUuidSlice
-
-						}
-
-						// Sort values in CheckGroup
-						sort.Strings(checkGroupOptions)
-
-						// Create the CheckGroup
-						var tempTestDataCheckGroup *widget.CheckGroup
-						tempTestDataCheckGroup = widget.NewCheckGroup(checkGroupOptions, func(changed []string) {
-							// Handle check change
-						})
-
-						// Add the CheckGroup
-						testDataValueSelection.testDataCheckGroup = tempTestDataCheckGroup
-
-						// Add 'testDataValueSelections' to slice
-						testDataValueSelections = append(testDataValueSelections, testDataValueSelection)
-
-						// Get the minimum size of the check group
-						var testDataCheckGroupMinSize fyne.Size
-						testDataCheckGroupMinSize = testDataValueSelection.testDataCheckGroup.MinSize()
-
-						// Create the container having scrollbar the TestDataCheckGroup
-						testDataCheckGroupContainer := container.NewScroll(testDataValueSelection.testDataCheckGroup)
-
-						// Set
-						testDataCheckGroupContainer.SetMinSize(fyne.NewSize(testDataCheckGroupContainer.Size().Height, testDataCheckGroupMinSize.Width))
-
-						// Add to TestDataColumn-container
-						tempTestDataColumnContainer = container.NewBorder(
-							testDataValueSelection.testDataSelectionLabel,
-							nil, nil, nil,
-							testDataCheckGroupContainer)
-
-						// Add 'tempTestDataColumnContainer' to 'testDataValuesSelectionContainer'
-						testDataValuesSelectionContainer.Add(tempTestDataColumnContainer)
-
-					}
+				if string(testDataArea.TestDataAreaName) == selected {
+					selectedTestDataArea = testDataArea
+					break
 				}
 			}
+
+			// Clear UI component that holds 'TestDataValuesSelections' by creating a new one that will be moved over to original
+			var tempTestDataValuesSelectionContainer *fyne.Container
+			tempTestDataValuesSelectionContainer = container.NewHBox()
+
+			// Create a slice with 'testDataColumnsMetaData' that can be sorted
+			var testDataColumnsMetaDataToBeSorted []*testDataEngine.TestDataColumnMetaDataStruct
+			for _, testDataColumnsMetaData := range *selectedTestDataArea.TestDataColumnsMetaDataMap {
+				testDataColumnsMetaDataToBeSorted = append(testDataColumnsMetaDataToBeSorted, testDataColumnsMetaData)
+			}
+
+			// Sort the slice based on TestDataColumnUIName
+			sort.Slice(testDataColumnsMetaDataToBeSorted, func(i, j int) bool {
+				return testDataColumnsMetaDataToBeSorted[i].TestDataColumnUIName < testDataColumnsMetaDataToBeSorted[j].TestDataColumnUIName
+			})
+
+			// Loop 'testDataColumnsMetaDataToBeSorted' for Columns to present as separate CheckGroups
+			for _, testDataColumnsMetaData := range testDataColumnsMetaDataToBeSorted {
+
+				// Check if column should be used for filtering TestData as a CheckGroup
+				if testDataColumnsMetaData.ShouldColumnBeUsedForFindingTestData == true {
+
+					var checkGroupOptions []string
+					var tempTestDataColumnContainer *fyne.Container
+
+					// Set Label
+					var newColumnFilterLabel *widget.Label
+					newColumnFilterLabel = widget.NewLabel(string(testDataColumnsMetaData.TestDataColumnUIName))
+					newColumnFilterLabel.TextStyle.Bold = true
+
+					var tempTestDataPointValueRowUuidMap map[testDataEngine.TestDataValueType]*[]testDataEngine.TestDataPointRowUuidType
+					tempTestDataPointValueRowUuidMap = make(map[testDataEngine.TestDataValueType]*[]testDataEngine.TestDataPointRowUuidType)
+
+					var testDataValueSelection *testDataValueSelectionStruct
+					testDataValueSelection = &testDataValueSelectionStruct{
+						testDataSelectionLabel:       newColumnFilterLabel,
+						testDataCheckGroup:           nil,
+						TestDataColumnUuid:           testDataColumnsMetaData.TestDataColumnUuid,
+						TestDataColumnDataName:       testDataColumnsMetaData.TestDataColumnDataName,
+						TestDataPointValueRowUuidMap: &tempTestDataPointValueRowUuidMap,
+					}
+
+					// Extract the Map with the values
+					var uniqueTestDataValuesForColumnMapPtr *map[testDataEngine.TestDataValueType][]testDataEngine.TestDataPointRowUuidType
+					UniqueTestDataValuesForColumnMap := *selectedTestDataArea.UniqueTestDataValuesForColumnMap
+
+					uniqueTestDataValuesForColumnMapPtr = UniqueTestDataValuesForColumnMap[testDataColumnsMetaData.TestDataColumnUuid]
+
+					// Loop Values in Column and create Checkboxes, and store RowUuids for unique values
+					for uniqueTestDataValue, testDataPointRowsUuid := range *uniqueTestDataValuesForColumnMapPtr {
+
+						// Add value to slice for CheckBox-labels
+						checkGroupOptions = append(checkGroupOptions, string(uniqueTestDataValue))
+
+						// Add 'TestDataPointRowUuid' to correct slice for each unique value in the column
+						var testDataPointRowUuidSlicePtr *[]testDataEngine.TestDataPointRowUuidType
+						var testDataPointRowUuidSlice []testDataEngine.TestDataPointRowUuidType
+						testDataPointRowUuidSlicePtr, existInMap = tempTestDataPointValueRowUuidMap[uniqueTestDataValue]
+
+						if existInMap == false {
+							var tempTestDataPointRowUuidSlice []testDataEngine.TestDataPointRowUuidType
+							testDataPointRowUuidSlice = tempTestDataPointRowUuidSlice
+						} else {
+							testDataPointRowUuidSlice = *testDataPointRowUuidSlicePtr
+						}
+
+						testDataPointRowUuidSlice = append(testDataPointRowUuidSlice, testDataPointRowsUuid...)
+
+						tempTestDataPointValueRowUuidMap[uniqueTestDataValue] = &testDataPointRowUuidSlice
+
+					}
+
+					// Sort values in CheckGroup
+					sort.Strings(checkGroupOptions)
+
+					// Create the CheckGroup
+					var tempTestDataCheckGroup *widget.CheckGroup
+					tempTestDataCheckGroup = widget.NewCheckGroup(checkGroupOptions, func(changed []string) {
+						// Handle check change
+					})
+
+					// Add the CheckGroup
+					testDataValueSelection.testDataCheckGroup = tempTestDataCheckGroup
+
+					// Add 'testDataValueSelections' to slice
+					testDataValueSelections = append(testDataValueSelections, testDataValueSelection)
+
+					// Get the minimum size of the check group
+					var testDataCheckGroupMinSize fyne.Size
+					testDataCheckGroupMinSize = testDataValueSelection.testDataCheckGroup.MinSize()
+
+					// Create the container having scrollbar the TestDataCheckGroup
+					testDataCheckGroupContainer := container.NewScroll(testDataValueSelection.testDataCheckGroup)
+
+					// Set
+					testDataCheckGroupContainer.SetMinSize(fyne.NewSize(testDataCheckGroupContainer.Size().Height, testDataCheckGroupMinSize.Width))
+
+					// Add to TestDataColumn-container
+					tempTestDataColumnContainer = container.NewBorder(
+						testDataValueSelection.testDataSelectionLabel,
+						nil, nil, nil,
+						testDataCheckGroupContainer)
+
+					// Add 'tempTestDataColumnContainer' to 'tempTestDataValuesSelectionContainer'
+					tempTestDataValuesSelectionContainer.Add(tempTestDataColumnContainer)
+
+				}
+			}
+
+			// Replace existing TestDataHeaders-filter container with a new one
+			testDataSelectionsContainer.Objects[2] = tempTestDataValuesSelectionContainer
+			testDataSelectionsContainer.Refresh()
+
 		})
 
 		// Set label for TestAreas
 		testAreasLabel.SetText(fmt.Sprintf(testDataTestAreaLabelText+"'%s'", domainOptions[0]))
+
+		// Replace existing TestDataArea-Select  with a new one
+		testAreasContainer.Objects[1] = testAreaSelect
+		testAreasContainer.Refresh()
+
+		// Replace existing TestDataHeaders-filter container with a new one
+		testDataSelectionsContainer.Objects[2] = container.NewHBox()
+		testDataSelectionsContainer.Refresh()
 
 		// If there is only one item in TestArea-item then select that one
 		if len(testAreaOptions) == 1 {
@@ -217,9 +256,19 @@ func generateTestDataSelectionsUIComponent(
 		testAreasLabel.SetText(fmt.Sprintf(testDataTestAreaLabelText+"'%s'", domainOptions[0]))
 	}
 
+	// Check if any Selection is done for Domain and TestArea -> testAreaSelect = nil then not done yet
+	if testAreaSelect == nil {
+		testAreaSelect = widget.NewSelect([]string{}, func(selected string) {})
+	}
+
 	// Create the separate TestData-selection-containers
 	testDomainContainer = container.NewVBox(domainsLabel, domainsSelect)
 	testAreasContainer = container.NewVBox(testAreasLabel, testAreaSelect)
+
+	// Check if any Selection is done for Domain and TestArea -> testDataValuesSelectionContainer = nil then not done yet
+	if testDataValuesSelectionContainer == nil {
+		testDataValuesSelectionContainer = container.NewHBox()
+	}
 
 	// Create the main TestData-selection-container
 	testDataSelectionsContainer = container.NewHBox(testDomainContainer, testAreasContainer, testDataValuesSelectionContainer)

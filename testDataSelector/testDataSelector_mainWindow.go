@@ -17,6 +17,9 @@ var embeddedFile_SubCustody_MainTestDataArea embed.FS
 //go:embed testData/FenixRawTestdata_3rows_240705.csv
 var embeddedFile_SubCustody_ExtraTestDataArea embed.FS
 
+//go:embed testData/FenixRawTestdata_10rows_240705.csv
+var embeddedFile_CustodyCash_MainTestDataArea embed.FS
+
 const (
 	testDataDomainUuid testDataEngine.TestDataDomainUuidType = "7edf2269-a8d3-472c-aed6-8cdcc4a8b6ae"
 	testDataDomainName testDataEngine.TestDataDomainNameType = "Sub Custody"
@@ -41,6 +44,17 @@ func ImportTestData_SubCustody_ExtraTestDataArea() {
 
 	testDataFromTestDataArea = testDataEngine.ImportEmbeddedSimpleCsvTestDataFile(
 		&embeddedFile_SubCustody_ExtraTestDataArea, "testData/FenixRawTestdata_3rows_240705.csv", ';')
+
+	testDataEngine.AddTestDataToTestDataModel(testDataFromTestDataArea)
+
+}
+
+func ImportTestData_CustodyCash_MainTestDataArea() {
+
+	var testDataFromTestDataArea testDataEngine.TestDataFromTestDataAreaStruct
+
+	testDataFromTestDataArea = testDataEngine.ImportEmbeddedSimpleCsvTestDataFile(
+		&embeddedFile_CustodyCash_MainTestDataArea, "testData/FenixRawTestdata_10rows_240705.csv", ';')
 
 	testDataEngine.AddTestDataToTestDataModel(testDataFromTestDataArea)
 

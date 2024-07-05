@@ -47,6 +47,7 @@ func main() {
 	//Add TestData to global TestDataModel
 	testDataSelector.ImportTestData_SubCustody_MainTestDataArea()
 	testDataSelector.ImportTestData_SubCustody_ExtraTestDataArea()
+	testDataSelector.ImportTestData_CustodyCash_MainTestDataArea()
 
 	var fileTable *widget.Table
 
