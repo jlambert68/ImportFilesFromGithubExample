@@ -1,4 +1,4 @@
-package testDataEngine
+package testDataEngine_old
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ func ImportEmbeddedSimpleCsvTestDataFile(
 	embeddedFilePtr *embed.FS,
 	fileNameAndRelativePath string,
 	divider rune) (
-	testDataFromTestDataArea TestDataFromTestDataAreaStruct) {
+	testDataFromTestDataArea TestDataFromSimpleTestDataAreaStruct) {
 
 	var err error
 
@@ -35,6 +35,7 @@ func ImportEmbeddedSimpleCsvTestDataFile(
 	var testDataHeaders []struct {
 		ShouldHeaderActAsFilter bool
 		HeaderName              string
+		HeaderUiName            string
 	}
 
 	// Read the embedded file
@@ -119,16 +120,18 @@ func ImportEmbeddedSimpleCsvTestDataFile(
 		var tempTestDataHeader struct {
 			ShouldHeaderActAsFilter bool
 			HeaderName              string
+			HeaderUiName            string
 		}
 
 		tempTestDataHeader.HeaderName = testDataHeader
+		tempTestDataHeader.HeaderUiName = testDataHeader
 		tempTestDataHeader.ShouldHeaderActAsFilter = testDataHeadersUsedInFiltersInCsvMap[testDataHeader]
 
 		testDataHeaders = append(testDataHeaders, tempTestDataHeader)
 	}
 
 	// Create full TestDataFromTestDataArea-object
-	testDataFromTestDataArea = TestDataFromTestDataAreaStruct{
+	testDataFromTestDataArea = TestDataFromSimpleTestDataAreaStruct{
 		TestDataDomainUuid: testDataDomainUuid[0],
 		TestDataDomainName: testDataDomainName[0],
 		TestDataAreaUuid:   testDataAreaUuid[0],

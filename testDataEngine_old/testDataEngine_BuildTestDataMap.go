@@ -1,9 +1,9 @@
-package testDataEngine
+package testDataEngine_old
 
 import uuidGenerator "github.com/google/uuid"
 
 func AddTestDataToTestDataModel(
-	testDataFromTestDataArea TestDataFromTestDataAreaStruct) {
+	testDataFromTestDataArea TestDataFromSimpleTestDataAreaStruct) {
 	var existInMap bool
 
 	// Define a namespace UUID; this could be any valid UUID that you choose to use as a namespace for your IDs.

@@ -3,7 +3,6 @@ package main
 import (
 	"ImportFilesFromGithub/fileViewer"
 	"ImportFilesFromGithub/importFilesFromGitHub"
-	"ImportFilesFromGithub/testDataEngine"
 	"ImportFilesFromGithub/testDataSelector"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -11,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jlambert68/FenixScriptEngine/luaEngine"
+	"github.com/jlambert68/FenixScriptEngine/testDataEngine"
 	"log"
 	"strings"
 )
@@ -46,7 +46,7 @@ func main() {
 
 	//Add TestData to global TestDataModel
 	testDataSelector.ImportTestData_SubCustody_MainTestDataArea()
-	testDataSelector.ImportTestData_SubCustody_ExtraTestDataArea()
+	testDataSelector.ImportTestData_SubCustody_ExtraTestDat20240702074005aArea()
 	testDataSelector.ImportTestData_CustodyCash_MainTestDataArea()
 
 	var fileTable *widget.Table

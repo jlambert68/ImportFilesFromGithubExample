@@ -2,13 +2,13 @@ package fileViewer
 
 import (
 	"ImportFilesFromGithub/importFilesFromGitHub"
-	"ImportFilesFromGithub/testDataEngine"
 	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jlambert68/FenixScriptEngine/luaEngine"
+	"github.com/jlambert68/FenixScriptEngine/testDataEngine"
 	"regexp"
 	"strconv"
 	"strings"

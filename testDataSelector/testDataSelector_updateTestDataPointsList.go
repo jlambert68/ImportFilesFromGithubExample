@@ -1,8 +1,6 @@
 package testDataSelector
 
-import (
-	"ImportFilesFromGithub/testDataEngine"
-)
+import "github.com/jlambert68/FenixScriptEngine/testDataEngine"
 
 // Updates the list that show the TestDataPoints for a specific Group in main window
 func updateTestDataPointsForAGroupList(

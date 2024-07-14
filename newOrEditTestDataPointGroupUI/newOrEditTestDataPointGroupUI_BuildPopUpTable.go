@@ -1,8 +1,8 @@
 package newOrEditTestDataPointGroupUI
 
 import (
-	"ImportFilesFromGithub/testDataEngine"
 	"fmt"
+	"github.com/jlambert68/FenixScriptEngine/testDataEngine"
 	"regexp"
 )
 

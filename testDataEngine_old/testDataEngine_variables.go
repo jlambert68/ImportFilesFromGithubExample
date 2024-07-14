@@ -1,4 +1,4 @@
-package testDataEngine
+package testDataEngine_old
 
 // Error/warning texts for control of Group Name
 const (
@@ -13,9 +13,9 @@ const (
 // The Full TestDataModel
 var TestDataModel TestDataModelStruct
 
-// TestDataFromTestDataAreaStruct
+// TestDataFromSimpleTestDataAreaStruct
 // Struct for holding TestData for one TestDataArea within a TestDataDomain
-type TestDataFromTestDataAreaStruct struct {
+type TestDataFromSimpleTestDataAreaStruct struct {
 	TestDataDomainUuid string
 	TestDataDomainName string
 	TestDataAreaUuid   string
@@ -23,6 +23,7 @@ type TestDataFromTestDataAreaStruct struct {
 	Headers            []struct {
 		ShouldHeaderActAsFilter bool
 		HeaderName              string
+		HeaderUiName            string
 	}
 	TestDataRows [][]string
 }

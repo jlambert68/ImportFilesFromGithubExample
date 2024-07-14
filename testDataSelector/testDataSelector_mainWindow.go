@@ -2,13 +2,14 @@ package testDataSelector
 
 import (
 	"ImportFilesFromGithub/newOrEditTestDataPointGroupUI"
-	"ImportFilesFromGithub/testDataEngine"
 	"embed"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jlambert68/FenixScriptEngine/testDataEngine"
+	"log"
 )
 
 //go:embed testData/FenixRawTestdata_646rows_211220.csv
@@ -29,21 +30,33 @@ const (
 
 func ImportTestData_SubCustody_MainTestDataArea() {
 
-	var testDataFromTestDataArea testDataEngine.TestDataFromTestDataAreaStruct
+	// Read the embedded file
+	data, err := embeddedFile_SubCustody_MainTestDataArea.ReadFile("testData/FenixRawTestdata_646rows_211220.csv")
+	if err != nil {
+		log.Fatalf("Error reading the embedded file: %v", err)
+	}
+
+	var testDataFromTestDataArea testDataEngine.TestDataFromSimpleTestDataAreaStruct
 
 	testDataFromTestDataArea = testDataEngine.ImportEmbeddedSimpleCsvTestDataFile(
-		&embeddedFile_SubCustody_MainTestDataArea, "testData/FenixRawTestdata_646rows_211220.csv", ';')
+		data, ';')
 
 	testDataEngine.AddTestDataToTestDataModel(testDataFromTestDataArea)
 
 }
 
-func ImportTestData_SubCustody_ExtraTestDataArea() {
+func ImportTestData_SubCustody_ExtraTestDat20240702074005aArea() {
 
-	var testDataFromTestDataArea testDataEngine.TestDataFromTestDataAreaStruct
+	// Read the embedded file
+	data, err := embeddedFile_SubCustody_ExtraTestDataArea.ReadFile("testData/FenixRawTestdata_3rows_240705.csv")
+	if err != nil {
+		log.Fatalf("Error reading the embedded file: %v", err)
+	}
+
+	var testDataFromTestDataArea testDataEngine.TestDataFromSimpleTestDataAreaStruct
 
 	testDataFromTestDataArea = testDataEngine.ImportEmbeddedSimpleCsvTestDataFile(
-		&embeddedFile_SubCustody_ExtraTestDataArea, "testData/FenixRawTestdata_3rows_240705.csv", ';')
+		data, ';')
 
 	testDataEngine.AddTestDataToTestDataModel(testDataFromTestDataArea)
 
@@ -51,10 +64,16 @@ func ImportTestData_SubCustody_ExtraTestDataArea() {
 
 func ImportTestData_CustodyCash_MainTestDataArea() {
 
-	var testDataFromTestDataArea testDataEngine.TestDataFromTestDataAreaStruct
+	// Read the embedded file
+	data, err := embeddedFile_CustodyCash_MainTestDataArea.ReadFile("testData/FenixRawTestdata_10rows_240705.csv")
+	if err != nil {
+		log.Fatalf("Error reading the embedded file: %v", err)
+	}
+
+	var testDataFromTestDataArea testDataEngine.TestDataFromSimpleTestDataAreaStruct
 
 	testDataFromTestDataArea = testDataEngine.ImportEmbeddedSimpleCsvTestDataFile(
-		&embeddedFile_CustodyCash_MainTestDataArea, "testData/FenixRawTestdata_10rows_240705.csv", ';')
+		data, ';')
 
 	testDataEngine.AddTestDataToTestDataModel(testDataFromTestDataArea)
 

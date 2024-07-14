@@ -1,8 +1,8 @@
 package newOrEditTestDataPointGroupUI
 
 import (
-	"ImportFilesFromGithub/testDataEngine"
 	"fyne.io/fyne/v2/dialog"
+	"github.com/jlambert68/FenixScriptEngine/testDataEngine"
 
 	//"fmt"
 	"fyne.io/fyne/v2"

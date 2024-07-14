@@ -1,10 +1,10 @@
 package newOrEditTestDataPointGroupUI
 
 import (
-	"ImportFilesFromGithub/testDataEngine"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jlambert68/FenixScriptEngine/testDataEngine"
 	"regexp"
 	"strings"
 )
